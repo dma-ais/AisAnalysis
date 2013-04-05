@@ -1,0 +1,7 @@
++ read filtered and unfiltered (maybe two consumers needed?)
++ make handler similar to existing
++ jetty + jersey as aisstore
++ json api
++ distribution package with BAT and SH
++ 
+
