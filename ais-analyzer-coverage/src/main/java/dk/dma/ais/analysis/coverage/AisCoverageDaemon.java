@@ -25,7 +25,10 @@ import com.google.inject.Injector;
 
 import dk.dma.ais.analysis.coverage.configuration.AisCoverageConfiguration;
 import dk.dma.ais.bus.AisBus;
+import dk.dma.ais.bus.consumer.DistributerConsumer;
+import dk.dma.ais.packet.AisPacket;
 import dk.dma.app.application.AbstractDaemon;
+import dk.dma.enav.util.function.Consumer;
 
 /**
  * Analyzer daemon
@@ -37,12 +40,12 @@ public class AisCoverageDaemon extends AbstractDaemon {
     @Parameter(names = "-file", description = "AisCoverage configuration file")
     String confFile = "aiscoverage.xml";
 
-    private AisCoverageConfiguration conf;
-    private AisBus aisBus;
-
     @Override
     protected void runDaemon(Injector injector) throws Exception {
-        LOG.info("Starting AisCoverage with configuration: " + confFile);
+        LOG.info("Starting AisCoverageDaemon with configuration: " + confFile);
+        
+        // Get configuration
+        final AisCoverageConfiguration conf;
         try {
             conf = AisCoverageConfiguration.load(confFile);
         } catch (FileNotFoundException e) {
@@ -50,7 +53,45 @@ public class AisCoverageDaemon extends AbstractDaemon {
             return;
         }
         
-
+        // Create handler
+        final CoverageHandler handler = new CoverageHandler(conf);
+        
+        // Create AisBus
+        final AisBus aisBus = conf.getAisbusConfiguration().getInstance();
+        
+        // Get distributers
+        final DistributerConsumer filteredConsumer = (DistributerConsumer)aisBus.getConsumer("FILTERED");
+        if (filteredConsumer == null) {
+            LOG.error("Could not find distributer with name: FILTERED");
+            return;
+        }
+        final DistributerConsumer unfilteredConsumer = (DistributerConsumer)aisBus.getConsumer("UNFILTERED");
+        if (unfilteredConsumer == null) {
+            LOG.error("Could not find distributer with name: UNFILTERED");
+            return;
+        }
+        
+        // Delegate filtered packets to handler
+        filteredConsumer.getConsumers().add(new Consumer<AisPacket>() {
+            @Override
+            public void accept(AisPacket packet) {
+                handler.receiveFiltered(packet);
+            }
+        });
+        
+        // Delegate unfiltered packets to handler
+        unfilteredConsumer.getConsumers().add(new Consumer<AisPacket>() {
+            @Override
+            public void accept(AisPacket packet) {
+                handler.receiveUnfiltered(packet);
+            }
+        });
+        
+        // Start aisBus
+        aisBus.start();
+        aisBus.startConsumers();
+        aisBus.startProviders();
+        
     }
     
     @Override

@@ -59,18 +59,18 @@ public class AisCoverageConfiguration {
         this.someSetting = someSetting;
     }
 
-    public static AisCoverageConfiguration load(String filename) throws JAXBException, FileNotFoundException {
-        JAXBContext context = JAXBContext.newInstance(AisBusConfiguration.class);
-        Unmarshaller um = context.createUnmarshaller();
-        return (AisCoverageConfiguration) um.unmarshal(new FileInputStream(new File(filename)));
-    }
-
-    public static void save(AisCoverageConfiguration conf, String filename) throws JAXBException, FileNotFoundException {
-        JAXBContext context = JAXBContext.newInstance(AisBusConfiguration.class);
+    public static void save(String filename, AisCoverageConfiguration conf) throws JAXBException, FileNotFoundException {
+        JAXBContext context = JAXBContext.newInstance(AisCoverageConfiguration.class);
         Marshaller m = context.createMarshaller();
         m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
         m.setProperty(Marshaller.JAXB_ENCODING, "UTF-8");
         m.marshal(conf, new FileOutputStream(new File(filename)));
+    }
+
+    public static AisCoverageConfiguration load(String filename) throws JAXBException, FileNotFoundException {
+        JAXBContext context = JAXBContext.newInstance(AisCoverageConfiguration.class);
+        Unmarshaller um = context.createUnmarshaller();
+        return (AisCoverageConfiguration) um.unmarshal(new FileInputStream(new File(filename)));
     }
 
 }
