@@ -13,8 +13,34 @@
  * You should have received a copy of the GNU General Public License
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
-package dk.dma.ais.analysis.common;
+package dk.dma.ais.analysis.common.web;
 
-public class WebServer {
+/**
+ * Configuration for the web server
+ */
+public class WebServerConfiguration {
+
+    private int port = 8080;
+    private String webappPath = "src/main/webapp";
+
+    public WebServerConfiguration() {
+
+    }
+
+    public int getPort() {
+        return port;
+    }
+
+    public void setPort(int port) {
+        this.port = port;
+    }
+
+    public String getWebappPath() {
+        return webappPath;
+    }
+
+    public void setWebappPath(String webappPath) {
+        this.webappPath = webappPath;
+    }
 
 }

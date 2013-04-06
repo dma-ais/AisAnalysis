@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import com.beust.jcommander.Parameter;
 import com.google.inject.Injector;
 
+import dk.dma.ais.analysis.common.web.WebServer;
 import dk.dma.ais.analysis.coverage.configuration.AisCoverageConfiguration;
 import dk.dma.ais.bus.AisBus;
 import dk.dma.ais.bus.consumer.DistributerConsumer;
@@ -39,6 +40,8 @@ public class AisCoverageDaemon extends AbstractDaemon {
 
     @Parameter(names = "-file", description = "AisCoverage configuration file")
     String confFile = "aiscoverage.xml";
+    
+    private static CoverageHandler handler;
 
     @Override
     protected void runDaemon(Injector injector) throws Exception {
@@ -54,7 +57,7 @@ public class AisCoverageDaemon extends AbstractDaemon {
         }
         
         // Create handler
-        final CoverageHandler handler = new CoverageHandler(conf);
+        handler = new CoverageHandler(conf);
         
         // Create AisBus
         final AisBus aisBus = conf.getAisbusConfiguration().getInstance();
@@ -92,6 +95,10 @@ public class AisCoverageDaemon extends AbstractDaemon {
         aisBus.startConsumers();
         aisBus.startProviders();
         
+        // Start web server
+        final WebServer webServer = new WebServer(conf.getServerConfiguration());
+        webServer.start();
+        
     }
     
     @Override
@@ -102,6 +109,10 @@ public class AisCoverageDaemon extends AbstractDaemon {
     
     public static void main(String[] args) throws Exception {
         new AisCoverageDaemon().execute(args);
+    }
+    
+    public static CoverageHandler getHandler() {
+        return handler;
     }
 
 }

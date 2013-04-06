@@ -35,7 +35,7 @@ public class CoverageHandler {
         if (message == null) {
             return;
         }
-                
+        
     }
     
     public void receiveFiltered(AisPacket packet) {

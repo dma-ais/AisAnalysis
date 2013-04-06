@@ -27,6 +27,7 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import dk.dma.ais.analysis.common.web.WebServerConfiguration;
 import dk.dma.ais.configuration.bus.AisBusConfiguration;
 
 /**
@@ -36,7 +37,7 @@ import dk.dma.ais.configuration.bus.AisBusConfiguration;
 public class AisCoverageConfiguration {
 
     private AisBusConfiguration aisbusConfiguration;
-    private String someSetting;
+    private WebServerConfiguration serverConfiguration = new WebServerConfiguration();
 
     public AisCoverageConfiguration() {
 
@@ -51,12 +52,12 @@ public class AisCoverageConfiguration {
         this.aisbusConfiguration = aisbusConfiguration;
     }
 
-    public String getSomeSetting() {
-        return someSetting;
+    public WebServerConfiguration getServerConfiguration() {
+        return serverConfiguration;
     }
 
-    public void setSomeSetting(String someSetting) {
-        this.someSetting = someSetting;
+    public void setServerConfiguration(WebServerConfiguration serverConfiguration) {
+        this.serverConfiguration = serverConfiguration;
     }
 
     public static void save(String filename, AisCoverageConfiguration conf) throws JAXBException, FileNotFoundException {
