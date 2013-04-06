@@ -1,4 +1,4 @@
-AisCoverage
+AisAnalysis
 ===========
 
-AIS coverage analyzer
+AIS analyzers

@@ -13,7 +13,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
-package dk.dma.ais.coverage;
+package dk.dma.ais.analysis.coverage;
 
 import java.io.FileNotFoundException;
 
@@ -23,10 +23,9 @@ import org.slf4j.LoggerFactory;
 import com.beust.jcommander.Parameter;
 import com.google.inject.Injector;
 
+import dk.dma.ais.analysis.coverage.configuration.AisCoverageConfiguration;
 import dk.dma.ais.bus.AisBus;
-import dk.dma.ais.bus.AisBusFactory;
-import dk.dma.ais.coverage.configuration.AisCoverageConfiguration;
-import dk.dma.commons.app.AbstractDaemon;
+import dk.dma.app.application.AbstractDaemon;
 
 /**
  * Analyzer daemon

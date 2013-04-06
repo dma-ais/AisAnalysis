@@ -8,22 +8,59 @@
   </parent>
 
   <modelVersion>4.0.0</modelVersion>
-  <groupId>dk.dma.ais.coverage</groupId>
-  <artifactId>ais-coverage-parent</artifactId>
+  <groupId>dk.dma.ais.analysis</groupId>
+  <artifactId>ais-analysis-parent</artifactId>
   <version>0.1-SNAPSHOT</version>
   <packaging>pom</packaging>
-  <name>AisCoverage Parent</name>
-  <description>AisCoverage parent module</description>
+  <name>AisAnalysis Parent</name>
+  <description>AisAnalysis parent module</description>
 
   <scm>
-    <connection>scm:git:git@github.com:dma-dk/AisCoverage.git</connection>
-    <developerConnection>scm:git:git@github.com:dma-dk/AisCoverage.git</developerConnection>
-    <url>https://github.com/dma-dk/AisCoverage</url>
+    <connection>scm:git:git@github.com:dma-dk/AisAnalysis.git</connection>
+    <developerConnection>scm:git:git@github.com:dma-dk/AisAnalysis.git</developerConnection>
+    <url>https://github.com/dma-dk/AisAnalysis</url>
   </scm>
 
   <modules>
-    <module>ais-coverage-analyzer</module>
+    <module>ais-analyzer-common</module>
+    <module>ais-analyzer-coverage</module>
+    <module>ais-analyzer-abnormal</module>
   </modules>
+
+  <dependencies>
+    <dependency>
+      <groupId>dk.dma.ais</groupId>
+      <artifactId>ais-communication</artifactId>
+      <version>0.1-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>dk.dma.commons</groupId>
+      <artifactId>dma-commons-app</artifactId>
+      <version>0.1-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>dk.dma.app</groupId>
+      <artifactId>dma-app</artifactId>
+      <version>0.1-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>dk.dma.enav</groupId>
+      <artifactId>enav-model</artifactId>
+      <version>0.1-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-log4j12</artifactId>
+      <version>1.7.3</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.11</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
 
   <repositories>
     <repository>
