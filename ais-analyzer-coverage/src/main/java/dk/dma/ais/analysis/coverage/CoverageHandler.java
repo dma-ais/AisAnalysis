@@ -36,6 +36,8 @@ public class CoverageHandler {
             return;
         }
         
+        // TODO 
+        
     }
     
     public void receiveFiltered(AisPacket packet) {
@@ -44,7 +46,7 @@ public class CoverageHandler {
             return;
         }
         
-
+        // TODO
     }
 
 }

@@ -37,7 +37,7 @@ import dk.dma.ais.configuration.bus.AisBusConfiguration;
 public class AisCoverageConfiguration {
 
     private AisBusConfiguration aisbusConfiguration;
-    private WebServerConfiguration serverConfiguration = new WebServerConfiguration();
+    private WebServerConfiguration serverConfiguration;
 
     public AisCoverageConfiguration() {
 
@@ -59,7 +59,7 @@ public class AisCoverageConfiguration {
     public void setServerConfiguration(WebServerConfiguration serverConfiguration) {
         this.serverConfiguration = serverConfiguration;
     }
-
+    
     public static void save(String filename, AisCoverageConfiguration conf) throws JAXBException, FileNotFoundException {
         JAXBContext context = JAXBContext.newInstance(AisCoverageConfiguration.class);
         Marshaller m = context.createMarshaller();

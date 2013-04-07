@@ -20,26 +20,30 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.bio.SocketConnector;
 import org.eclipse.jetty.webapp.WebAppContext;
 
+/**
+ * Embedded Jetty web server and servlet container using a web app context  
+ */
 public class WebServer {
     
-    private final WebServerConfiguration conf;
+    private final Server server = new Server();
     
     public WebServer(WebServerConfiguration conf) {
-        this.conf = conf;        
-    }
-    
-    public void start() throws Exception {
-        Server server = new Server();
         SocketConnector connector = new SocketConnector();
         connector.setPort(conf.getPort());
-        server.setConnectors(new Connector[] { connector });
-        
+        server.setConnectors(new Connector[] { connector });        
         WebAppContext bb = new WebAppContext();
         bb.setServer(server);
         bb.setContextPath(conf.getContextPath());
         bb.setWar(conf.getWebappPath());
         server.setHandler(bb);
+    }
+    
+    public void start() throws Exception {        
         server.start();
+    }
+    
+    public void stop() throws Exception {
+        server.stop();
     }
 
 }

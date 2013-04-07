@@ -28,7 +28,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriInfo;
 
-import dk.dma.ais.analysis.coverage.AisCoverageDaemon;
+import dk.dma.ais.analysis.coverage.AisCoverage;
 import dk.dma.ais.analysis.coverage.CoverageHandler;
 
 /**
@@ -40,7 +40,7 @@ public class CoverageRestService {
     private final CoverageHandler handler;
 
     public CoverageRestService() {
-        this.handler = AisCoverageDaemon.getDaemon().getHandler();
+        this.handler = AisCoverage.get().getHandler();
     }
 
     @GET

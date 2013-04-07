@@ -23,109 +23,46 @@ import org.slf4j.LoggerFactory;
 import com.beust.jcommander.Parameter;
 import com.google.inject.Injector;
 
-import dk.dma.ais.analysis.common.web.WebServer;
 import dk.dma.ais.analysis.coverage.configuration.AisCoverageConfiguration;
-import dk.dma.ais.bus.AisBus;
-import dk.dma.ais.bus.consumer.DistributerConsumer;
-import dk.dma.ais.packet.AisPacket;
 import dk.dma.app.application.AbstractDaemon;
-import dk.dma.enav.util.function.Consumer;
 
 /**
- * Analyzer daemon
+ * AIS coverage analyzer daemon
  */
 public class AisCoverageDaemon extends AbstractDaemon {
 
     private static final Logger LOG = LoggerFactory.getLogger(AisCoverageDaemon.class);
-    
-    private static AisCoverageDaemon daemon;
 
     @Parameter(names = "-file", description = "AisCoverage configuration file")
     String confFile = "aiscoverage.xml";
-    
-    private AisCoverageConfiguration conf;
-    private CoverageHandler handler;
-    private AisBus aisBus;
 
     @Override
     protected void runDaemon(Injector injector) throws Exception {
         LOG.info("Starting AisCoverageDaemon with configuration: " + confFile);
-        
+
         // Get configuration
+        AisCoverageConfiguration conf;
         try {
             conf = AisCoverageConfiguration.load(confFile);
         } catch (FileNotFoundException e) {
             LOG.error(e.getMessage());
             return;
         }
-        
-        // Create handler
-        handler = new CoverageHandler(conf);
-        
-        // Create AisBus
-        aisBus = conf.getAisbusConfiguration().getInstance();
-        
-        // Get distributers
-        final DistributerConsumer filteredConsumer = (DistributerConsumer)aisBus.getConsumer("FILTERED");
-        if (filteredConsumer == null) {
-            LOG.error("Could not find distributer with name: FILTERED");
-            return;
-        }
-        final DistributerConsumer unfilteredConsumer = (DistributerConsumer)aisBus.getConsumer("UNFILTERED");
-        if (unfilteredConsumer == null) {
-            LOG.error("Could not find distributer with name: UNFILTERED");
-            return;
-        }
-        
-        // Delegate filtered packets to handler
-        filteredConsumer.getConsumers().add(new Consumer<AisPacket>() {
-            @Override
-            public void accept(AisPacket packet) {
-                handler.receiveFiltered(packet);
-            }
-        });
-        
-        // Delegate unfiltered packets to handler
-        unfilteredConsumer.getConsumers().add(new Consumer<AisPacket>() {
-            @Override
-            public void accept(AisPacket packet) {
-                handler.receiveUnfiltered(packet);
-            }
-        });
-        
-        // Start aisBus
-        aisBus.start();
-        aisBus.startConsumers();
-        aisBus.startProviders();
-        
-        // Start web server
-        final WebServer webServer = new WebServer(conf.getServerConfiguration());
-        webServer.start();
-        
+
+        // Create and start
+        AisCoverage.create(conf);
+        AisCoverage.get().start();
     }
-    
+
     @Override
     protected void shutdown() {
         LOG.info("Shutting down");
-        super.shutdown();        
-    }
-        
-    public CoverageHandler getHandler() {
-        return handler;
-    }
-    
-    public AisCoverageConfiguration getConf() {
-        return conf;
-    }
-    
-    public static AisCoverageDaemon getDaemon() {
-        return daemon;
-    }
-    
-    public static void main(String[] args) throws Exception {
-        daemon = new AisCoverageDaemon();
-        daemon.execute(args);
+        AisCoverage.get().stop();
+        super.shutdown();
     }
 
+    public static void main(String[] args) throws Exception {
+        new AisCoverageDaemon().execute(args);
+    }
 
 }
