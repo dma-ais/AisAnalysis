@@ -37,18 +37,21 @@ import dk.dma.enav.util.function.Consumer;
 public class AisCoverageDaemon extends AbstractDaemon {
 
     private static final Logger LOG = LoggerFactory.getLogger(AisCoverageDaemon.class);
+    
+    private static AisCoverageDaemon daemon;
 
     @Parameter(names = "-file", description = "AisCoverage configuration file")
     String confFile = "aiscoverage.xml";
     
-    private static CoverageHandler handler;
+    private AisCoverageConfiguration conf;
+    private CoverageHandler handler;
+    private AisBus aisBus;
 
     @Override
     protected void runDaemon(Injector injector) throws Exception {
         LOG.info("Starting AisCoverageDaemon with configuration: " + confFile);
         
         // Get configuration
-        final AisCoverageConfiguration conf;
         try {
             conf = AisCoverageConfiguration.load(confFile);
         } catch (FileNotFoundException e) {
@@ -60,7 +63,7 @@ public class AisCoverageDaemon extends AbstractDaemon {
         handler = new CoverageHandler(conf);
         
         // Create AisBus
-        final AisBus aisBus = conf.getAisbusConfiguration().getInstance();
+        aisBus = conf.getAisbusConfiguration().getInstance();
         
         // Get distributers
         final DistributerConsumer filteredConsumer = (DistributerConsumer)aisBus.getConsumer("FILTERED");
@@ -106,13 +109,23 @@ public class AisCoverageDaemon extends AbstractDaemon {
         LOG.info("Shutting down");
         super.shutdown();        
     }
-    
-    public static void main(String[] args) throws Exception {
-        new AisCoverageDaemon().execute(args);
-    }
-    
-    public static CoverageHandler getHandler() {
+        
+    public CoverageHandler getHandler() {
         return handler;
     }
+    
+    public AisCoverageConfiguration getConf() {
+        return conf;
+    }
+    
+    public static AisCoverageDaemon getDaemon() {
+        return daemon;
+    }
+    
+    public static void main(String[] args) throws Exception {
+        daemon = new AisCoverageDaemon();
+        daemon.execute(args);
+    }
+
 
 }

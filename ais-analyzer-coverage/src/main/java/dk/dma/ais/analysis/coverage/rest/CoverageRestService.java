@@ -29,28 +29,35 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriInfo;
 
 import dk.dma.ais.analysis.coverage.AisCoverageDaemon;
+import dk.dma.ais.analysis.coverage.CoverageHandler;
 
 /**
  * JAX-RS rest services
  */
-@Path("coverage")
+@Path("/")
 public class CoverageRestService {
-    
+
+    private final CoverageHandler handler;
+
+    public CoverageRestService() {
+        this.handler = AisCoverageDaemon.getDaemon().getHandler();
+    }
+
     @GET
     @Path("test")
     @Produces(MediaType.APPLICATION_JSON)
     public Map<String, String> test(@QueryParam("q") String q) {
-        Objects.requireNonNull(AisCoverageDaemon.getHandler());
+        Objects.requireNonNull(handler);
         Map<String, String> map = new HashMap<String, String>();
         map.put("q", q);
         return map;
     }
-    
+
     @GET
     @Path("test2")
     @Produces(MediaType.APPLICATION_JSON)
     public Map<String, String> test2(@Context UriInfo uriInfo) {
-        Objects.requireNonNull(AisCoverageDaemon.getHandler());
+        Objects.requireNonNull(handler);
         Map<String, String> map = new HashMap<String, String>();
         MultivaluedMap<String, String> queryParams = uriInfo.getQueryParameters();
         for (String key : queryParams.keySet()) {

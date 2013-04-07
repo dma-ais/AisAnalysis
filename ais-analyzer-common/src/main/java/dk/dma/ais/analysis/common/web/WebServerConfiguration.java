@@ -22,6 +22,7 @@ public class WebServerConfiguration {
 
     private int port = 8080;
     private String webappPath = "src/main/webapp";
+    private String contextPath = "/";
 
     public WebServerConfiguration() {
 
@@ -41,6 +42,14 @@ public class WebServerConfiguration {
 
     public void setWebappPath(String webappPath) {
         this.webappPath = webappPath;
+    }
+    
+    public String getContextPath() {
+        return contextPath;
+    }
+    
+    public void setContextPath(String contextPath) {
+        this.contextPath = contextPath;
     }
 
 }

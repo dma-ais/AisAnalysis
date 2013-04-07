@@ -36,7 +36,7 @@ public class WebServer {
         
         WebAppContext bb = new WebAppContext();
         bb.setServer(server);
-        bb.setContextPath("/");
+        bb.setContextPath(conf.getContextPath());
         bb.setWar(conf.getWebappPath());
         server.setHandler(bb);
         server.start();
