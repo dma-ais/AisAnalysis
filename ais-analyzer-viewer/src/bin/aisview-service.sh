@@ -5,21 +5,21 @@ cd $SCRIPTPATH
 
 if [ -z $2 ]
 then
-	CONFFILE=coverage.xml
+	CONFFILE=aisview.xml
 else
 	CONFFILE=$2
 fi
 
-PROCNAME="dk.dma.ais.analysis.coverage.AisCoverageDaemon -file $CONFFILE"
+PROCNAME="dk.dma.ais.analysis.viewer.AisViewDaemon -file $CONFFILE"
 
 stop () {
 	# Find pid
 	PID=`./getpid.pl "$PROCNAME"`
 	if [ -z $PID ]; then
-		echo "AisCoverageDaemon not running"
+		echo "AisViewDaemon not running"
 		exit 1
 	fi
-	echo "Stopping AisCoverageDaemon"
+	echo "Stopping AisViewDaemon"
 	kill $PID
     exit 0
 }
@@ -28,11 +28,11 @@ case "$1" in
 start)
 	PID=`./getpid.pl "$PROCNAME"`
 	if [ ! -z $PID ]; then
-		echo "AisCoverageDaemon already running"
+		echo "AisViewDaemon already running"
 		exit 1
 	fi
-    echo "Starting AisCoverageDaemon"
-    ./coverage.sh -file $CONFFILE > /dev/null 2>&1 &
+    echo "Starting AisViewDaemon"
+    ./aisview.sh -file $CONFFILE > /dev/null 2>&1 &
     ;;
 stop)
     stop

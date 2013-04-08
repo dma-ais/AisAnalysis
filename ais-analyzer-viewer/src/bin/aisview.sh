@@ -10,4 +10,4 @@ then
 	LOG_CONF="file:log4j.xml"
 fi
 
-java -Dlog4j.configuration=$LOG_CONF -cp ".:lib/*:./*" $JAVA_OPTS dk.dma.ais.analysis.coverage.AisCoverageDaemon $@
+java -Dlog4j.configuration=$LOG_CONF -cp ".:lib/*:./*" $JAVA_OPTS dk.dma.ais.analysis.viewer.AisViewDaemon $@
