@@ -35,7 +35,7 @@ public abstract class BaseVesselList {
     
     public abstract void addTarget(AisVesselTarget vesselTarget, int anonId);
     
-    public HashMap<Integer, ArrayList<String>> getShips() {
+    public HashMap<Integer, ArrayList<String>> getVessels() {
         return vessels;
     }
     

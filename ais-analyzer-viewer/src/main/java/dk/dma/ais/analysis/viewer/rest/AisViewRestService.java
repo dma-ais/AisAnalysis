@@ -15,23 +15,23 @@
  */
 package dk.dma.ais.analysis.viewer.rest;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 import dk.dma.ais.analysis.common.web.QueryParams;
 import dk.dma.ais.analysis.viewer.AisView;
 import dk.dma.ais.analysis.viewer.handler.AisViewHandler;
+import dk.dma.ais.analysis.viewer.rest.handler.VesselClusterHandler;
 import dk.dma.ais.analysis.viewer.rest.handler.VesselListHandler;
+import dk.dma.ais.analysis.viewer.rest.json.VesselClusterJsonRepsonse;
 import dk.dma.ais.analysis.viewer.rest.json.VesselListJsonResponse;
+import dk.dma.ais.analysis.viewer.rest.json.VesselTargetDetails;
 
 /**
  * JAX-RS rest services
@@ -54,16 +54,50 @@ public class AisViewRestService {
     }
 
     @GET
-    @Path("test2")
+    @Path("vessel_list")
     @Produces(MediaType.APPLICATION_JSON)
-    public Map<String, String> test2(@Context UriInfo uriInfo) {
-        Objects.requireNonNull(handler);
-        Map<String, String> map = new HashMap<String, String>();
-        MultivaluedMap<String, String> queryParams = uriInfo.getQueryParameters();
-        for (String key : queryParams.keySet()) {
-            map.put(key, queryParams.getFirst(key));
-        }
-        return map;
+    public VesselListJsonResponse vesselList(@Context UriInfo uriInfo) {
+        QueryParams queryParams = new QueryParams(uriInfo.getQueryParameters());
+        return VesselListHandler.handle(queryParams, handler, false);
     }
 
+    @GET
+    @Path("vessel_clusters")
+    @Produces(MediaType.APPLICATION_JSON)
+    public VesselClusterJsonRepsonse vesselClusters(@Context UriInfo uriInfo) {
+        QueryParams queryParams = new QueryParams(uriInfo.getQueryParameters());
+        return VesselClusterHandler.handle(queryParams, handler);
+    }    
+        
+    @GET
+    @Path("vessel_target_details")
+    @Produces(MediaType.APPLICATION_JSON)
+    public VesselTargetDetails vesselTargetDetails(@Context UriInfo uriInfo) {
+        QueryParams queryParams = new QueryParams(uriInfo.getQueryParameters());
+        Integer id = queryParams.getInt("id");
+        Integer mmsi = queryParams.getInt("mmsi");
+        boolean pastTrack = queryParams.containsKey("past_track");
+        VesselTargetDetails details = handler.getVesselTargetDetails(id, mmsi, pastTrack);
+        if (details == null) {
+            throw new WebApplicationException(Response.Status.BAD_REQUEST);
+        }
+        return details;
+    }
+    
+    @GET
+    @Path("vessel_search")
+    @Produces(MediaType.APPLICATION_JSON)
+    public VesselTargetDetails vesselSearch(@Context UriInfo uriInfo) {
+        // TODO
+        throw new WebApplicationException(Response.Status.NOT_FOUND);
+    }
+    
+    @GET
+    @Path("stats")
+    @Produces(MediaType.APPLICATION_JSON)
+    public VesselTargetDetails stats(@Context UriInfo uriInfo) {
+        // TODO
+        throw new WebApplicationException(Response.Status.NOT_FOUND);
+    }
+        
 }

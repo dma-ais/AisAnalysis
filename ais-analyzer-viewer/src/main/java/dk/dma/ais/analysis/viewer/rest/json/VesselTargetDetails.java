@@ -42,8 +42,8 @@ public class VesselTargetDetails {
     protected String cog;
     protected boolean moored;
     protected String vesselType = "N/A";
-    protected Short length = null;
-    protected Short width = null;
+    protected Short length;
+    protected Short width;
     protected String sog;
     protected String name = "N/A";
     protected String callsign = "N/A";
@@ -387,12 +387,8 @@ public class VesselTargetDetails {
         this.vesselType = vesselType;
     }
 
-    public short getLength() {
+    public Short getLength() {
         return length;
-    }
-
-    public void setLength(short length) {
-        this.length = length;
     }
 
     public long getCurrentTime() {
@@ -411,14 +407,10 @@ public class VesselTargetDetails {
         this.lastReceived = lastReceived;
     }
 
-    public short getWidth() {
+    public Short getWidth() {
         return width;
     }
 
-    public void setWidth(short width) {
-        this.width = width;
-    }
-    
     public String getSourceType() {
         return sourceType;
     }

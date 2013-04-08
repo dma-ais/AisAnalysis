@@ -24,9 +24,15 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 
+import dk.dma.ais.analysis.common.grid.Grid;
+import dk.dma.ais.analysis.common.grid.GridFactory;
 import dk.dma.ais.analysis.viewer.configuration.AisViewConfiguration;
 import dk.dma.ais.analysis.viewer.rest.handler.VesselListFilter;
 import dk.dma.ais.analysis.viewer.rest.json.BaseVesselList;
+import dk.dma.ais.analysis.viewer.rest.json.VesselCluster;
+import dk.dma.ais.analysis.viewer.rest.json.VesselClusterJsonRepsonse;
+import dk.dma.ais.analysis.viewer.rest.json.VesselList;
+import dk.dma.ais.analysis.viewer.rest.json.VesselTargetDetails;
 import dk.dma.ais.data.AisTarget;
 import dk.dma.ais.data.AisVesselPosition;
 import dk.dma.ais.data.AisVesselTarget;
@@ -228,7 +234,7 @@ public class AisViewHandler extends Thread implements Consumer<AisPacket> {
      * @param mmsi
      * @return
      */
-    public synchronized int getAnonId(int mmsi) {
+    public synchronized Integer getAnonId(int mmsi) {
         return mmsiAnonIdMap.get(mmsi);
     }
 
@@ -238,7 +244,7 @@ public class AisViewHandler extends Thread implements Consumer<AisPacket> {
      * @param anonId
      * @return
      */
-    public synchronized int getMmsi(int anonId) {
+    public synchronized Integer getMmsi(int anonId) {
         return anonIdMap.get(anonId);
     }
 
@@ -315,7 +321,7 @@ public class AisViewHandler extends Thread implements Consumer<AisPacket> {
 
         return list;
     }
-    
+
     /**
      * Returns a casted AisVesselTarget of the given AisTarget if it is an instance of AisVesselTarget.
      * 
@@ -339,10 +345,10 @@ public class AisViewHandler extends Thread implements Consumer<AisPacket> {
         if (filter.rejectedByFilter((AisVesselTarget) target)) {
             return null;
         }
-        
+
         return (AisVesselTarget) target;
     }
-    
+
     /**
      * Returns false if target is out of specified area. Nothing will be rejected if the area is not specified.
      * 
@@ -372,16 +378,16 @@ public class AisViewHandler extends Thread implements Consumer<AisPacket> {
 
             // Longitude check - Accept targets between A and B
             if (pointB.getLongitude() <= pointA.getLongitude()
-                    && (target.getVesselPosition().getPos().getLongitude() >= pointA.getLongitude() || target
-                            .getVesselPosition().getPos().getLongitude() <= pointB.getLongitude())) {
+                    && (target.getVesselPosition().getPos().getLongitude() >= pointA.getLongitude() || target.getVesselPosition()
+                            .getPos().getLongitude() <= pointB.getLongitude())) {
 
                 return false;
             }
 
             // Longitude - Reject targets between B and A - Accept others
             if (pointA.getLongitude() <= pointB.getLongitude()
-                    && (target.getVesselPosition().getPos().getLongitude() >= pointB.getLongitude() || target
-                            .getVesselPosition().getPos().getLongitude() <= pointA.getLongitude())) {
+                    && (target.getVesselPosition().getPos().getLongitude() >= pointB.getLongitude() || target.getVesselPosition()
+                            .getPos().getLongitude() <= pointA.getLongitude())) {
                 return true;
 
             } else if (pointA.getLongitude() <= pointB.getLongitude()) {
@@ -389,6 +395,111 @@ public class AisViewHandler extends Thread implements Consumer<AisPacket> {
             }
         }
         return true;
+    }
+
+    /**
+     * Returns a list of vessel clusters based on a filtering. The returned list does only contain clusters with vessels.
+     * 
+     * @param filter
+     * @param size
+     * @param limit
+     * @return
+     */
+    public synchronized VesselClusterJsonRepsonse getClusterResponse(int requestId, VesselListFilter filter, Position pointA,
+            Position pointB, int limit, double size) {
+
+        Grid grid = GridFactory.getInstance().getGrid(size);
+
+        // Maps cell ids to vessel clusters
+        HashMap<Long, VesselCluster> map = new HashMap<Long, VesselCluster>();
+
+        // Iterate over targets
+        int inWorld = 0;
+        for (AisTarget target : getAllTargets()) {
+
+            AisVesselTarget vesselTarget = getFilteredAisVessel(target, filter);
+            if (vesselTarget == null || vesselTarget.getVesselPosition() == null
+                    || vesselTarget.getVesselPosition().getPos() == null) {
+                continue;
+            }
+
+            inWorld++;
+
+            // Is it inside the requested area
+            if (rejectedByPosition(vesselTarget, pointA, pointB)) {
+                continue;
+            }
+
+            Position vesselPosition = vesselTarget.getVesselPosition().getPos();
+            long cellId = grid.getCellId(vesselPosition.getLatitude(), vesselPosition.getLongitude());
+
+            // Only create vessel cluster if new
+            if (map.containsKey(cellId)) {
+
+                map.get(cellId).incrementCount();
+
+                if (map.get(cellId).getCount() < limit) {
+                    map.get(cellId).getVessels().addTarget(vesselTarget, getAnonId(vesselTarget.getMmsi()));
+                }
+
+            } else {
+
+                Position from = grid.getGeoPosOfCellId(cellId);
+
+                double toLon = from.getLongitude() + grid.getCellSizeInDegrees();
+                double toLat = from.getLatitude() + grid.getCellSizeInDegrees();
+                Position to = Position.create(toLat, toLon);
+
+                VesselCluster cluster = new VesselCluster(from, to, 1, new VesselList());
+                map.put(cellId, cluster);
+                map.get(cellId).getVessels().addTarget(vesselTarget, getAnonId(vesselTarget.getMmsi()));
+
+            }
+        }
+
+        // Calculate density
+        ArrayList<VesselCluster> clusters = new ArrayList<VesselCluster>(map.values());
+        for (VesselCluster c : clusters) {
+
+            Position from = Position.create(c.getFrom().getLatitude(), c.getFrom().getLongitude());
+            Position to = Position.create(c.getTo().getLatitude(), c.getTo().getLongitude());
+            Position topRight = Position.create(from.getLatitude(), to.getLongitude());
+            Position botLeft = Position.create(to.getLatitude(), from.getLongitude());
+            double width = from.geodesicDistanceTo(topRight) / 1000;
+            double height = from.geodesicDistanceTo(botLeft) / 1000;
+            double areaSize = width * height;
+            double density = (double) c.getCount() / areaSize;
+            c.setDensity(density);
+
+        }
+        VesselClusterJsonRepsonse response = new VesselClusterJsonRepsonse(requestId, clusters, inWorld);
+        return response;
+    }
+
+    public synchronized VesselTargetDetails getVesselTargetDetails(Integer anonId, Integer mmsi, boolean pastTrack) {
+        // Get MMSI for anonymous id if mmsi not given
+        if (mmsi == null && anonId != null) {
+            mmsi = getMmsi(anonId);
+        }
+        if (mmsi == null) {
+            return null;
+        }
+        anonId = getAnonId(mmsi);
+        AisTarget target = getTarget(mmsi);
+        if (target == null) {
+            return null;
+        }
+        if (!(target instanceof AisVesselTarget)) {
+            return null;
+        }
+
+        VesselTargetDetails details = new VesselTargetDetails();
+        details.init((AisVesselTarget) target, anonId);
+        if (pastTrack) {
+            details.setPastTrack(getPastTrack(mmsi));
+        }
+
+        return details;
     }
 
 }
