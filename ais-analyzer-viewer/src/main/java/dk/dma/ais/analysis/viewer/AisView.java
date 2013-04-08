@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 
 import dk.dma.ais.analysis.common.web.WebServer;
 import dk.dma.ais.analysis.viewer.configuration.AisViewConfiguration;
+import dk.dma.ais.analysis.viewer.handler.AisViewHandler;
 import dk.dma.ais.bus.AisBus;
 import dk.dma.ais.bus.consumer.DistributerConsumer;
 
@@ -45,8 +46,9 @@ public class AisView {
     private AisView(AisViewConfiguration conf) {
         this.conf = conf;
 
-        // Create handler
+        // Create and start handler
         handler = new AisViewHandler(conf);
+        handler.start();
 
         // Create AisBus
         aisBus = conf.getAisbusConfiguration().getInstance();
@@ -83,6 +85,8 @@ public class AisView {
     }
 
     public void stop() {
+        // Stop handler
+        handler.interrupt();
         // Stop AisBus
         aisBus.cancel();
     }

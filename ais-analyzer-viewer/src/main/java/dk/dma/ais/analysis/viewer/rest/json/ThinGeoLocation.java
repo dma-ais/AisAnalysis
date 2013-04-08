@@ -13,29 +13,31 @@
  * You should have received a copy of the GNU General Public License
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
-package dk.dma.ais.analysis.viewer;
+package dk.dma.ais.analysis.viewer.rest.json;
 
-import dk.dma.ais.analysis.viewer.configuration.AisViewConfiguration;
-import dk.dma.ais.packet.AisPacket;
-import dk.dma.enav.util.function.Consumer;
+public class ThinGeoLocation {
 
-/**
- * Handler for received AisPackets 
- */
-public class AisViewHandler implements Consumer<AisPacket> {
-
-    private final AisViewConfiguration conf;
+    double latitude, longitude;
     
-    public AisViewHandler(AisViewConfiguration conf) {
-        this.conf = conf;
+    public ThinGeoLocation(double latitude, double longitude) {
+        this.latitude = latitude;
+        this.longitude = longitude;
     }
 
-    @Override
-    public void accept(AisPacket packet) {
-        System.out.println("packet: " + packet.getStringMessage());
-        
-        
+    public double getLatitude() {
+        return latitude;
     }
 
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
+    }
+
+    public double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
+    }
 
 }

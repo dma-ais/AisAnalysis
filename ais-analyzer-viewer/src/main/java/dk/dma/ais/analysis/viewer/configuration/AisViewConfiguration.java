@@ -31,13 +31,21 @@ import dk.dma.ais.analysis.common.web.WebServerConfiguration;
 import dk.dma.ais.configuration.bus.AisBusConfiguration;
 
 /**
- * Class to represent AIS coverage configuration. To be marshalled and unmarshalled by JAXB.
+ * Class to represent AisView configuration. To be marshalled and unmarshalled by JAXB.
  */
 @XmlRootElement
 public class AisViewConfiguration {
 
     private AisBusConfiguration aisbusConfiguration;
     private WebServerConfiguration serverConfiguration;
+    private boolean recordPastTrack = false;
+    private int liveTargetTtl = 1200; // 20 min
+    private int satTargetTtl = 172800; // 48 hours
+    private int pastTrackMinDist = 100; // 100 meters
+    private int pastTrackLiveTtl = 3600; // 1 hour
+    private int pastTrackSatTtl = 3600; // 1 hour
+    private int cleanupInterval = 600; // 10 minutes
+    private int cleanupTtl = 43200; // 12 hours
 
     public AisViewConfiguration() {
 
@@ -59,7 +67,71 @@ public class AisViewConfiguration {
     public void setServerConfiguration(WebServerConfiguration serverConfiguration) {
         this.serverConfiguration = serverConfiguration;
     }
-    
+
+    public boolean isRecordPastTrack() {
+        return recordPastTrack;
+    }
+
+    public void setRecordPastTrack(boolean recordPastTrack) {
+        this.recordPastTrack = recordPastTrack;
+    }
+
+    public int getLiveTargetTtl() {
+        return liveTargetTtl;
+    }
+
+    public void setLiveTargetTtl(int liveTargetTtl) {
+        this.liveTargetTtl = liveTargetTtl;
+    }
+
+    public int getSatTargetTtl() {
+        return satTargetTtl;
+    }
+
+    public void setSatTargetTtl(int satTargetTtl) {
+        this.satTargetTtl = satTargetTtl;
+    }
+
+    public int getPastTrackMinDist() {
+        return pastTrackMinDist;
+    }
+
+    public void setPastTrackMinDist(int pastTrackMinDist) {
+        this.pastTrackMinDist = pastTrackMinDist;
+    }
+
+    public int getPastTrackLiveTtl() {
+        return pastTrackLiveTtl;
+    }
+
+    public void setPastTrackLiveTtl(int pastTrackLiveTtl) {
+        this.pastTrackLiveTtl = pastTrackLiveTtl;
+    }
+
+    public int getPastTrackSatTtl() {
+        return pastTrackSatTtl;
+    }
+
+    public void setPastTrackSatTtl(int pastTrackSatTtl) {
+        this.pastTrackSatTtl = pastTrackSatTtl;
+    }
+
+    public int getCleanupInterval() {
+        return cleanupInterval;
+    }
+
+    public void setCleanupInterval(int cleanupInterval) {
+        this.cleanupInterval = cleanupInterval;
+    }
+
+    public int getCleanupTtl() {
+        return cleanupTtl;
+    }
+
+    public void setCleanupTtl(int cleanupTtl) {
+        this.cleanupTtl = cleanupTtl;
+    }
+
     public static void save(String filename, AisViewConfiguration conf) throws JAXBException, FileNotFoundException {
         JAXBContext context = JAXBContext.newInstance(AisViewConfiguration.class);
         Marshaller m = context.createMarshaller();

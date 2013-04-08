@@ -22,14 +22,16 @@ import java.util.Objects;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriInfo;
 
+import dk.dma.ais.analysis.common.web.QueryParams;
 import dk.dma.ais.analysis.viewer.AisView;
-import dk.dma.ais.analysis.viewer.AisViewHandler;
+import dk.dma.ais.analysis.viewer.handler.AisViewHandler;
+import dk.dma.ais.analysis.viewer.rest.handler.VesselListHandler;
+import dk.dma.ais.analysis.viewer.rest.json.VesselListJsonResponse;
 
 /**
  * JAX-RS rest services
@@ -44,13 +46,11 @@ public class AisViewRestService {
     }
 
     @GET
-    @Path("test")
+    @Path("anon_vessel_list")
     @Produces(MediaType.APPLICATION_JSON)
-    public Map<String, String> test(@QueryParam("q") String q) {
-        Objects.requireNonNull(handler);
-        Map<String, String> map = new HashMap<String, String>();
-        map.put("q", q);
-        return map;
+    public VesselListJsonResponse anonVesselList(@Context UriInfo uriInfo) {
+        QueryParams queryParams = new QueryParams(uriInfo.getQueryParameters());
+        return VesselListHandler.handle(queryParams, handler, true);
     }
 
     @GET
