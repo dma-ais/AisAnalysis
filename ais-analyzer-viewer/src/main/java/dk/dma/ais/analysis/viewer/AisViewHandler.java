@@ -22,11 +22,11 @@ import dk.dma.enav.util.function.Consumer;
 /**
  * Handler for received AisPackets 
  */
-public class AisViewerHandler implements Consumer<AisPacket> {
+public class AisViewHandler implements Consumer<AisPacket> {
 
     private final AisViewConfiguration conf;
     
-    public AisViewerHandler(AisViewConfiguration conf) {
+    public AisViewHandler(AisViewConfiguration conf) {
         this.conf = conf;
     }
 

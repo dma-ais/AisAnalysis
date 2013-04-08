@@ -38,7 +38,7 @@ public class AisView {
     private static AisView instance;
 
     private final AisViewConfiguration conf;
-    private final AisViewerHandler handler;
+    private final AisViewHandler handler;
     private final AisBus aisBus;
     private final WebServer webServer;
 
@@ -46,7 +46,7 @@ public class AisView {
         this.conf = conf;
 
         // Create handler
-        handler = new AisViewerHandler(conf);
+        handler = new AisViewHandler(conf);
 
         // Create AisBus
         aisBus = conf.getAisbusConfiguration().getInstance();
@@ -91,7 +91,7 @@ public class AisView {
         return conf;
     }
 
-    public AisViewerHandler getHandler() {
+    public AisViewHandler getHandler() {
         return handler;
     }
 

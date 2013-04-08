@@ -29,7 +29,7 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriInfo;
 
 import dk.dma.ais.analysis.viewer.AisView;
-import dk.dma.ais.analysis.viewer.AisViewerHandler;
+import dk.dma.ais.analysis.viewer.AisViewHandler;
 
 /**
  * JAX-RS rest services
@@ -37,7 +37,7 @@ import dk.dma.ais.analysis.viewer.AisViewerHandler;
 @Path("/")
 public class AisViewRestService {
 
-    private final AisViewerHandler handler;
+    private final AisViewHandler handler;
 
     public AisViewRestService() {
         this.handler = AisView.get().getHandler();
