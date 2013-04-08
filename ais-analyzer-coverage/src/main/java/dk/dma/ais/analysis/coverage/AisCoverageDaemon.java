@@ -35,6 +35,8 @@ public class AisCoverageDaemon extends AbstractDaemon {
 
     @Parameter(names = "-file", description = "AisCoverage configuration file")
     String confFile = "aiscoverage.xml";
+    
+    private AisCoverage aisCoverage;
 
     @Override
     protected void runDaemon(Injector injector) throws Exception {
@@ -50,14 +52,16 @@ public class AisCoverageDaemon extends AbstractDaemon {
         }
 
         // Create and start
-        AisCoverage.create(conf);
-        AisCoverage.get().start();
+        aisCoverage = AisCoverage.create(conf);
+        aisCoverage.start();
     }
 
     @Override
     protected void shutdown() {
         LOG.info("Shutting down");
-        AisCoverage.get().stop();
+        if (aisCoverage != null) {
+            aisCoverage.stop();
+        }
         super.shutdown();
     }
 

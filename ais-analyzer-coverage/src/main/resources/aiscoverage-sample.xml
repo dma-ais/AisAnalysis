@@ -17,7 +17,7 @@
 	</aisbus>
 	<serverConfiguration>
 		<port>8080</port>
-		<webappPath>src/main/webapp</webappPath>
+		<webappPath>web</webappPath>
 		<contextPath>/coverage</contextPath>
 	</serverConfiguration>
 </aisCoverageConfiguration>

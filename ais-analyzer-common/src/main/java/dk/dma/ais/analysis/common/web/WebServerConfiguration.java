@@ -21,7 +21,7 @@ package dk.dma.ais.analysis.common.web;
 public class WebServerConfiguration {
 
     private int port = 8080;
-    private String webappPath = "src/main/webapp";
+    private String webappPath = "web";
     private String contextPath = "/";
 
     public WebServerConfiguration() {
