@@ -16,6 +16,7 @@
 package dk.dma.ais.analysis.coverage;
 
 import java.io.FileNotFoundException;
+import java.lang.Thread.UncaughtExceptionHandler;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,6 +67,14 @@ public class AisCoverageDaemon extends AbstractDaemon {
     }
 
     public static void main(String[] args) throws Exception {
+        Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler() {            
+            @Override
+            public void uncaughtException(Thread t, Throwable e) {
+                LOG.error("Uncaught exception in thread " + t.getClass().getCanonicalName() + ": " + e.getMessage());
+                e.printStackTrace();
+                System.exit(-1);
+            }
+        });
         new AisCoverageDaemon().execute(args);
     }
 
