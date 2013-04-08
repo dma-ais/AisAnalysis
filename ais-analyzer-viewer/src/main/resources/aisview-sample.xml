@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<aisViewConfiguration>
+	<aisbus>
+		<provider xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="tcpClientProviderConfiguration">
+			<hostPort>ais163.sealan.dk:4712</hostPort>
+		</provider>
+	</aisbus>
+	<serverConfiguration>
+		<port>8081</port>
+		<webappPath>web</webappPath>
+		<contextPath>/aisview</contextPath>
+	</serverConfiguration>
+</aisViewConfiguration>

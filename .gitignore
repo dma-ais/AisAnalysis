@@ -3,7 +3,8 @@ target
 .settings
 .classpath
 .project
-log/
+log
 aiscoverage-test.xml
+aisview-test.xml
 .DS_Store
 

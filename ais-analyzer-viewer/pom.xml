@@ -10,10 +10,10 @@
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
-	<artifactId>ais-analyzer-coverage</artifactId>
+	<artifactId>ais-analyzer-viewer</artifactId>
 	<version>0.1-SNAPSHOT</version>
-	<name>AIS coverage analyzer</name>
-	<description>AIS coverage analyzer</description>
+	<name>AIS viewer</name>
+	<description>AIS viewer</description>
 
 	<build>
 		<plugins>
@@ -22,7 +22,7 @@
 				<artifactId>maven-assembly-plugin</artifactId>
 				<configuration>
 					<descriptor>src/assembly/bin.xml</descriptor>
-					<finalName>ais-analyzer-coverage-${project.version}</finalName>
+					<finalName>ais-analyzer-viewer-${project.version}</finalName>
 				</configuration>
 				<executions>
 					<execution>
