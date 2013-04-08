@@ -25,4 +25,8 @@ Import into Eclipse
 
     /coverage/rest/*
 
+### Distribution ###
+
+A distributable zip file will be created in `target/`
+
 

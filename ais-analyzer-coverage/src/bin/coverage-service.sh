@@ -5,7 +5,7 @@ cd $SCRIPTPATH
 
 if [ -z $2 ]
 then
-	CONFFILE=aiscoverage.xml
+	CONFFILE=coverage.xml
 else
 	CONFFILE=$2
 fi
@@ -32,7 +32,7 @@ start)
 		exit 1
 	fi
     echo "Starting AisCoverageDaemon"
-    ./aaf.sh -f $CONFFILE > /dev/null 2>&1 &
+    ./coverage.sh -f $CONFFILE > /dev/null 2>&1 &
     ;;
 stop)
     stop

@@ -33,7 +33,7 @@ public class ConfigurationTest {
     
     @Test
     public void makeConfiguration() throws FileNotFoundException, JAXBException {
-        String filename = "src/main/resources/aiscoverage-test.xml";
+        String filename = "src/main/resources/coverage-test.xml";
         AisCoverageConfiguration conf = new AisCoverageConfiguration();
         AisBusConfiguration aisBusConf = new AisBusConfiguration();
         

@@ -22,7 +22,7 @@
 				<artifactId>maven-assembly-plugin</artifactId>
 				<configuration>
 					<descriptor>src/assembly/bin.xml</descriptor>
-					<finalName>ais-analyzer-coverage-${project.version}</finalName>
+					<finalName>coverage-${project.version}</finalName>
 				</configuration>
 				<executions>
 					<execution>

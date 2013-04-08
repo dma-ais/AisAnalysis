@@ -107,15 +107,6 @@ public class AisCoverage {
     }
 
     public void stop() {
-        // Stop web server
-        if (webServer != null) {
-            try {
-                webServer.stop();
-            } catch (Exception e) {
-                LOG.error("Failed to stop web server: " + e.getMessage());
-                e.printStackTrace();
-            }
-        }
         // Stop AisBus
         aisBus.cancel();
     }

@@ -34,7 +34,7 @@ public class AisCoverageDaemon extends AbstractDaemon {
     private static final Logger LOG = LoggerFactory.getLogger(AisCoverageDaemon.class);
 
     @Parameter(names = "-file", description = "AisCoverage configuration file")
-    String confFile = "aiscoverage.xml";
+    String confFile = "coverage.xml";
     
     private AisCoverage aisCoverage;
 
