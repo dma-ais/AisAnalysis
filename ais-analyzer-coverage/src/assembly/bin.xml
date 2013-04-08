@@ -10,6 +10,7 @@
 			<outputDirectory>/</outputDirectory>
 			<includes>
 				<include>*.sh</include>
+				<include>*.bat</include>
 				<include>*.pl</include>
 			</includes>
 			<fileMode>755</fileMode>

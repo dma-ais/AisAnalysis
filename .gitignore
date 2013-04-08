@@ -5,4 +5,5 @@ target
 .project
 log/
 aiscoverage-test.xml
+.DS_Store
 

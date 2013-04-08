@@ -32,7 +32,7 @@ start)
 		exit 1
 	fi
     echo "Starting AisCoverageDaemon"
-    ./coverage.sh -f $CONFFILE > /dev/null 2>&1 &
+    ./coverage.sh -file $CONFFILE > /dev/null 2>&1 &
     ;;
 stop)
     stop
