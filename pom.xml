@@ -25,6 +25,7 @@
     <module>ais-analyzer-common</module>
     <module>ais-analyzer-coverage</module>
     <module>ais-analyzer-abnormal</module>
+    <module>ais-analyzer-viewer</module>
   </modules>
 
   <dependencies>

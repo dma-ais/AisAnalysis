@@ -682,8 +682,7 @@ function drawPastTrack(tracks) {
 					var timeStampFeature = new OpenLayers.Feature.Vector(timeStampPos);
 					
 					// Remove date from time
-					var time = 	currentTrack.time.split(" ")[3] + " " +
-								currentTrack.time.split(" ")[4];
+					var time = (new Date(currentTrack.time)).toTimeString();
 					
 					// Change to 24h clock
 					time = to24hClock(time);

@@ -13,7 +13,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
-package dk.dma.ais.analysis.viewer.rest.handler;
+package dk.dma.ais.analysis.viewer.rest;
 
 import java.util.HashMap;
 import java.util.HashSet;

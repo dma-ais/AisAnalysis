@@ -27,12 +27,14 @@ import org.apache.log4j.Logger;
 import dk.dma.ais.analysis.common.grid.Grid;
 import dk.dma.ais.analysis.common.grid.GridFactory;
 import dk.dma.ais.analysis.viewer.configuration.AisViewConfiguration;
-import dk.dma.ais.analysis.viewer.rest.handler.VesselListFilter;
+import dk.dma.ais.analysis.viewer.rest.VesselListFilter;
+import dk.dma.ais.analysis.viewer.rest.json.AisViewHandlerStats;
 import dk.dma.ais.analysis.viewer.rest.json.BaseVesselList;
 import dk.dma.ais.analysis.viewer.rest.json.VesselCluster;
 import dk.dma.ais.analysis.viewer.rest.json.VesselClusterJsonRepsonse;
 import dk.dma.ais.analysis.viewer.rest.json.VesselList;
 import dk.dma.ais.analysis.viewer.rest.json.VesselTargetDetails;
+import dk.dma.ais.data.AisClassATarget;
 import dk.dma.ais.data.AisTarget;
 import dk.dma.ais.data.AisVesselPosition;
 import dk.dma.ais.data.AisVesselTarget;
@@ -500,6 +502,109 @@ public class AisViewHandler extends Thread implements Consumer<AisPacket> {
         }
 
         return details;
+    }
+
+    /**
+     * Get simple list of anonymous targets that matches the search criteria.
+     * 
+     * @param searchCriteria
+     *            A string that will be matched to all vessel names, IMOs and MMSIs.
+     * @return A list of targets.
+     */
+    public synchronized VesselList searchTargets(String searchCriteria) {
+
+        VesselList response = new VesselList();
+
+        // Iterate through all vessel targets and add to response
+        for (AisTarget target : getAllTargets()) {
+            if (!(target instanceof AisVesselTarget)) {
+                continue;
+            }
+
+            // Determine TTL (could come from configuration)
+            boolean satData = target.getSourceData().isSatData();
+            int ttl = (satData) ? conf.getSatTargetTtl() : conf.getLiveTargetTtl();
+
+            // Is it alive
+            if (!target.isAlive(ttl)) {
+                continue;
+            }
+
+            // Maybe filtered away
+            if (rejectedBySearchCriteria(target, searchCriteria)) {
+                continue;
+            }
+
+            response.addTarget((AisVesselTarget) target, getAnonId(target.getMmsi()));
+        }
+
+        return response;
+    }
+
+    /**
+     * Returns false if target matches a given searchCriteria. This method only matches on the targets name, mmsi and imo.
+     * 
+     * @param target
+     * @param searchCriteria
+     * @return false if the target matches the search criteria.
+     * @throws JsonApiException
+     */
+    private static boolean rejectedBySearchCriteria(AisTarget target, String searchCriteria) {
+
+        if (!(target instanceof AisVesselTarget)) {
+            return true;
+        }
+
+        // Get length of search criteria
+        int searchLength = searchCriteria.length();
+
+        AisVesselTarget vessel = (AisVesselTarget) target;
+
+        // Get details
+        Integer mmsi = vessel.getMmsi();
+
+        // Check mmsi
+        String mmsiString = Long.toString(mmsi);
+        if (mmsiString.length() >= searchLength && mmsiString.substring(0, searchLength).equals(searchCriteria)) {
+            return false;
+        }
+
+        // Check name
+        if (vessel.getVesselStatic() != null && vessel.getVesselStatic().getName() != null) {
+            String name = vessel.getVesselStatic().getName().toUpperCase();
+
+            // Check entire name
+            if (name.length() >= searchLength && name.substring(0, searchLength).equals(searchCriteria.toUpperCase())) {
+                return false;
+            }
+
+            // Check each word
+            String[] words = name.split(" ");
+            for (String w : words) {
+                if (w.length() >= searchLength && w.substring(0, searchLength).equals(searchCriteria.toUpperCase())) {
+                    return false;
+                }
+            }
+        }
+
+        // Check imo - if Class A
+        if (vessel instanceof AisClassATarget) {
+            AisClassATarget classAVessel = (AisClassATarget) vessel;
+            if (classAVessel.getClassAStatic() != null && classAVessel.getClassAStatic().getImoNo() != null) {
+                int imo = classAVessel.getClassAStatic().getImoNo();
+                String imoString = Integer.toString(imo);
+                if (imoString.length() >= searchLength && imoString.substring(0, searchLength).equals(searchCriteria)) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    public synchronized AisViewHandlerStats getStat() {
+        AisViewHandlerStats stats = new AisViewHandlerStats(getAllTargets(), getAllPastTracks());
+        return stats;
     }
 
 }

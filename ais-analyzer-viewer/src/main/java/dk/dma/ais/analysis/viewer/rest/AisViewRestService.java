@@ -18,6 +18,7 @@ package dk.dma.ais.analysis.viewer.rest;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
@@ -27,11 +28,14 @@ import javax.ws.rs.core.UriInfo;
 import dk.dma.ais.analysis.common.web.QueryParams;
 import dk.dma.ais.analysis.viewer.AisView;
 import dk.dma.ais.analysis.viewer.handler.AisViewHandler;
-import dk.dma.ais.analysis.viewer.rest.handler.VesselClusterHandler;
-import dk.dma.ais.analysis.viewer.rest.handler.VesselListHandler;
+import dk.dma.ais.analysis.viewer.rest.json.AisViewHandlerStats;
+import dk.dma.ais.analysis.viewer.rest.json.AnonymousVesselList;
+import dk.dma.ais.analysis.viewer.rest.json.BaseVesselList;
 import dk.dma.ais.analysis.viewer.rest.json.VesselClusterJsonRepsonse;
+import dk.dma.ais.analysis.viewer.rest.json.VesselList;
 import dk.dma.ais.analysis.viewer.rest.json.VesselListJsonResponse;
 import dk.dma.ais.analysis.viewer.rest.json.VesselTargetDetails;
+import dk.dma.enav.model.geometry.Position;
 
 /**
  * JAX-RS rest services
@@ -50,7 +54,7 @@ public class AisViewRestService {
     @Produces(MediaType.APPLICATION_JSON)
     public VesselListJsonResponse anonVesselList(@Context UriInfo uriInfo) {
         QueryParams queryParams = new QueryParams(uriInfo.getQueryParameters());
-        return VesselListHandler.handle(queryParams, handler, true);
+        return vesselList(queryParams, true);
     }
 
     @GET
@@ -58,7 +62,7 @@ public class AisViewRestService {
     @Produces(MediaType.APPLICATION_JSON)
     public VesselListJsonResponse vesselList(@Context UriInfo uriInfo) {
         QueryParams queryParams = new QueryParams(uriInfo.getQueryParameters());
-        return VesselListHandler.handle(queryParams, handler, false);
+        return vesselList(queryParams, false);
     }
 
     @GET
@@ -66,9 +70,9 @@ public class AisViewRestService {
     @Produces(MediaType.APPLICATION_JSON)
     public VesselClusterJsonRepsonse vesselClusters(@Context UriInfo uriInfo) {
         QueryParams queryParams = new QueryParams(uriInfo.getQueryParameters());
-        return VesselClusterHandler.handle(queryParams, handler);
-    }    
-        
+        return cluster(queryParams);
+    }
+
     @GET
     @Path("vessel_target_details")
     @Produces(MediaType.APPLICATION_JSON)
@@ -83,21 +87,93 @@ public class AisViewRestService {
         }
         return details;
     }
-    
+
     @GET
     @Path("vessel_search")
     @Produces(MediaType.APPLICATION_JSON)
-    public VesselTargetDetails vesselSearch(@Context UriInfo uriInfo) {
-        // TODO
-        throw new WebApplicationException(Response.Status.NOT_FOUND);
+    public VesselList vesselSearch(@QueryParam("argument") String argument) {
+        // Get response from AisViewHandler and return it
+        return handler.searchTargets(argument);
     }
-    
+
     @GET
     @Path("stats")
     @Produces(MediaType.APPLICATION_JSON)
-    public VesselTargetDetails stats(@Context UriInfo uriInfo) {
-        // TODO
-        throw new WebApplicationException(Response.Status.NOT_FOUND);
+    public AisViewHandlerStats stats() {
+        return handler.getStat();
     }
-        
+
+    private VesselListJsonResponse vesselList(QueryParams request, boolean anonymous) {
+        VesselListFilter filter = new VesselListFilter(request);
+        // Get corners
+        Double topLat = request.getDouble("topLat");
+        Double topLon = request.getDouble("topLon");
+        Double botLat = request.getDouble("botLat");
+        Double botLon = request.getDouble("botLon");
+
+        // Extract requested area
+        Position pointA = null;
+        Position pointB = null;
+
+        if (topLat != null && topLon != null && botLat != null && botLon != null) {
+            pointA = Position.create(topLat, topLon);
+            pointB = Position.create(botLat, botLon);
+        }
+
+        // Get response from AisViewHandler and return it
+        BaseVesselList list;
+        if (anonymous) {
+            list = new AnonymousVesselList();
+        } else {
+            list = new VesselList();
+        }
+
+        // Get request id
+        Integer requestId = request.getInt("requestId");
+        if (requestId == null) {
+            requestId = -1;
+        }
+
+        return new VesselListJsonResponse(requestId, handler.getVesselList(list, filter, pointA, pointB));
+    }
+
+    private VesselClusterJsonRepsonse cluster(QueryParams request) {
+        VesselListFilter filter = new VesselListFilter(request);
+
+        // Extract cluster limit
+        Integer limit = request.getInt("clusterLimit");
+        if (limit == null) {
+            limit = 10;
+        }
+
+        // Extract cluster size
+        Double size = request.getDouble("clusterSize");
+        if (size == null) {
+            size = 4.0;
+        }
+
+        // Get corners
+        Double topLat = request.getDouble("topLat");
+        Double topLon = request.getDouble("topLon");
+        Double botLat = request.getDouble("botLat");
+        Double botLon = request.getDouble("botLon");
+
+        // Extract requested area
+        Position pointA = null;
+        Position pointB = null;
+
+        if (topLat != null && topLon != null && botLat != null && botLon != null) {
+            pointA = Position.create(topLat, topLon);
+            pointB = Position.create(botLat, botLon);
+        }
+
+        // Get request id
+        Integer requestId = request.getInt("requestId");
+        if (requestId == null) {
+            requestId = -1;
+        }
+
+        return handler.getClusterResponse(requestId, filter, pointA, pointB, limit, size);
+    }
+
 }
