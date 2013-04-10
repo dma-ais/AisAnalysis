@@ -15,7 +15,10 @@
  */
 package dk.dma.ais.analysis.coverage;
 
+import dk.dma.ais.analysis.coverage.calculator.DistributeOnlyCalculator2;
+import dk.dma.ais.analysis.coverage.calculator.SupersourceCoverageCalculator;
 import dk.dma.ais.analysis.coverage.configuration.AisCoverageConfiguration;
+import dk.dma.ais.analysis.coverage.data.OnlyMemoryData;
 import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.packet.AisPacket;
 
@@ -25,9 +28,30 @@ import dk.dma.ais.packet.AisPacket;
 public class CoverageHandler {
 
     private final AisCoverageConfiguration conf;
+    private SupersourceCoverageCalculator superCalc;
+    private DistributeOnlyCalculator2 distributeOnlyCalc;
+    private int cellSize=2500;
+   
     
     public CoverageHandler(AisCoverageConfiguration conf) {
         this.conf = conf;
+        
+        superCalc = new SupersourceCoverageCalculator( false);
+		superCalc.setCellSize(cellSize);	
+		
+		distributeOnlyCalc = new DistributeOnlyCalculator2( false);
+		distributeOnlyCalc.setCellSize(cellSize);	
+		superCalc.addListener(distributeOnlyCalc);
+		
+		
+		distributeOnlyCalc.setDataHandler(new OnlyMemoryData());
+		superCalc.setDataHandler(new OnlyMemoryData());
+		
+		distributeOnlyCalc.getDataHandler().setLatSize(0.0225225225);
+		distributeOnlyCalc.getDataHandler().setLonSize(0.0386812541);
+		superCalc.getDataHandler().setLatSize(0.0225225225);
+		superCalc.getDataHandler().setLonSize(0.0386812541);
+		
     }
 
     public void receiveUnfiltered(AisPacket packet) {
@@ -35,8 +59,7 @@ public class CoverageHandler {
         if (message == null) {
             return;
         }
-        
-        // TODO 
+        distributeOnlyCalc.processMessage(message, "1");	
         
     }
     
@@ -46,7 +69,7 @@ public class CoverageHandler {
             return;
         }
         
-        // TODO
+        superCalc.processMessage(message, "supersource");
     }
 
 }

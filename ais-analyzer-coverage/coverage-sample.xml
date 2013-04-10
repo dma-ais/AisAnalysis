@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<aisCoverageConfiguration>
+	<aisbus>
+		<provider xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="fileReaderProviderConfiguration">
+		<filename>d:\Søfart\aisdump.txt</filename>
+		</provider>
+<!-- 		<provider xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="tcpClientProviderConfiguration"> -->
+<!-- 			<hostPort>ais163.sealan.dk:65262</hostPort> -->
+<!-- 		</provider> -->
+		<consumer xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="distributerConsumerConfiguration">
+			<name>UNFILTERED</name>
+		</consumer>
+		<consumer xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="distributerConsumerConfiguration">
+			<filter xsi:type="duplicateFilterConfiguration" />
+			<name>FILTERED</name>
+		</consumer>
+	</aisbus>
+	<serverConfiguration>
+		<port>8090</port>
+		<webappPath>web</webappPath>
+		<contextPath>/coverage</contextPath>
+	</serverConfiguration>
+</aisCoverageConfiguration>
