@@ -38,6 +38,7 @@ public class AisViewConfiguration {
 
     private AisBusConfiguration aisbusConfiguration;
     private WebServerConfiguration serverConfiguration;
+    private boolean anonymous = false;
     private boolean recordPastTrack = false;
     private int liveTargetTtl = 1200; // 20 min
     private int satTargetTtl = 172800; // 48 hours
@@ -66,6 +67,14 @@ public class AisViewConfiguration {
 
     public void setServerConfiguration(WebServerConfiguration serverConfiguration) {
         this.serverConfiguration = serverConfiguration;
+    }
+    
+    public boolean isAnonymous() {
+        return anonymous;
+    }
+    
+    public void setAnonymous(boolean anonymous) {
+        this.anonymous = anonymous;
     }
 
     public boolean isRecordPastTrack() {

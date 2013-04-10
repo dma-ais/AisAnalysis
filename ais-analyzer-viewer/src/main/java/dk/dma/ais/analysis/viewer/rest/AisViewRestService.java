@@ -62,7 +62,7 @@ public class AisViewRestService {
     @Produces(MediaType.APPLICATION_JSON)
     public VesselListJsonResponse vesselList(@Context UriInfo uriInfo) {
         QueryParams queryParams = new QueryParams(uriInfo.getQueryParameters());
-        return vesselList(queryParams, false);
+        return vesselList(queryParams, handler.getConf().isAnonymous());
     }
 
     @GET
@@ -92,6 +92,9 @@ public class AisViewRestService {
     @Path("vessel_search")
     @Produces(MediaType.APPLICATION_JSON)
     public VesselList vesselSearch(@QueryParam("argument") String argument) {
+        if (handler.getConf().isAnonymous()) {
+            throw new WebApplicationException(Response.Status.FORBIDDEN);
+        }
         // Get response from AisViewHandler and return it
         return handler.searchTargets(argument);
     }

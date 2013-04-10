@@ -495,10 +495,9 @@ public class AisViewHandler extends Thread implements Consumer<AisPacket> {
             return null;
         }
 
-        VesselTargetDetails details = new VesselTargetDetails();
-        details.init((AisVesselTarget) target, anonId);
-        if (pastTrack) {
-            details.setPastTrack(getPastTrack(mmsi));
+        VesselTargetDetails details = new VesselTargetDetails((AisVesselTarget) target, anonId, pastTrack ? getPastTrack(mmsi) : null);
+        if (conf.isAnonymous()) {
+            details.anonymize();
         }
 
         return details;
@@ -605,6 +604,10 @@ public class AisViewHandler extends Thread implements Consumer<AisPacket> {
     public synchronized AisViewHandlerStats getStat() {
         AisViewHandlerStats stats = new AisViewHandlerStats(getAllTargets(), getAllPastTracks());
         return stats;
+    }
+    
+    public AisViewConfiguration getConf() {
+        return conf;
     }
 
 }

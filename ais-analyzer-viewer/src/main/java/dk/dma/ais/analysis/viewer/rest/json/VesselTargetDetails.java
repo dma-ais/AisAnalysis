@@ -42,8 +42,8 @@ public class VesselTargetDetails {
     protected String cog;
     protected boolean moored;
     protected String vesselType = "N/A";
-    protected Short length;
-    protected Short width;
+    protected String length = "N/A";
+    protected String width = "N/A";
     protected String sog;
     protected String name = "N/A";
     protected String callsign = "N/A";
@@ -65,17 +65,15 @@ public class VesselTargetDetails {
     protected String pos;
     protected IPastTrack pastTrack;
 
-    public VesselTargetDetails() {
-        
-    }
-    
-    public void init(AisVesselTarget target, int anonId) {        
+    public VesselTargetDetails(AisVesselTarget target, int anonId, IPastTrack pastTrack) {        
         AisVesselPosition pos = target.getVesselPosition();
         if (pos == null || pos.getPos() == null) return;
         AisClassAPosition classAPos = null;
         if (pos instanceof AisClassAPosition) {
             classAPos = (AisClassAPosition)pos;
         }
+        
+        this.pastTrack = pastTrack;
                         
         this.currentTime = System.currentTimeMillis();
         this.id = anonId;
@@ -144,8 +142,8 @@ public class VesselTargetDetails {
         
         AisTargetDimensions dim = statics.getDimensions();
         if (dim != null) {
-            this.length = (short) (dim.getDimBow() + dim.getDimStern());
-            this.width = (short) (dim.getDimPort() + dim.getDimStarboard());
+            this.length = Integer.toString(dim.getDimBow() + dim.getDimStern());
+            this.width = Integer.toString(dim.getDimPort() + dim.getDimStarboard());
         }
         if (statics.getShipTypeCargo() != null) {
             this.vesselType = statics.getShipTypeCargo().prettyType();
@@ -165,6 +163,15 @@ public class VesselTargetDetails {
             this.eta = getISO8620(classAStatics.getEta());
         }        
 
+    }
+    
+    public void anonymize() {
+        this.name = "N/A";
+        this.callsign = "N/A";
+        this.imoNo = "N/A";
+        this.destination = "N/A";
+        this.mmsi = 0;
+        this.eta = "N/A";
     }
     
     public static String getISO8620(Date date) {
@@ -255,139 +262,71 @@ public class VesselTargetDetails {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public String getCallsign() {
         return callsign;
-    }
-
-    public void setCallsign(String callsign) {
-        this.callsign = callsign;
     }
 
     public String getImoNo() {
         return imoNo;
     }
 
-    public void setImoNo(String imoNo) {
-        this.imoNo = imoNo;
-    }
-
     public String getCargo() {
         return cargo;
-    }
-
-    public void setCargo(String cargo) {
-        this.cargo = cargo;
     }
 
     public String getCountry() {
         return country;
     }
 
-    public void setCountry(String country) {
-        this.country = country;
-    }
-
     public String getDraught() {
         return draught;
-    }
-
-    public void setDraught(String draught) {
-        this.draught = draught;
     }
 
     public String getRot() {
         return rot;
     }
 
-    public void setRot(String rot) {
-        this.rot = rot;
-    }
-
     public String getDestination() {
         return destination;
-    }
-
-    public void setDestination(String destination) {
-        this.destination = destination;
     }
 
     public String getNavStatus() {
         return navStatus;
     }
 
-    public void setNavStatus(String navStatus) {
-        this.navStatus = navStatus;
-    }
-
     public String getEta() {
         return eta;
-    }
-
-    public void setEta(String eta) {
-        this.eta = eta;
     }
 
     public String getPosAcc() {
         return posAcc;
     }
 
-    public void setPosAcc(String posAcc) {
-        this.posAcc = posAcc;
-    }
-    
     public long getMmsi() {
         return mmsi;
-    }
-    
-    public void setMmsi(long mmsi) {
-        this.mmsi = mmsi;
     }
     
     public String getVesselClass() {
         return vesselClass;
     }
     
-    public void setVesselClass(String vesselClass) {
-        this.vesselClass = vesselClass;
-    }
-
     public String getLat() {
         return lat;
-    }
-
-    public void setLat(String lat) {
-        this.lat = lat;
     }
 
     public String getLon() {
         return lon;
     }
 
-    public void setLon(String lon) {
-        this.lon = lon;
-    }
-
     public boolean isMoored() {
         return moored;
     }
     
-    public void setMoored(boolean moored) {
-        this.moored = moored;
-    }
-
     public String getVesselType() {
         return vesselType;
     }
 
-    public void setVesselType(String vesselType) {
-        this.vesselType = vesselType;
-    }
-
-    public Short getLength() {
+    public String getLength() {
         return length;
     }
 
@@ -395,19 +334,11 @@ public class VesselTargetDetails {
         return currentTime;
     }
 
-    public void setCurrentTime(long currentTime) {
-        this.currentTime = currentTime;
-    }
-
     public String getLastReceived() {
         return lastReceived;
     }
 
-    public void setLastReceived(String lastReceived) {
-        this.lastReceived = lastReceived;
-    }
-
-    public Short getWidth() {
+    public String getWidth() {
         return width;
     }
 
@@ -415,96 +346,44 @@ public class VesselTargetDetails {
         return sourceType;
     }
     
-    public void setSourceType(String sourceType) {
-        this.sourceType = sourceType;
-    }
-    
     public long getId() {
         return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
     }
 
     public String getCog() {
         return cog;
     }
 
-    public void setCog(String cog) {
-        this.cog = cog;
-    }
-
     public String getSog() {
         return sog;
-    }
-
-    public void setSog(String sog) {
-        this.sog = sog;
     }
 
     public String getHeading() {
         return heading;
     }
 
-    public void setHeading(String heading) {
-        this.heading = heading;
-    }
-
-    public void setLength(Short length) {
-        this.length = length;
-    }
-
-    public void setWidth(Short width) {
-        this.width = width;
-    }
-    
     public String getPos() {
         return pos;
-    }
-    
-    public void setPos(String pos) {
-        this.pos = pos;
     }
     
     public String getSourceSystem() {
         return sourceSystem;
     }
     
-    public void setSourceSystem(String sourceSystem) {
-        this.sourceSystem = sourceSystem;
-    }
-    
     public String getSourceRegion() {
         return sourceRegion;
-    }
-    
-    public void setSourceRegion(String sourceRegion) {
-        this.sourceRegion = sourceRegion;
     }
     
     public String getSourceBs() {
         return sourceBs;
     }
     
-    public void setSourceBs(String sourceBs) {
-        this.sourceBs = sourceBs;
-    }
-    
     public String getSourceCountry() {
         return sourceCountry;
-    }
-    
-    public void setSourceCountry(String sourceCountry) {
-        this.sourceCountry = sourceCountry;
     }
     
     public IPastTrack getPastTrack() {
         return pastTrack;
     }
     
-    public void setPastTrack(IPastTrack pastTrack) {
-        this.pastTrack = pastTrack;
-    }
-
 }
