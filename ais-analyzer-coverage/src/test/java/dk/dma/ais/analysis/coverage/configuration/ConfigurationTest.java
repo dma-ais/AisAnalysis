@@ -50,7 +50,10 @@ public class ConfigurationTest {
         // Filtered consumer
         DistributerConsumerConfiguration filteredDist = new DistributerConsumerConfiguration();
         filteredDist.setName("FILTERED");
-        filteredDist.getFilters().add(new DuplicateFilterConfiguration());
+        DuplicateFilterConfiguration duplicateFilter = new DuplicateFilterConfiguration();
+//        duplicateFilter.setWindowSize(0);
+//        duplicateFilter.getInstance().
+        filteredDist.getFilters().add(duplicateFilter);
         aisBusConf.getConsumers().add(filteredDist);
         conf.setAisbusConfiguration(aisBusConf);
         

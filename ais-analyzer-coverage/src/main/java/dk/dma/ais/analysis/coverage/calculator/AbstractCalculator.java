@@ -18,7 +18,7 @@ import dk.dma.ais.analysis.coverage.data.OnlyMemoryData;
 import dk.dma.ais.analysis.coverage.data.Ship;
 import dk.dma.ais.analysis.coverage.data.Ship.ShipClass;
 import dk.dma.ais.analysis.coverage.event.AisEvent;
-import dk.dma.ais.analysis.coverage.project.ProjectHandler;
+import dk.dma.ais.analysis.coverage.event.EventBroadcaster;
 import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.message.AisMessage1;
 import dk.dma.ais.message.AisMessage4;
@@ -181,7 +181,7 @@ public abstract class AbstractCalculator implements Serializable {
 				b.setLatitude( m.getPos().getGeoLocation().getLatitude() );
 				b.setLongitude( m.getPos().getGeoLocation().getLongitude() );
 
-				ProjectHandler.getInstance().broadcastEvent(new AisEvent(AisEvent.Event.BS_POSITION_FOUND, this, b));
+				EventBroadcaster.getInstance().broadcastEvent(new AisEvent(AisEvent.Event.BS_POSITION_FOUND, this, b));
 			}		
 		}
 	}

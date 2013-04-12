@@ -10,7 +10,7 @@
         </consumer>
         <consumer xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="distributerConsumerConfiguration">
             <filter xsi:type="duplicateFilterConfiguration">
-                <windowSize>10000</windowSize>
+                <windowSize>0</windowSize>
             </filter>
             <name>FILTERED</name>
             <consumerPullMaxElements>1000</consumerPullMaxElements>

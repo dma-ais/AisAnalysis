@@ -20,7 +20,7 @@ import dk.dma.ais.binary.SixbitException;
  * It increments "received cell-message counter" for corresponding sources,
  * based on the messages that the supersource approves. 
  */
-public class DistributeOnlyCalculator2 extends AbstractCalculator implements IAisEventListener {
+public class DistributeOnlyCalculator extends AbstractCalculator implements IAisEventListener {
 
 	private static final long serialVersionUID = -528305318453243556L;
 	private long messagesProcessed = 0;
@@ -30,13 +30,12 @@ public class DistributeOnlyCalculator2 extends AbstractCalculator implements IAi
 		@Override
 	     protected boolean removeEldestEntry(Map.Entry eldest)
 	     {
-			Map<String, CustomMessage> e = (Map<String, CustomMessage>) eldest.getValue();
-			e.clear();
-	        return this.size() > 1000000;   
+			((Map<String, CustomMessage>) eldest.getValue()).clear();
+	        return this.size() > 100000;   
 	     }
 	  };
 	
-	public DistributeOnlyCalculator2(boolean ignoreRotation) {
+	public DistributeOnlyCalculator(boolean ignoreRotation) {
 		super();
 		Thread t1 = new Thread(new Runnable(){
 			@Override

@@ -37,7 +37,9 @@ function setupMap(){
 	
 	coverageUI.setupUI();
 
+	
 	aisJsonClient.getSources(function(sources){
+		
 		coverageUI.sources=sources;
 		coverageUI.refreshSourceList();
 		coverageUI.drawSources();

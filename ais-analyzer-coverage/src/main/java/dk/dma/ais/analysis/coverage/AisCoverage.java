@@ -61,11 +61,11 @@ public class AisCoverage {
         }
 
         // Get distributers
-        final DistributerConsumer filteredConsumer = (DistributerConsumer) aisBus.getConsumer("FILTERED");
-        if (filteredConsumer == null) {
-            LOG.error("Could not find distributer with name: FILTERED");
-            return;
-        }
+//        final DistributerConsumer filteredConsumer = (DistributerConsumer) aisBus.getConsumer("FILTERED");
+//        if (filteredConsumer == null) {
+//            LOG.error("Could not find distributer with name: FILTERED");
+//            return;
+//        }
         final DistributerConsumer unfilteredConsumer = (DistributerConsumer) aisBus.getConsumer("UNFILTERED");
         if (unfilteredConsumer == null) {
             LOG.error("Could not find distributer with name: UNFILTERED");
@@ -73,12 +73,12 @@ public class AisCoverage {
         }
 
         // Delegate filtered packets to handler
-        filteredConsumer.getConsumers().add(new Consumer<AisPacket>() {
-            @Override
-            public void accept(AisPacket packet) {
-                handler.receiveFiltered(packet);
-            }
-        });
+//        filteredConsumer.getConsumers().add(new Consumer<AisPacket>() {
+//            @Override
+//            public void accept(AisPacket packet) {
+//                handler.receiveFiltered(packet);
+//            }
+//        });
 
         // Delegate unfiltered packets to handler
         unfilteredConsumer.getConsumers().add(new Consumer<AisPacket>() {

@@ -45,15 +45,15 @@ function CoverageUI () {
     	$('#exportPanel').expandable({
     		header: "Export"
     	});
-
     	//add check box listeners
-    	$(".sourceCheckbox").live("change", function(e) {	
+    	$(document).on('change', ".sourceCheckbox", function(e) {
     		self.sources[this.id].enabled=$(this).is(':checked');
     		self.refreshSourceList();
     		self.refreshSourceDetails();
     		self.changed=true;
     	});
-    	$("#selectall").live("change", function(e) {
+    	
+    	$(document).on('change', "#selectall", function(e) {
     		var element = $(this);
     		$.each(self.sources, function(key, source) {
     			source.enabled=element.is(':checked');
@@ -63,14 +63,6 @@ function CoverageUI () {
     		self.changed=true;
     	});
     	
-    	//add export button listener
-//    	$("#exportButton").click(function(){
-//    		aisJsonClient.export(exportMultiplicationFactor, function(data){
-//    			//done loading
-//    			alert();
-//    		})
-//
-//    	})
     	
     	//setup the threshold slider
     	$( "#slider-range" ).slider({

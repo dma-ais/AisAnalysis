@@ -15,10 +15,18 @@
  */
 package dk.dma.ais.analysis.coverage;
 
-import dk.dma.ais.analysis.coverage.calculator.DistributeOnlyCalculator2;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import dk.dma.ais.analysis.coverage.calculator.DistributeOnlyCalculator;
 import dk.dma.ais.analysis.coverage.calculator.SupersourceCoverageCalculator;
 import dk.dma.ais.analysis.coverage.configuration.AisCoverageConfiguration;
+import dk.dma.ais.analysis.coverage.data.Cell;
 import dk.dma.ais.analysis.coverage.data.OnlyMemoryData;
+import dk.dma.ais.analysis.coverage.data.json.JSonCoverageMap;
+import dk.dma.ais.analysis.coverage.data.json.JsonCell;
+import dk.dma.ais.analysis.coverage.data.json.JsonConverter;
 import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.packet.AisPacket;
 
@@ -29,7 +37,7 @@ public class CoverageHandler {
 
     private final AisCoverageConfiguration conf;
     private SupersourceCoverageCalculator superCalc;
-    private DistributeOnlyCalculator2 distributeOnlyCalc;
+    private DistributeOnlyCalculator distributeOnlyCalc;
     private int cellSize=2500;
    
     
@@ -39,7 +47,7 @@ public class CoverageHandler {
         superCalc = new SupersourceCoverageCalculator( false);
 		superCalc.setCellSize(cellSize);	
 		
-		distributeOnlyCalc = new DistributeOnlyCalculator2( false);
+		distributeOnlyCalc = new DistributeOnlyCalculator( false);
 		distributeOnlyCalc.setCellSize(cellSize);	
 		superCalc.addListener(distributeOnlyCalc);
 		
@@ -59,17 +67,72 @@ public class CoverageHandler {
         if (message == null) {
             return;
         }
+        superCalc.processMessage(message, "supersource");
         distributeOnlyCalc.processMessage(message, "1");	
+
         
     }
     
+    int filtCount = 0;
     public void receiveFiltered(AisPacket packet) {
         AisMessage message = packet.tryGetAisMessage();
         if (message == null) {
             return;
         }
-        
-        superCalc.processMessage(message, "supersource");
+        filtCount++;
+//        superCalc.processMessage(message, "supersource");
+//        System.out.println("filt: "+filtCount);
     }
+    
+    public JSonCoverageMap getJsonCoverage(double latStart, double lonStart, double latEnd, double lonEnd, Map<String, Boolean> sources, int multiplicationFactor) {
+
+		JSonCoverageMap map = new JSonCoverageMap();
+		map.latSize=distributeOnlyCalc.getDataHandler().getLatSize()*multiplicationFactor;
+		map.lonSize=distributeOnlyCalc.getDataHandler().getLonSize()*multiplicationFactor;
+		
+
+		HashMap<String, JsonCell> JsonCells = new HashMap<String, JsonCell>();
+
+		List<Cell> celllist = distributeOnlyCalc.getDataHandler().getCells( latStart,  lonStart,  latEnd, lonEnd, sources, multiplicationFactor);
+		HashMap<String,Boolean> superSourceIsHere = new HashMap<String,Boolean>();
+		superSourceIsHere.put("supersource", true);
+		List<Cell> celllistSuper = superCalc.getDataHandler().getCells( latStart,  lonStart,  latEnd, lonEnd, superSourceIsHere, multiplicationFactor);
+		System.out.println("WEEEE"+celllistSuper.size());
+		System.out.println("MUUUU"+celllist.size());
+		Map<String,Cell> superMap = new HashMap<String,Cell>();
+		for (Cell cell : celllistSuper) {
+			superMap.put(cell.getId(), cell);
+		}
+		
+		if(!celllist.isEmpty())
+			map.latSize = celllist.get(0).getGrid().getLatSize();
+		
+		for (Cell cell : celllist) {
+			Cell superCell = superMap.get(cell.getId());
+			if(superCell == null){
+//				System.out.println("prit");
+			}else{
+				JsonCell existing = JsonCells.get(cell.getId());
+				JsonCell theCell = JsonConverter.toJsonCell(cell, superCell);
+				if (existing == null)
+					existing = JsonCells.put(cell.getId(), JsonConverter.toJsonCell(cell, superCell));
+				else if (theCell.getCoverage() > existing.getCoverage()){
+					JsonCells.put(cell.getId(), theCell);
+				}
+			}
+		}
+
+		map.cells = JsonCells;
+		return map;
+	}
+    
+    
+    public DistributeOnlyCalculator getDistributeCalc(){
+    	return distributeOnlyCalc;
+    }
+    public SupersourceCoverageCalculator getSupersourceCalc(){
+    	return superCalc;
+    }
+
 
 }

@@ -10,7 +10,8 @@ function AisJsonClient (serverurl) {
     }
 
     this.getSources = function(callback){
-    	$.post('/json/coverage', { action: "getSources"}, function(data) {
+    	
+    	$.get('/coverage/rest/sources/', function(data) {
     		this.sources = data;
     		$.each(this.sources, function(key, val) {
     			val.enabled=true;
@@ -20,12 +21,14 @@ function AisJsonClient (serverurl) {
     	});
     }
     
-    this.getCoverage = function(dataToBeSent, screenarea, multifactor, callback){
+    this.getCoverage = function(dataToBeSent, screenarea, multifactor, callback){	
+    	
     	//aborting any previous requests
     	if(self.jsoncoveragerequest != null){
     		self.jsoncoveragerequest.abort();
     	}
-    	self.jsoncoveragerequest = $.post('/json/coverage', { action: "getCoverage", sources: dataToBeSent, area: screenarea, multiplicationFactor: multifactor }, function(data) {
+    	//post won't work with the jetty server...
+    	self.jsoncoveragerequest = $.get('/coverage/rest/coverage', { sources: dataToBeSent, area: screenarea, multiplicationFactor: multifactor }, function(data) {
     		callback(data);
     	}); 
     }

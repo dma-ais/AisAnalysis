@@ -46,8 +46,6 @@ public class SupersourceCoverageCalculator extends AbstractCalculator {
 	private int bufferInSeconds = 20;
 	private int degreesPerMinute = 20;
 	private boolean ignoreRotation;
-	private double highThreshold = .8;
-	private double lowThreshold = .3;
 	private List<IAisEventListener> listeners = new ArrayList<IAisEventListener>();
 	private LinkedHashMap<String, CustomMessage> doubletBuffer = new LinkedHashMap<String, CustomMessage>()
 			  {
@@ -82,9 +80,11 @@ public class SupersourceCoverageCalculator extends AbstractCalculator {
 
 	private boolean checkDoublets(CustomMessage m){
 		String key = m.getKey();
+//		System.out.println(key);
 
 		//if message exist in queue return true, otherwise false.
 		if(doubletBuffer.containsKey(key)){
+//			System.out.println(bufferInSeconds);
 			return true;
 		}
 		doubletBuffer.put(key, m);		
@@ -405,20 +405,5 @@ public class SupersourceCoverageCalculator extends AbstractCalculator {
 		this.ignoreRotation = ignoreRotation;
 	}
 
-	public double getHighThreshold() {
-		return highThreshold;
-	}
-
-	public void setHighThreshold(double highThreshold) {
-		this.highThreshold = highThreshold;
-	}
-
-	public double getLowThreshold() {
-		return lowThreshold;
-	}
-
-	public void setLowThreshold(double lowTHreshold) {
-		this.lowThreshold = lowTHreshold;
-	}
 
 }
