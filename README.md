@@ -29,4 +29,15 @@ Import into Eclipse
 
 A distributable zip file will be created in `target/`
 
+## AIS viewer ##
+
+### Rest API ###
+
+    /aisview/rest/*
+
+### Distribution ###
+
+A distributable zip file will be created in `target/`
+
+
 
