@@ -28,6 +28,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import dk.dma.ais.analysis.common.web.WebServerConfiguration;
+import dk.dma.ais.analysis.viewer.handler.table.AisTargetTableConfiguration;
 import dk.dma.ais.configuration.bus.AisBusConfiguration;
 
 /**
@@ -37,7 +38,8 @@ import dk.dma.ais.configuration.bus.AisBusConfiguration;
 public class AisViewConfiguration {
 
     private AisBusConfiguration aisbusConfiguration;
-    private WebServerConfiguration serverConfiguration;
+    private WebServerConfiguration serverConfiguration = new WebServerConfiguration();
+    private AisTargetTableConfiguration tableConf = new AisTargetTableConfiguration();
     private boolean anonymous = false;
     private boolean recordPastTrack = false;
     private int liveTargetTtl = 1200; // 20 min
@@ -67,6 +69,14 @@ public class AisViewConfiguration {
 
     public void setServerConfiguration(WebServerConfiguration serverConfiguration) {
         this.serverConfiguration = serverConfiguration;
+    }
+    
+    public AisTargetTableConfiguration getTableConf() {
+        return tableConf;
+    }
+    
+    public void setTableConf(AisTargetTableConfiguration tableConf) {
+        this.tableConf = tableConf;
     }
     
     public boolean isAnonymous() {

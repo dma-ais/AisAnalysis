@@ -27,6 +27,8 @@ import org.apache.log4j.Logger;
 import dk.dma.ais.analysis.common.grid.Grid;
 import dk.dma.ais.analysis.common.grid.GridFactory;
 import dk.dma.ais.analysis.viewer.configuration.AisViewConfiguration;
+import dk.dma.ais.analysis.viewer.handler.table.AisTargetTable;
+import dk.dma.ais.analysis.viewer.handler.table.AisTargetTableConfiguration;
 import dk.dma.ais.analysis.viewer.rest.VesselListFilter;
 import dk.dma.ais.analysis.viewer.rest.json.AisViewHandlerStats;
 import dk.dma.ais.analysis.viewer.rest.json.BaseVesselList;
@@ -54,6 +56,7 @@ public class AisViewHandler extends Thread implements Consumer<AisPacket> {
     private static Logger LOG = Logger.getLogger(AisViewHandler.class);
 
     private final AisViewConfiguration conf;
+    
     // Map from mmsi to newest position report
     private Map<Integer, Date> lastPosReportMap = new HashMap<Integer, Date>();
     // Map from MMSI to AisTarget data object
@@ -70,12 +73,18 @@ public class AisViewHandler extends Thread implements Consumer<AisPacket> {
     // Time of last cleanup
     private long lastCleanup = 0;
 
+    // Table of targets
+    private final AisTargetTable table;
+
     public AisViewHandler(AisViewConfiguration conf) {
         this.conf = conf;
+        table = new AisTargetTable(conf.getTableConf());        
     }
 
     @Override
     public synchronized void accept(AisPacket packet) {
+        table.accept(packet);
+        
         // Get AisMessage
         AisMessage aisMessage = packet.tryGetAisMessage();
         if (aisMessage == null) {
