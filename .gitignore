@@ -4,7 +4,7 @@ target
 .classpath
 .project
 log
-aiscoverage-test.xml
 aisview-test.xml
 .DS_Store
 aisview.xml
+coverage-test.xml
