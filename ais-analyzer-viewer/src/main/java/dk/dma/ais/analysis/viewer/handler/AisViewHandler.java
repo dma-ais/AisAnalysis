@@ -19,8 +19,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 
@@ -43,6 +45,7 @@ import dk.dma.ais.data.PastTrackSortedSet;
 import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.message.IVesselPositionMessage;
 import dk.dma.ais.packet.AisPacket;
+import dk.dma.enav.model.Country;
 import dk.dma.enav.model.geometry.Position;
 import dk.dma.enav.util.function.Consumer;
 
@@ -54,19 +57,12 @@ public class AisViewHandler extends Thread implements Consumer<AisPacket> {
     private static Logger LOG = Logger.getLogger(AisViewHandler.class);
 
     private final AisViewConfiguration conf;
-    // Map from mmsi to newest position report
-    private Map<Integer, Date> lastPosReportMap = new HashMap<Integer, Date>();
-    // Map from MMSI to AisTarget data object
-    private Map<Integer, AisTarget> targetsMap = new HashMap<Integer, AisTarget>();
-    // Map from anonymous id to MMSI
-    private Map<Integer, Integer> anonIdMap = new HashMap<Integer, Integer>();
-    // Map from MMSI to anonymous id
-    private Map<Integer, Integer> mmsiAnonIdMap = new HashMap<Integer, Integer>();
-    // Map from MMSI to PastTrack
-    private Map<Integer, IPastTrack> pastTrackMap = new HashMap<Integer, IPastTrack>();
 
-    // Counter to for mmsi <-> anonid mappings
-    private int anonymousCounter = 0;
+    // Map from MMSI to target and associated data
+    private Map<Integer, AisTargetEntry> targetsMap = new HashMap<>();
+    // Map from MMSI to PastTrack
+    private Map<Integer, IPastTrack> pastTrackMap = new HashMap<>();
+
     // Time of last cleanup
     private long lastCleanup = 0;
 
@@ -86,61 +82,31 @@ public class AisViewHandler extends Thread implements Consumer<AisPacket> {
         if (!AisTarget.isTargetDataMessage(aisMessage)) {
             return;
         }
+        int mmsi = aisMessage.getUserId();
 
-        boolean newTarget = false;
-        // Get existing AisTarget or create new
-        AisTarget target = getTarget(aisMessage.getUserId());
-        if (target == null) {
-            newTarget = true;
-            target = AisTarget.createTarget(aisMessage);
+        // Get existing AisTargetEntry or create new
+        AisTargetEntry targetEntry = targetsMap.get(mmsi);
+        if (targetEntry == null) {
+            targetEntry = new AisTargetEntry(packet);
+            targetsMap.put(mmsi, targetEntry);
         }
-        // Check if message actually relates to a target
-        if (target == null) {
-            return;
-        }
+        // Update entry
+        boolean targetReplaced = targetEntry.update(packet);
 
-        // We want to avoid to update a target position with an older position
-        // than the last one received
-        boolean oldPos = false;
-        if (aisMessage instanceof IVesselPositionMessage) {
-            Date lastReport = lastPosReportMap.get(aisMessage.getUserId());
-            Date thisReport = null;
-            // Get timestamp for message tag or fallback to time now
-            thisReport = aisMessage.getVdm().getTimestamp();
-            if (thisReport == null) {
-                thisReport = new Date();
-            }
-            if (lastReport != null) {
-                // We will not update if this report is older than last
-                if (thisReport.before(lastReport)) {
-                    oldPos = true;
-                }
-            }
-            lastPosReportMap.put(aisMessage.getUserId(), thisReport);
-        }
-
-        // Update target data
-        if (!oldPos) {
-            try {
-                target.update(aisMessage);
-            } catch (IllegalArgumentException e) {
-                // Trying to update target with report of different type of target.
-                // Replace target with new target
-                target = AisTarget.createTarget(aisMessage);
-                target.update(aisMessage);
-                replaceTarget(aisMessage.getUserId(), target);
-            }
-        }
-
-        if (newTarget) {
-            newTarget(aisMessage.getUserId(), target);
+        if (targetReplaced) {
+            pastTrackMap.remove(mmsi);
         }
 
         // Get or create past track entry for mmsi
         IPastTrack pastTrack = null;
         // Update pasttrack
         if (conf.isRecordPastTrack()) {
-            pastTrack = getPastTrack(aisMessage.getUserId());
+            pastTrack = pastTrackMap.get(mmsi);
+            if (pastTrack == null) {
+                pastTrack = new PastTrackSortedSet();
+                pastTrackMap.put(mmsi, pastTrack);
+            }
+
             if (aisMessage instanceof IVesselPositionMessage) {
                 IVesselPositionMessage posMessage = (IVesselPositionMessage) aisMessage;
                 Position pos = posMessage.getPos().getGeoLocation();
@@ -157,101 +123,8 @@ public class AisViewHandler extends Thread implements Consumer<AisPacket> {
 
     }
 
-    /**
-     * Get target given MMSI number
-     * 
-     * @param mmsi
-     * @return
-     */
-    public synchronized AisTarget getTarget(int mmsi) {
-        return targetsMap.get(mmsi);
-    }
-
-    /**
-     * Insert new target
-     * 
-     * @param userId
-     * @param target
-     */
-    public synchronized void newTarget(int mmsi, AisTarget target) {
-        int anonId = nextAnonId();
-        targetsMap.put(mmsi, target);
-        anonIdMap.put(anonId, mmsi);
-        mmsiAnonIdMap.put(mmsi, anonId);
-    }
-
-    /**
-     * Replace existing target with new target
-     * 
-     * @param mmsi
-     * @param target
-     */
-    public synchronized void replaceTarget(int mmsi, AisTarget target) {
-        targetsMap.put(mmsi, target);
-        // Remove past track
-        pastTrackMap.remove(mmsi);
-    }
-
-    public synchronized void removeTarget(int mmsi) {
-        Integer anonId = mmsiAnonIdMap.get(mmsi);
-        if (anonId != null) {
-            anonIdMap.remove(anonId);
-        }
-        mmsiAnonIdMap.remove(mmsi);
-        targetsMap.remove(mmsi);
-        pastTrackMap.remove(mmsi);
-    }
-
-    /**
-     * Get past track of target
-     * 
-     * @param mmsi
-     * @return
-     */
-    public synchronized IPastTrack getPastTrack(int mmsi) {
-        IPastTrack pastTrack = pastTrackMap.get(mmsi);
-        if (pastTrack == null) {
-            pastTrack = new PastTrackSortedSet();
-            pastTrackMap.put(mmsi, pastTrack);
-        }
-        return pastTrack;
-    }
-
-    /**
-     * Get collection of all targets
-     * 
-     * @return
-     */
-    public synchronized Collection<AisTarget> getAllTargets() {
-        return targetsMap.values();
-    }
-
     public synchronized Collection<IPastTrack> getAllPastTracks() {
         return pastTrackMap.values();
-    }
-
-    /**
-     * Get anonymous id for MMSI number
-     * 
-     * @param mmsi
-     * @return
-     */
-    public synchronized Integer getAnonId(int mmsi) {
-        return mmsiAnonIdMap.get(mmsi);
-    }
-
-    /**
-     * Get MMSI for anonymous id
-     * 
-     * @param anonId
-     * @return
-     */
-    public synchronized Integer getMmsi(int anonId) {
-        return anonIdMap.get(anonId);
-    }
-
-    private synchronized int nextAnonId() {
-        return this.anonymousCounter++;
     }
 
     @Override
@@ -275,7 +148,8 @@ public class AisViewHandler extends Thread implements Consumer<AisPacket> {
         }
         lastCleanup = now;
         List<Integer> deadTargets = new ArrayList<>();
-        for (AisTarget target : getAllTargets()) {
+        for (AisTargetEntry targetEntry : targetsMap.values()) {
+            AisTarget target = targetEntry.getTarget();
             Date lastReport = target.getLastReport();
             elapsed = System.currentTimeMillis() - lastReport.getTime();
             if (elapsed > conf.getCleanupTtl() * 1000) {
@@ -284,10 +158,12 @@ public class AisViewHandler extends Thread implements Consumer<AisPacket> {
         }
         // Cleanup past track
         if (conf.isRecordPastTrack()) {
-            for (AisTarget target : getAllTargets()) {
-                IPastTrack pastTrack = getPastTrack(target.getMmsi());
+            for (AisTargetEntry targetEntry : targetsMap.values()) {
+                AisTarget target = targetEntry.getTarget();
+                IPastTrack pastTrack = pastTrackMap.get(target.getMmsi());
                 if (pastTrack != null) {
-                    pastTrack.cleanup(target.getSourceData().isSatData() ? conf.getPastTrackSatTtl() : conf.getPastTrackLiveTtl());
+                    pastTrack.cleanup(targetEntry.getSourceData().isSatData() ? conf.getPastTrackSatTtl() : conf
+                            .getPastTrackLiveTtl());
                 }
             }
         }
@@ -295,16 +171,16 @@ public class AisViewHandler extends Thread implements Consumer<AisPacket> {
         LOG.info("Removing " + deadTargets.size() + " dead targets");
         for (Integer mmsi : deadTargets) {
             // LOG.info("Removing target: " + mmsi);
-            removeTarget(mmsi);
-            lastPosReportMap.remove(mmsi);
+            targetsMap.remove(mmsi);
+            pastTrackMap.remove(mmsi);
         }
     }
 
     public synchronized BaseVesselList getVesselList(BaseVesselList list, VesselListFilter filter, Position pointA, Position pointB) {
         // Iterate through all vessel targets and add to response
         int inWorld = 0;
-        for (AisTarget target : getAllTargets()) {
-            AisVesselTarget vesselTarget = getFilteredAisVessel(target, filter);
+        for (AisTargetEntry targetEntry : targetsMap.values()) {
+            AisVesselTarget vesselTarget = getFilteredAisVessel(targetEntry, filter);
             if (vesselTarget == null || vesselTarget.getVesselPosition() == null
                     || vesselTarget.getVesselPosition().getPos() == null)
                 continue;
@@ -316,7 +192,7 @@ public class AisViewHandler extends Thread implements Consumer<AisPacket> {
                 continue;
             }
 
-            list.addTarget(vesselTarget, getAnonId(vesselTarget.getMmsi()));
+            list.addTarget(vesselTarget, targetEntry.getAnonId());
         }
 
         list.setInWorldCount(inWorld);
@@ -331,24 +207,108 @@ public class AisViewHandler extends Thread implements Consumer<AisPacket> {
      * @param filter
      * @return
      */
-    private synchronized AisVesselTarget getFilteredAisVessel(AisTarget target, VesselListFilter filter) {
+    private synchronized AisVesselTarget getFilteredAisVessel(AisTargetEntry targetEntry, VesselListFilter filter) {
+        AisTarget target = targetEntry.getTarget();
         if (!(target instanceof AisVesselTarget)) {
             return null;
         }
+        AisVesselTarget vesselTarget = (AisVesselTarget) target;
+        Map<String, HashSet<String>> filterMap = filter.getFilterMap();
+        TargetSourceData sourceData = targetEntry.getSourceData();
+
         // Determine TTL
-        boolean satData = target.getSourceData().isSatData();
-        int ttl = (satData) ? conf.getSatTargetTtl() : conf.getLiveTargetTtl();
+        boolean lastIsSatData = sourceData.isSatData();
+        Set<String> sourceType = filterMap.get("sourceType");
+        int ttl = (lastIsSatData) ? conf.getSatTargetTtl() : conf.getLiveTargetTtl();
+
+        // If quering for SAT the ttl will be forced to sat ttl
+        if (sourceType != null && sourceType.contains("SAT")) {
+            ttl = conf.getSatTargetTtl();
+        }
+
         // Is it alive
         if (!target.isAlive(ttl)) {
             return null;
         }
 
         // Maybe filtered away
-        if (filter.rejectedByFilter((AisVesselTarget) target)) {
-            return null;
+        Set<String> vesselClass = filterMap.get("vesselClass");
+        if (vesselClass != null) {
+            String vc = (target instanceof AisClassATarget) ? "A" : "B";
+            if (!vesselClass.contains(vc)) {
+                return null;
+            }
+        }
+        Set<String> country = filterMap.get("country");
+        if (country != null) {
+            Country mc = target.getCountry();
+            if (mc == null)
+                return null;
+            if (!country.contains(mc.getThreeLetter())) {
+                return null;
+            }
+        }
+        if (sourceType != null) {
+            boolean matches = false;
+            for (String st : sourceType) {
+                matches |= sourceData.isSourceType(st, conf.getLiveTargetTtl(), conf.getSatTargetTtl());
+            }
+            if (!matches) {
+                return null;
+            }
+        }
+        Set<String> sourceCountry = filterMap.get("sourceCountry");
+        if (sourceCountry != null) {
+            boolean matches = false;
+            for (String cnt : sourceCountry) {
+                matches |= sourceData.isCountry(cnt, ttl);
+            }
+            if (!matches) {
+                return null;
+            }
+        }
+        Set<String> sourceRegion = filterMap.get("sourceRegion");
+        if (sourceRegion != null) {
+            boolean matches = false;
+            for (String region : sourceRegion) {
+                matches |= sourceData.isRegion(region, ttl);
+            }
+            if (!matches) {
+                return null;
+            }
+        }
+        Set<String> sourceBs = filterMap.get("sourceBs");
+        if (sourceBs != null) {
+            boolean matches = false;
+            for (String bs : sourceBs) {
+                matches |= sourceData.isBs(bs, ttl);
+            }
+            if (!matches) {
+                return null;
+            }
+        }
+        Set<String> sourceSystem = filterMap.get("sourceSystem");
+        if (sourceSystem != null) {
+            boolean matches = false;
+            for (String sys : sourceSystem) {
+                matches |= sourceData.isSystem(sys, ttl);
+            }
+            if (!matches) {
+                return null;
+            }
+        }
+        Set<String> staticReport = filterMap.get("staticReport");
+        if (staticReport != null) {
+            boolean hasStatic = (vesselTarget.getVesselStatic() != null);
+            if (staticReport.contains("yes") && !hasStatic) {
+                return null;
+            }
+            if (staticReport.contains("no") && hasStatic) {
+                return null;
+            }
         }
 
-        return (AisVesselTarget) target;
+        return vesselTarget;
     }
 
     /**
@@ -417,9 +377,8 @@ public class AisViewHandler extends Thread implements Consumer<AisPacket> {
 
         // Iterate over targets
         int inWorld = 0;
-        for (AisTarget target : getAllTargets()) {
-
-            AisVesselTarget vesselTarget = getFilteredAisVessel(target, filter);
+        for (AisTargetEntry targetEntry : targetsMap.values()) {
+            AisVesselTarget vesselTarget = getFilteredAisVessel(targetEntry, filter);
             if (vesselTarget == null || vesselTarget.getVesselPosition() == null
                     || vesselTarget.getVesselPosition().getPos() == null) {
                 continue;
@@ -441,7 +400,7 @@ public class AisViewHandler extends Thread implements Consumer<AisPacket> {
                 map.get(cellId).incrementCount();
 
                 if (map.get(cellId).getCount() < limit) {
-                    map.get(cellId).getVessels().addTarget(vesselTarget, getAnonId(vesselTarget.getMmsi()));
+                    map.get(cellId).getVessels().addTarget(vesselTarget, targetEntry.getAnonId());
                 }
 
             } else {
@@ -454,7 +413,7 @@ public class AisViewHandler extends Thread implements Consumer<AisPacket> {
 
                 VesselCluster cluster = new VesselCluster(from, to, 1, new VesselList());
                 map.put(cellId, cluster);
-                map.get(cellId).getVessels().addTarget(vesselTarget, getAnonId(vesselTarget.getMmsi()));
+                map.get(cellId).getVessels().addTarget(vesselTarget, targetEntry.getAnonId());
 
             }
         }
@@ -481,21 +440,23 @@ public class AisViewHandler extends Thread implements Consumer<AisPacket> {
     public synchronized VesselTargetDetails getVesselTargetDetails(Integer anonId, Integer mmsi, boolean pastTrack) {
         // Get MMSI for anonymous id if mmsi not given
         if (mmsi == null && anonId != null) {
-            mmsi = getMmsi(anonId);
+            mmsi = AisTargetEntry.getMmsi(anonId);
         }
         if (mmsi == null) {
             return null;
         }
-        anonId = getAnonId(mmsi);
-        AisTarget target = getTarget(mmsi);
-        if (target == null) {
+        AisTargetEntry targetEntry = targetsMap.get(mmsi);
+        if (targetEntry == null) {
             return null;
         }
+        anonId = targetEntry.getAnonId();
+        AisTarget target = targetEntry.getTarget();
         if (!(target instanceof AisVesselTarget)) {
             return null;
         }
 
-        VesselTargetDetails details = new VesselTargetDetails((AisVesselTarget) target, anonId, pastTrack ? getPastTrack(mmsi) : null);
+        VesselTargetDetails details = new VesselTargetDetails((AisVesselTarget) target, targetEntry.getSourceData(), anonId,
+                pastTrack ? pastTrackMap.get(mmsi) : null);
         if (conf.isAnonymous()) {
             details.anonymize();
         }
@@ -515,13 +476,15 @@ public class AisViewHandler extends Thread implements Consumer<AisPacket> {
         VesselList response = new VesselList();
 
         // Iterate through all vessel targets and add to response
-        for (AisTarget target : getAllTargets()) {
+        for (AisTargetEntry targetEntry : targetsMap.values()) {
+            AisTarget target = targetEntry.getTarget();
             if (!(target instanceof AisVesselTarget)) {
                 continue;
             }
 
             // Determine TTL (could come from configuration)
-            boolean satData = target.getSourceData().isSatData();
+            TargetSourceData sourceData = targetEntry.getSourceData();
+            boolean satData = sourceData.isSatData();
             int ttl = (satData) ? conf.getSatTargetTtl() : conf.getLiveTargetTtl();
 
             // Is it alive
@@ -534,7 +497,7 @@ public class AisViewHandler extends Thread implements Consumer<AisPacket> {
                 continue;
             }
 
-            response.addTarget((AisVesselTarget) target, getAnonId(target.getMmsi()));
+            response.addTarget((AisVesselTarget) target, targetEntry.getAnonId());
         }
 
         return response;
@@ -602,10 +565,10 @@ public class AisViewHandler extends Thread implements Consumer<AisPacket> {
     }
 
     public synchronized AisViewHandlerStats getStat() {
-        AisViewHandlerStats stats = new AisViewHandlerStats(getAllTargets(), getAllPastTracks());
+        AisViewHandlerStats stats = new AisViewHandlerStats(targetsMap.values(), getAllPastTracks());
         return stats;
     }
-    
+
     public AisViewConfiguration getConf() {
         return conf;
     }

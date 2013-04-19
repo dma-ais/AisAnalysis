@@ -20,6 +20,7 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
+import dk.dma.ais.analysis.viewer.handler.TargetSourceData;
 import dk.dma.ais.data.AisClassAPosition;
 import dk.dma.ais.data.AisClassAStatic;
 import dk.dma.ais.data.AisClassBTarget;
@@ -65,7 +66,7 @@ public class VesselTargetDetails {
     protected String pos;
     protected IPastTrack pastTrack;
 
-    public VesselTargetDetails(AisVesselTarget target, int anonId, IPastTrack pastTrack) {        
+    public VesselTargetDetails(AisVesselTarget target, TargetSourceData sourceData, int anonId, IPastTrack pastTrack) {        
         AisVesselPosition pos = target.getVesselPosition();
         if (pos == null || pos.getPos() == null) return;
         AisClassAPosition classAPos = null;
@@ -94,24 +95,24 @@ public class VesselTargetDetails {
         }
         
         
-        this.sourceType = target.getSourceData().getSourceType();
+        this.sourceType = sourceData.getSourceType();
         
-        this.sourceSystem = target.getSourceData().getTagging().getSourceId();
+        this.sourceSystem = sourceData.getTagging().getSourceId();
         if (this.sourceSystem == null) {
             this.sourceSystem = "N/A";
         }
-        this.sourceRegion = target.getSourceData().getSourceRegion();
+        this.sourceRegion = sourceData.getSourceRegion();
         if (this.sourceRegion == null) {
             this.sourceRegion = "N/A";
         }
-        if (target.getSourceData().getTagging().getSourceBs() != null) {
-            this.sourceBs = Integer.toString(target.getSourceData().getTagging().getSourceBs());
+        if (sourceData.getTagging().getSourceBs() != null) {
+            this.sourceBs = Integer.toString(sourceData.getTagging().getSourceBs());
         } else {
             this.sourceBs = "N/A";
         }
         
-        if (target.getSourceData().getTagging().getSourceCountry() != null) {
-            this.sourceCountry = target.getSourceData().getTagging().getSourceCountry().getName();
+        if (sourceData.getTagging().getSourceCountry() != null) {
+            this.sourceCountry = sourceData.getTagging().getSourceCountry().getName();
         } else {
             this.sourceCountry = "N/A";
         }

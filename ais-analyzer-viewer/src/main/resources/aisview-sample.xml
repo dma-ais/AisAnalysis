@@ -2,11 +2,11 @@
 <aisViewConfiguration>
 	<aisbus>
 		<provider xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="tcpClientProviderConfiguration">
-			<hostPort>ais163.sealan.dk:4712</hostPort>
+			<hostPort>linux06.fomfrv.dk:9991</hostPort>
 		</provider>
-		<filter xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="downSampleFilterConfiguration">
-			<samplingRate>60</samplingRate>
-		</filter>
+<!-- 		<filter xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="downSampleFilterConfiguration"> -->
+<!-- 			<samplingRate>60</samplingRate> -->
+<!-- 		</filter> -->
 	</aisbus>
 	<serverConfiguration>
 		<port>8081</port>
