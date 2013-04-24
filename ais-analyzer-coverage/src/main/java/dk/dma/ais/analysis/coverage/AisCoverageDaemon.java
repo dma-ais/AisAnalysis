@@ -25,7 +25,7 @@ import com.beust.jcommander.Parameter;
 import com.google.inject.Injector;
 
 import dk.dma.ais.analysis.coverage.configuration.AisCoverageConfiguration;
-import dk.dma.app.application.AbstractDaemon;
+import dk.dma.commons.app.AbstractDaemon;
 
 /**
  * AIS coverage analyzer daemon
