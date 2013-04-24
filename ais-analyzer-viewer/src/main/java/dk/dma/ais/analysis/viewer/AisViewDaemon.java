@@ -25,7 +25,7 @@ import com.beust.jcommander.Parameter;
 import com.google.inject.Injector;
 
 import dk.dma.ais.analysis.viewer.configuration.AisViewConfiguration;
-import dk.dma.app.application.AbstractDaemon;
+import dk.dma.commons.app.AbstractDaemon;
 
 /**
  * AIS viewer daemon

@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
 import com.beust.jcommander.Parameter;
 import com.google.inject.Injector;
 
-import dk.dma.app.application.AbstractDaemon;
+import dk.dma.commons.app.AbstractDaemon;
 
 /**
  * Daemon to build AIS abnormal behavior statistics from AIS sources
