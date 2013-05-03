@@ -35,13 +35,10 @@ A distributable zip file is found [Read more](https://insertlink). Put this [bat
 
 Examples of configuration files can be found here:
 	
-	[Read from a file](https://github.com/dma-dk/AisAnalysis/blob/master/ais-analyzer-coverage/src/main/resources/coverage-fromfile-sample.xml)
-	
-	[Read from a live stream using a TCP connection](https://github.com/dma-dk/AisAnalysis/blob/master/ais-analyzer-coverage/src/main/resources/coverage-fromtcp-sample.xml)
-	
-	[Keep coverage results in memory only](https://github.com/dma-dk/AisAnalysis/blob/master/ais-analyzer-coverage/src/main/resources/coverage-memoryonly-sample.xml)
-	
-	[Save coverage to an instance of MongoDB](https://github.com/dma-dk/AisAnalysis/blob/master/ais-analyzer-coverage/src/main/resources/coverage-mongodb-sample.xml) (Remember to install MongoDB)
+	[Read from a file](https://github.com/dma-dk/AisAnalysis/blob/master/ais-analyzer-coverage/src/main/resources/coverage-fromfile-sample.xml)<br>
+	[Read from a live stream using a TCP connection](https://github.com/dma-dk/AisAnalysis/blob/master/ais-analyzer-coverage/src/main/resources/coverage-fromtcp-sample.xml)<br>
+	[Keep coverage results in memory only](https://github.com/dma-dk/AisAnalysis/blob/master/ais-analyzer-coverage/src/main/resources/coverage-memoryonly-sample.xml)<br>
+	[Save coverage to an instance of MongoDB](https://github.com/dma-dk/AisAnalysis/blob/master/ais-analyzer-coverage/src/main/resources/coverage-mongodb-sample.xml) (Remember to install MongoDB)<br>
 
 
 ## AIS viewer ##
