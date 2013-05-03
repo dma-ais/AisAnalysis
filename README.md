@@ -30,7 +30,7 @@ AisCoverage is a tool for calculating how well AIS receivers (sources) cover a g
 
 ### Distribution ###
 
-A distributable zip file is found [Read more](https://insertlink). Put this [bat file](https://insertlink) in the same folder as the zip file. Remember to modify the bat file to point to a configuration file.
+A distributable zip file is found [here](https://insertlink). Put this [bat file](https://insertlink) in the same folder as the zip file. Remember to modify the bat file to point to a configuration file.
 
 Examples of configuration files can be found here:<br>
 [Read from a file](https://github.com/dma-dk/AisAnalysis/blob/master/ais-analyzer-coverage/src/main/resources/coverage-fromfile-sample.xml)<br>
