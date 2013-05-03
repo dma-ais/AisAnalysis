@@ -1112,7 +1112,7 @@ function resetFilterQuery(){
  */
 function clearFilters() {
 	$("#country").val("");
-	$("#soruceCountry").val("");
+	$("#sourceCountry").val("");
 	$("#sourceType").val("");
 	$("#sourceRegion").val("");
 	$("#sourceBS").val("");
@@ -1129,7 +1129,7 @@ function clearFilters() {
 function parseFilterQuery() {
 	clearFilters();
 	$("#country").val(filterQuery.country);
-	$("#soruceCountry").val(filterQuery.sourceCountry);
+	$("#sourceCountry").val(filterQuery.sourceCountry);
 	$("#sourceType").val(filterQuery.sourceType);
 	$("#sourceRegion").val(filterQuery.sourceRegion);
 	$("#sourceBS").val(filterQuery.sourceBS);
@@ -1147,7 +1147,7 @@ function applyFilter() {
 	resetFilterQuery();
 	
 	filterQuery.country = $("#country").val();
-	filterQuery.sourceCountry = $("#soruceCountry").val();
+	filterQuery.sourceCountry = $("#sourceCountry").val();
 	filterQuery.sourceType = $("#sourceType").val();
 	filterQuery.sourceRegion = $("#sourceRegion").val();
 	filterQuery.sourceBS = $("#sourceBS").val();

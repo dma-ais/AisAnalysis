@@ -18,6 +18,7 @@ package dk.dma.ais.analysis.viewer.rest.json;
 import java.io.Serializable;
 import java.util.Collection;
 
+import dk.dma.ais.analysis.viewer.handler.AisTargetEntry;
 import dk.dma.ais.data.AisTarget;
 import dk.dma.ais.data.AisVesselTarget;
 import dk.dma.ais.data.IPastTrack;
@@ -31,10 +32,11 @@ public class AisViewHandlerStats implements Serializable {
     private int vesselTargets = 0;
     private int pastTrackPoints = 0;
 
-    public AisViewHandlerStats(Collection<AisTarget> targets, Collection<IPastTrack> pastTracks) {
+    public AisViewHandlerStats(Collection<AisTargetEntry> targets, Collection<IPastTrack> pastTracks) {
         totalTargets = targets.size();
         // Go through all targets
-        for (AisTarget target : targets) {
+        for (AisTargetEntry targetEntry : targets) {
+            AisTarget target = targetEntry.getTarget();                   
             if (target instanceof AisVesselTarget) {
                 vesselTargets++;
             }

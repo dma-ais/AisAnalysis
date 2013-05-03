@@ -25,7 +25,7 @@ import com.beust.jcommander.Parameter;
 import com.google.inject.Injector;
 
 import dk.dma.ais.analysis.viewer.configuration.AisViewConfiguration;
-import dk.dma.app.application.AbstractDaemon;
+import dk.dma.commons.app.AbstractDaemon;
 
 /**
  * AIS viewer daemon
@@ -70,8 +70,7 @@ public class AisViewDaemon extends AbstractDaemon {
         Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler() {            
             @Override
             public void uncaughtException(Thread t, Throwable e) {
-                LOG.error("Uncaught exception in thread " + t.getClass().getCanonicalName() + ": " + e.getMessage());
-                e.printStackTrace();
+                LOG.error("Uncaught exception in thread " + t.getClass().getCanonicalName() + ": " + e.getMessage(), t);
                 System.exit(-1);
             }
         });

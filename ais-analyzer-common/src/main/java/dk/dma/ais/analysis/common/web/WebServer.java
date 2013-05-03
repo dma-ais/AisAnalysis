@@ -15,9 +15,8 @@
  */
 package dk.dma.ais.analysis.common.web;
 
-import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.bio.SocketConnector;
+import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.webapp.WebAppContext;
 
 /**
@@ -25,12 +24,12 @@ import org.eclipse.jetty.webapp.WebAppContext;
  */
 public class WebServer {
     
-    private final Server server = new Server();
+    private final Server server;
     
     public WebServer(WebServerConfiguration conf) {
-        SocketConnector connector = new SocketConnector();
-        connector.setPort(conf.getPort());
-        server.setConnectors(new Connector[] { connector });        
+        server = new Server(conf.getPort());
+        // Sets setReuseAddress
+        ((ServerConnector) server.getConnectors()[0]).setReuseAddress(true);
         WebAppContext bb = new WebAppContext();
         bb.setServer(server);
         bb.setContextPath(conf.getContextPath());

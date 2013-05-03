@@ -25,7 +25,9 @@ import com.beust.jcommander.Parameter;
 import com.google.inject.Injector;
 
 import dk.dma.ais.analysis.coverage.configuration.AisCoverageConfiguration;
-import dk.dma.app.application.AbstractDaemon;
+import dk.dma.commons.app.AbstractDaemon;
+
+
 
 /**
  * AIS coverage analyzer daemon
@@ -77,8 +79,7 @@ public class AisCoverageDaemon extends AbstractDaemon {
         Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler() {            
             @Override
             public void uncaughtException(Thread t, Throwable e) {
-                LOG.error("Uncaught exception in thread " + t.getClass().getCanonicalName() + ": " + e.getMessage());
-                e.printStackTrace();
+                LOG.error("Uncaught exception in thread " + t.getClass().getCanonicalName() + ": " + e.getMessage(), t);
                 System.exit(-1);
             }
         });

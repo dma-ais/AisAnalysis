@@ -16,19 +16,19 @@
 	<description>AIS analyzer commons</description>
 
 	<properties>
-		<jettyVersion>8.1.10.v20130312</jettyVersion>
+		<jetty.version>9.0.1.v20130408</jetty.version>
 	</properties>
 
 	<dependencies>
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-server</artifactId>
-			<version>${jettyVersion}</version>
+			<version>${jetty.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-webapp</artifactId>
-			<version>${jettyVersion}</version>
+			<version>${jetty.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>

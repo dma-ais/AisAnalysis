@@ -18,15 +18,10 @@ package dk.dma.ais.analysis.viewer.rest;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 
 import dk.dma.ais.analysis.common.web.QueryParams;
-import dk.dma.ais.data.AisClassATarget;
-import dk.dma.ais.data.AisTargetSourceData;
-import dk.dma.ais.data.AisVesselTarget;
-import dk.dma.enav.model.Country;
 
 public class VesselListFilter {
 
@@ -50,75 +45,8 @@ public class VesselListFilter {
         }
     }
 
-    public boolean rejectedByFilter(AisVesselTarget target) {
-        AisTargetSourceData data = target.getSourceData();
-        Set<String> vesselClass = filterMap.get("vesselClass");
-        if (vesselClass != null) {
-            String vc = (target instanceof AisClassATarget) ? "A" : "B";
-            if (!vesselClass.contains(vc)) {
-                return true;
-            }
-        }
-        Set<String> country = filterMap.get("country");
-        if (country != null) {
-            Country mc = target.getCountry();
-            if (mc == null)
-                return true;
-            if (!country.contains(mc.getThreeLetter())) {
-                return true;
-            }
-        }
-        Set<String> sourceType = filterMap.get("sourceType");
-        if (sourceType != null) {
-            if (!sourceType.contains(data.getSourceType())) {
-                return true;
-            }
-        }
-        Set<String> sourceCountry = filterMap.get("sourceCountry");
-        if (sourceCountry != null) {
-            Country mc = data.getTagging().getSourceCountry();
-            if (mc == null)
-                return true;
-            if (!sourceCountry.contains(mc.getThreeLetter())) {
-                return true;
-            }
-        }
-        Set<String> sourceRegion = filterMap.get("sourceRegion");
-        if (sourceRegion != null) {
-            if (data.getSourceRegion() == null)
-                return true;
-            if (!sourceRegion.contains(data.getSourceRegion())) {
-                return true;
-            }
-        }
-        Set<String> sourceBs = filterMap.get("sourceBs");
-        if (sourceBs != null) {
-            if (data.getTagging().getSourceBs() == null)
-                return true;
-            if (!sourceBs.contains(Long.toString(data.getTagging().getSourceBs()))) {
-                return true;
-            }
-        }
-        Set<String> sourceSystem = filterMap.get("sourceSystem");
-        if (sourceSystem != null) {
-            if (data.getTagging().getSourceId() == null)
-                return true;
-            if (!sourceSystem.contains(data.getTagging().getSourceId())) {
-                return true;
-            }
-        }
-        Set<String> staticReport = filterMap.get("staticReport");
-        if (staticReport != null) {
-            boolean hasStatic = (target.getVesselStatic() != null);
-            if (staticReport.contains("yes") && !hasStatic) {
-                return true;
-            }
-            if (staticReport.contains("no") && hasStatic) {
-                return true;
-            }
-        }
-
-        return false;
+    public Map<String, HashSet<String>> getFilterMap() {
+        return filterMap;
     }
-
+    
 }
