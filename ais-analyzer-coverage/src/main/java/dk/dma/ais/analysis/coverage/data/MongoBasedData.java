@@ -15,6 +15,7 @@ import com.mongodb.DBObject;
 import com.mongodb.Mongo;
 import com.mongodb.MongoException;
 
+import dk.dma.ais.analysis.coverage.configuration.DatabaseConfiguration;
 import dk.dma.ais.analysis.coverage.data.Ship.ShipClass;
 
 
@@ -25,15 +26,15 @@ public class MongoBasedData implements ICoverageData{
 	private String dbname = "cells";
 	DBCollection latLonCollection;
 
-	public MongoBasedData(String dbname)
+	public MongoBasedData(DatabaseConfiguration dbConf)
 	{
 		try {
 			//mongo connection
 			//TODO set up for permanent central mongoDB?
-			mongo = new Mongo("localhost", 27017);
+			mongo = new Mongo(dbConf.getAddr(), dbConf.getPort());
 			// get database from MongoDB,
 			// if database doesn't exists, mongoDB will create it automatically
-			db = mongo.getDB("cells");
+			db = mongo.getDB(dbConf.getDbName());
 			latLonCollection = db.getCollection("latLon");
 			
 			System.out.println("db created");

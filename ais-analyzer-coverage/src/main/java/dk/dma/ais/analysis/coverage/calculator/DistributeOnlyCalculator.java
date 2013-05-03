@@ -6,6 +6,10 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import dk.dma.ais.analysis.coverage.AisCoverage;
 import dk.dma.ais.analysis.coverage.data.BaseStation;
 import dk.dma.ais.analysis.coverage.data.Cell;
 import dk.dma.ais.analysis.coverage.data.CustomMessage;
@@ -22,6 +26,7 @@ import dk.dma.ais.binary.SixbitException;
  */
 public class DistributeOnlyCalculator extends AbstractCalculator implements IAisEventListener {
 
+	private static final Logger LOG = LoggerFactory.getLogger(AisCoverage.class);
 	private static final long serialVersionUID = -528305318453243556L;
 	private long messagesProcessed = 0;
 	private Date start = new Date();
@@ -30,7 +35,7 @@ public class DistributeOnlyCalculator extends AbstractCalculator implements IAis
 		@Override
 	     protected boolean removeEldestEntry(Map.Entry eldest)
 	     {
-			((Map<String, CustomMessage>) eldest.getValue()).clear();
+			((Map<String, CustomMessage>) eldest.getValue()).clear(); //seems to be necessary in order to keep application from performance degration.
 	        return this.size() > 100000;   
 	     }
 	  };
@@ -81,7 +86,7 @@ public class DistributeOnlyCalculator extends AbstractCalculator implements IAis
 			receivedMessages.remove(key);
 		}
 		else{
-			System.out.println("Error: supersource approved a message, but it was not found in any sources "+key);
+			LOG.error("Supersource approved a message, but it was not found in any sources "+key);
 		}
 	}
 
@@ -106,7 +111,6 @@ public class DistributeOnlyCalculator extends AbstractCalculator implements IAis
 		Map<String, CustomMessage> map = receivedMessages.remove(m);
 		if(map != null){
 			map.clear();
-			System.out.println("sdf");
 		}
 		
 	}

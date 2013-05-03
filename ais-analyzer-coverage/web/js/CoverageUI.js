@@ -126,6 +126,8 @@ function CoverageUI () {
     	//map changed listener
     	map.events.register('moveend', this, function (event) {
     		
+    		
+    	
     		//update export div
     		self.exportMultiplicationFactor = self.getMultiplicationFactor();
     		exportMultiplicationDivHidden.val(self.exportMultiplicationFactor);
@@ -135,8 +137,11 @@ function CoverageUI () {
         	
         	//draw coverage
     		coverageUI.drawCoverage();
+    		
         });
     }
+
+
     
     /**
      * Adds all the layers that will contain graphic.

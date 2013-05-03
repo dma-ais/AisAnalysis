@@ -12,10 +12,6 @@ import dk.dma.ais.analysis.coverage.data.BaseStation;
 import dk.dma.ais.analysis.coverage.data.Cell;
 
 
-/*
- * This KML-generator doesn't use the same color scale as CoverageLayer.
- * Fix this..
- */
 
 //TODO retrieve sources with larger cells.
 //TODO retrieve cell data from both super and individual source

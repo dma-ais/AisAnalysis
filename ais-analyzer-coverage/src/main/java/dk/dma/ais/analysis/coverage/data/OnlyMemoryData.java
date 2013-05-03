@@ -117,16 +117,12 @@ public class OnlyMemoryData implements ICoverageData{
 	public List<Cell> getCells(double latStart, double lonStart, double latEnd,
 			double lonEnd, Map<String, Boolean> sources, int multiplicationFactor) {
 		
-		System.out.println("ceeeels");
-		System.out.println(latStart + " " +lonStart);
 		List<Cell> cells = new ArrayList<Cell>();
 		Collection<BaseStation> basestations = gridHandler.getBaseStations().values();
 		
 		for (BaseStation basestation : basestations) {
 			if ( sources.containsKey(basestation.getIdentifier()) ) {	
-				System.out.println(basestation.getIdentifier());
 				
-				System.out.println("MAAAH" + basestation.getGrid().size());
 				BaseStation tempSource = new BaseStation(basestation.getIdentifier(), gridHandler.getLatSize()*multiplicationFactor, gridHandler.getLonSize()*multiplicationFactor);
 				// For each cell
 				Collection<Cell> bscells = basestation.getGrid().values();
@@ -161,7 +157,6 @@ public class OnlyMemoryData implements ICoverageData{
 			}
 
 		}
-		System.out.println("mm: " + cells.size());
 		return cells;
 	}
 

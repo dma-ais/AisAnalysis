@@ -7,7 +7,7 @@ import java.util.List;
 
 
 /**
- * Useful for listening for project events, just register a IAisEventListener.
+ * Useful for listening for AIS events, just register a IAisEventListener.
  * Other objects can broadcast events to listeners via broadcastEvent(AisEvent).
  * 
  * Get access to this by calling ProjectHandler.getInstance()
@@ -16,6 +16,7 @@ import java.util.List;
 public class EventBroadcaster {
 
 	private List<IAisEventListener> listeners = new ArrayList<IAisEventListener>();
+	
 	public void broadcastEvent(AisEvent event){
 		for (IAisEventListener listener : listeners) {
 			listener.aisEventReceived(event);

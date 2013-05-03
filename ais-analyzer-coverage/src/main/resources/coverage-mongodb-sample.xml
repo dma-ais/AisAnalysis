@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 
 <!--
-Reads AIS messages from FILE and saves coverage data to memory only.
+Reads AIS messages from FILE and saves coverage data to MongoDB.
 -->
 <aisCoverageConfiguration>
 	<aisbus>
@@ -22,10 +22,14 @@ Reads AIS messages from FILE and saves coverage data to memory only.
 	
 	<!--Specifies where to store coverage data.
 	Currently supported types are: "MemoryOnly" or "MongoDB".
-	MemoryOnly will process a file many times faster than MongoDB.
+	MemoryOnly is the fastest and is recommended when reading files, and when the coverage does not need to be stored permanently.
+	MongoDB is fast enough for live streams
 	-->
 	<databaseConfiguration>
-        <type>MemoryOnly</type>
+		<type>MongoDB</type>
+        <addr>localhost</addr>
+        <dbName>nordicCoverage</dbName>
+        <port>27017</port>
     </databaseConfiguration>
     
 	<!--Access the frontend via http://localhost:8090/coverage  -->

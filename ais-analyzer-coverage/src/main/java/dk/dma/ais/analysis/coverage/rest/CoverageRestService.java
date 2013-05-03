@@ -112,7 +112,7 @@ public class CoverageRestService {
 		
 		int multiplicationFactor = Integer.parseInt(request.getParameter("multiplicationFactor"));
 		
-		System.out.println(multiplicationFactor);
+//		System.out.println(multiplicationFactor);
 		
 		double latStart = Double.parseDouble(areaArray[0]);
 		double lonStart = Double.parseDouble(areaArray[1]);
@@ -124,7 +124,7 @@ public class CoverageRestService {
 			String[] sourcesArray = sources.split(",");	
 			for (String string : sourcesArray) {
 				sourcesMap.put(string, true);
-				System.out.println(string);
+//				System.out.println(string);
 			}
 		}		
 		
@@ -134,7 +134,7 @@ public class CoverageRestService {
     @GET
     @Path("export")
     @Produces(MediaType.APPLICATION_JSON)
-    public void export(@QueryParam("exportType") String exportType, @QueryParam("exportMultiFactor") String exportMultiFactor, @Context HttpServletResponse response) {
+    public Object export(@QueryParam("exportType") String exportType, @QueryParam("exportMultiFactor") String exportMultiFactor, @Context HttpServletResponse response) {
     	System.out.println("we need to return the KML");
 
 
@@ -194,5 +194,6 @@ public class CoverageRestService {
 		//TODO print cells to kml with larger cellsize then the standart one (multiplication factor)
 	
 		KMLGenerator.generateKML(dh.getSources(), dh.getLatSize(), dh.getLonSize(), response);
+		return null;
     }
 }

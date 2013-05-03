@@ -28,6 +28,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import dk.dma.ais.analysis.common.web.WebServerConfiguration;
+import dk.dma.ais.analysis.coverage.data.OnlyMemoryData;
 import dk.dma.ais.configuration.bus.AisBusConfiguration;
 
 /**
@@ -38,8 +39,21 @@ public class AisCoverageConfiguration {
 
     private AisBusConfiguration aisbusConfiguration;
     private WebServerConfiguration serverConfiguration;
+    private double latSize=0.0225225225;
+    private double lonSize=0.0386812541;
+    private DatabaseConfiguration dbConf = new DatabaseConfiguration();
 
-    public AisCoverageConfiguration() {
+ 
+
+	public DatabaseConfiguration getDatabaseConfiguration() {
+		return dbConf;
+	}
+
+	public void setDatabaseConfiguration(DatabaseConfiguration dbConf) {
+		this.dbConf = dbConf;
+	}
+
+	public AisCoverageConfiguration() {
 
     }
 
@@ -60,6 +74,19 @@ public class AisCoverageConfiguration {
         this.serverConfiguration = serverConfiguration;
     }
     
+    public void setLatSize(double latSize){
+    	this.latSize=latSize;
+    }
+    public void setLonSize(double lonSize){
+    	this.lonSize=lonSize;
+    }
+    public double getLatSize(){
+    	return this.latSize;
+    }
+    public double getLonSize(){
+    	return this.lonSize;
+    }
+    
     public static void save(String filename, AisCoverageConfiguration conf) throws JAXBException, FileNotFoundException {
         JAXBContext context = JAXBContext.newInstance(AisCoverageConfiguration.class);
         Marshaller m = context.createMarshaller();
@@ -73,5 +100,7 @@ public class AisCoverageConfiguration {
         Unmarshaller um = context.createUnmarshaller();
         return (AisCoverageConfiguration) um.unmarshal(new FileInputStream(new File(filename)));
     }
+    
+    
 
 }

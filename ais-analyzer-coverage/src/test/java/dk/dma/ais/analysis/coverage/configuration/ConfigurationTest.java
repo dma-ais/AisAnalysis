@@ -51,11 +51,19 @@ public class ConfigurationTest {
         DistributerConsumerConfiguration filteredDist = new DistributerConsumerConfiguration();
         filteredDist.setName("FILTERED");
         DuplicateFilterConfiguration duplicateFilter = new DuplicateFilterConfiguration();
-//        duplicateFilter.setWindowSize(0);
-//        duplicateFilter.getInstance().
         filteredDist.getFilters().add(duplicateFilter);
         aisBusConf.getConsumers().add(filteredDist);
         conf.setAisbusConfiguration(aisBusConf);
+        
+        conf.setLatSize(1.5);
+        conf.setLonSize(1.5);
+        DatabaseConfiguration dbConf = new DatabaseConfiguration();
+        conf.setDatabaseConfiguration(dbConf);
+//        dbConf.set
+//        dbConf.setName("MongoDB");
+//        dbConf.setAddr("localhost");
+//        dbConf.setPort(9999);
+//        conf.setDatabase("MemoryOnly");
         
         AisCoverageConfiguration.save(filename, conf);
         

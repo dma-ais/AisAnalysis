@@ -23,6 +23,7 @@ import dk.dma.ais.analysis.coverage.calculator.DistributeOnlyCalculator;
 import dk.dma.ais.analysis.coverage.calculator.SupersourceCoverageCalculator;
 import dk.dma.ais.analysis.coverage.configuration.AisCoverageConfiguration;
 import dk.dma.ais.analysis.coverage.data.Cell;
+import dk.dma.ais.analysis.coverage.data.MongoBasedData;
 import dk.dma.ais.analysis.coverage.data.OnlyMemoryData;
 import dk.dma.ais.analysis.coverage.data.json.JSonCoverageMap;
 import dk.dma.ais.analysis.coverage.data.json.JsonCell;
@@ -52,13 +53,21 @@ public class CoverageHandler {
 		superCalc.addListener(distributeOnlyCalc);
 		
 		
-		distributeOnlyCalc.setDataHandler(new OnlyMemoryData());
-		superCalc.setDataHandler(new OnlyMemoryData());
+		//Setting data handlers
+		if(conf.getDatabaseConfiguration().getType().toLowerCase().equals("memoryonly")){
+			distributeOnlyCalc.setDataHandler(new OnlyMemoryData());
+			superCalc.setDataHandler(new OnlyMemoryData());
+		}else{
+			distributeOnlyCalc.setDataHandler(new MongoBasedData(conf.getDatabaseConfiguration()));
+			superCalc.setDataHandler(new MongoBasedData(conf.getDatabaseConfiguration()));
+		}
 		
-		distributeOnlyCalc.getDataHandler().setLatSize(0.0225225225);
-		distributeOnlyCalc.getDataHandler().setLonSize(0.0386812541);
-		superCalc.getDataHandler().setLatSize(0.0225225225);
-		superCalc.getDataHandler().setLonSize(0.0386812541);
+		
+		//setting grid granularity
+		distributeOnlyCalc.getDataHandler().setLatSize(conf.getLatSize());
+		distributeOnlyCalc.getDataHandler().setLonSize(conf.getLonSize());
+		superCalc.getDataHandler().setLatSize(conf.getLatSize());
+		superCalc.getDataHandler().setLonSize(conf.getLonSize());
 		
     }
 
@@ -97,8 +106,6 @@ public class CoverageHandler {
 		HashMap<String,Boolean> superSourceIsHere = new HashMap<String,Boolean>();
 		superSourceIsHere.put("supersource", true);
 		List<Cell> celllistSuper = superCalc.getDataHandler().getCells( latStart,  lonStart,  latEnd, lonEnd, superSourceIsHere, multiplicationFactor);
-		System.out.println("WEEEE"+celllistSuper.size());
-		System.out.println("MUUUU"+celllist.size());
 		Map<String,Cell> superMap = new HashMap<String,Cell>();
 		for (Cell cell : celllistSuper) {
 			superMap.put(cell.getId(), cell);

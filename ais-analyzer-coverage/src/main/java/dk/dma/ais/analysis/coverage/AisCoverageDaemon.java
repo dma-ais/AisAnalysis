@@ -17,7 +17,6 @@ package dk.dma.ais.analysis.coverage;
 
 import java.io.FileNotFoundException;
 import java.lang.Thread.UncaughtExceptionHandler;
-import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,7 +25,6 @@ import com.beust.jcommander.Parameter;
 import com.google.inject.Injector;
 
 import dk.dma.ais.analysis.coverage.configuration.AisCoverageConfiguration;
-import dk.dma.ais.configuration.transform.TransformerConfiguration;
 import dk.dma.app.application.AbstractDaemon;
 
 /**
@@ -52,6 +50,12 @@ public class AisCoverageDaemon extends AbstractDaemon {
         } catch (FileNotFoundException e) {
             LOG.error(e.getMessage());
             return;
+        }
+        
+        if(!conf.getDatabaseConfiguration().getType().toLowerCase().equals("memoryonly") && 
+        		!conf.getDatabaseConfiguration().getType().toLowerCase().equals("mongodb")){
+        	LOG.error("Unknown database type");
+        	return;
         }
 
         // Create and start
