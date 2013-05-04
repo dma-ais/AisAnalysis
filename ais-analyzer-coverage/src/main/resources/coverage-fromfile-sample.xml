@@ -7,7 +7,7 @@ Reads AIS messages from FILE. coverage data is saved memory only (the default).
 	<aisbus>
 	
 		<provider xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="fileReaderProviderConfiguration">
-			<filename>d:\Søfart\aisdump_fullday.txt</filename>
+			<filename>c:\ais-coverage-analysis\ais-data.txt</filename>
 		</provider>
 		
 		
