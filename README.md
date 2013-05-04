@@ -29,9 +29,10 @@ AisCoverage is a tool for calculating how well AIS receivers (sources) cover a g
 
 ### Distribution ###
 
-A distributable zip file is found [here](http://fuka.dk/aisanalyzer-coverage-0.1.rar). <br>
-Modify the coverage-sample.xml (configuration file) to suit your needs (Look at the 4 configuration samples (also included) for guidance). <br>
-Run the coverage.bat file to start the coverage-analysis. While the service is running, you can view the progress by opening your browser at the address given in the configuration file (sample-default-address = localhost:8090/coverage/)
+A distributable zip file is found [here](http://fuka.dk/ais-coverage-analysis.zip). Be aware: As it contains executable files, your browser may post a warning when you download the file. <br>
+When you have downloaded the zip file, extract it to your desired location, and open the folder. <br>
+Modify the configuration file (configuration.xml)to suit your needs (For guidance, Look at the 4 configuration samples (also included)). <br>
+Run the coverage.bat file to start the coverage-analysis. While the service is running, you can view the progress/result by opening your browser at the address given in the configuration file (sample-default-address = localhost:8090/coverage/)
 
 Examples of configuration files can be found here:<br>
 [Read from a file](https://github.com/dma-dk/AisAnalysis/blob/master/ais-analyzer-coverage/src/main/resources/coverage-fromfile-sample.xml)<br>
