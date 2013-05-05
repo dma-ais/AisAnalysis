@@ -33,8 +33,8 @@ A distributable zip file is found [here](http://fuka.dk/ais-coverage-analysis.zi
 When you have downloaded the zip file, extract it to your desired location, and open the folder. <br>
 Modify the configuration file (configuration.xml)to suit your needs (For guidance, Look at the 4 configuration samples (also included)). <br>
 Run the coverage.bat file to start the coverage-analysis. While the service is running, you can view the progress/result by opening your browser at the address given in the configuration file (sample-default-address = localhost:8090/coverage/)
-<br>
-When running tests from files, please use the memory only option.
+<br><br>
+When running tests from files, please use the memory only option. <br>
 When running tests over longer periods using mongodb you might experience some issues. A solution to this, is being worked on.
 
 Examples of configuration files can be found here:<br>
