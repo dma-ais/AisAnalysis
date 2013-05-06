@@ -29,10 +29,12 @@ AisCoverage is a tool for calculating how well AIS receivers (sources) cover a g
 
 ### Distribution ###
 
-A distributable zip file is found [here](http://fuka.dk/ais-coverage-analysis.zip). Be aware: As it contains executable files, your browser may post a warning when you download the file. <br>
+A distributable zip file is found [here](http://fuka.dk/ais-coverage-analysis.zip). <br>
+Be aware: As it contains executable files, your browser may post a warning when you download the file. <br><br>
 When you have downloaded the zip file, extract it to your desired location, and open the folder. <br>
-Modify the configuration file (configuration.xml)to suit your needs (For guidance, Look at the 4 configuration samples (also included)). <br>
-Run the coverage.bat file to start the coverage-analysis. While the service is running, you can view the progress/result by opening your browser at the address given in the configuration file (sample-default-address = localhost:8090/coverage/)
+Modify the configuration file (configuration.xml)to suit your needs (For guidance, Look at the 4 configuration samples (also included)). If you will be using several standart configurations you can edit the -file part in the bat file to point at the configuration file you wish you use for the given test<br>
+
+Run the coverage.bat file (windows) or the coverage.sh file (linux) to start the coverage-analysis. While the service is running, you can view the progress/result by opening your browser at the address given in the configuration file (sample-default-address = localhost:8090/coverage/)
 <br><br>
 When running tests from files, please use the memory only option. <br>
 When running tests over longer periods using mongodb you might experience some issues. A solution to this, is being worked on.
