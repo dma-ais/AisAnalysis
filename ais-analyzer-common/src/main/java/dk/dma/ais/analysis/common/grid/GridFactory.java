@@ -15,7 +15,7 @@
  */
 package dk.dma.ais.analysis.common.grid;
 
-public class GridFactory {
+public final class GridFactory {
 
     private static final double DEFAULT_SIZE = 0.0045;
     private static GridFactory factory;

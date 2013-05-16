@@ -17,15 +17,8 @@ package dk.dma.ais.analysis.common.grid;
 
 import dk.dma.enav.model.geometry.Position;
 
-//Each latitude strip is stored with the parameters below
-class LatitudeStrip {
-    int nColumns; // Number of columns in the strip
-    double latmin; // The lower latitude of the strip
-    double cellHeightInDeg; // The height of the latitude strip
-    double cellWidthInDeg; // the width of the cells in the strip
-}
-
 public class GridEqualArea {
+
     private double earthRadius = 6371228; // [m]
     private double poleLatitude = 89.8; // The poles are defined in a single cell
 
@@ -66,8 +59,9 @@ public class GridEqualArea {
         }
 
         long j = 0;
-        if (latmax > poleLatitude)
+        if (latmax > poleLatitude) {
             j = 1; // Make room for the polecap
+        }
         int i = 0;
         for (i = numberOfCells; i <= numberOfParallelStrips - 1 - j; i++) {
             cellHeightInDeg = cellHeightInMeter * LatitudeDeg2m(lat);
@@ -120,8 +114,9 @@ public class GridEqualArea {
             lat = -poleLatitude;
             numberOfParallelStrips = 1;
         }
-        if (lat > poleLatitude)
+        if (lat > poleLatitude) {
             lat = poleLatitude;
+        }
 
         while (lat < latmax && lat < poleLatitude) {
             double cellHeightInDeg = cellHeightInMeter * LatitudeDeg2m(lat);
@@ -129,8 +124,9 @@ public class GridEqualArea {
             numberOfParallelStrips = numberOfParallelStrips + 1;
         }
 
-        if (latmax > poleLatitude)
+        if (latmax > poleLatitude) {
             numberOfParallelStrips = numberOfParallelStrips + 1;
+        }
         return numberOfParallelStrips;
     }
 
@@ -138,8 +134,9 @@ public class GridEqualArea {
     public int calcNumberOfColumns(double lat) {
         double lat0;
 
-        if ((lat < -poleLatitude) || (lat >= poleLatitude))
+        if ((lat < -poleLatitude) || (lat >= poleLatitude)) {
             return 1;
+        }
 
         lat0 = calcLat0(lat); // Calculates the lower border of the cell where lat is located
         double d = CalcCircumference(lat0) * ((lonmax - lonmin) / 360.0);
@@ -150,8 +147,9 @@ public class GridEqualArea {
             } else {
                 return (int) Math.ceil(d / cellHeightInMeter);
             }
-        } else
+        } else {
             return 1;
+        }
     }
 
     // Calculates the earth radius at a given latitude
@@ -165,10 +163,11 @@ public class GridEqualArea {
     public double calcLat0(double lat) {
         double lat0;
 
-        if (lat >= -poleLatitude)
+        if (lat >= -poleLatitude) {
             lat0 = latmin;
-        else
+        } else {
             lat0 = -poleLatitude;
+        }
 
         for (int i = 0; i <= numberOfParallelStrips - 1; i++) {
             double latPrevious = lat0;
@@ -190,22 +189,27 @@ public class GridEqualArea {
         }
 
         int id = 0;
-        if (lat < -poleLatitude)
+        if (lat < -poleLatitude) {
             return id;
-        if (lat > poleLatitude)
+        }
+        if (lat > poleLatitude) {
             return numberOfCells - 1;
+        }
 
         int Row = 0;
-        if (parallelStrips[0].nColumns == 1)
+        if (parallelStrips[0].nColumns == 1) {
             Row = 1;
+        }
         for (int i = 0; i <= numberOfParallelStrips - 1; i++) {
             if ((parallelStrips[i].latmin + parallelStrips[i].cellHeightInDeg) < lat) {
                 id = id + parallelStrips[i].nColumns;
-                if (i > 0)
+                if (i > 0) {
                     id = id + 1;
+                }
                 Row = i + 1;
-            } else
+            } else {
                 i = numberOfParallelStrips; // Break the for loop
+            }
 
         }
 
@@ -243,10 +247,20 @@ public class GridEqualArea {
             id -= parallelStrips[0].nColumns;
             i++;
         }
-        if (id < 0)
+        if (id < 0) {
             id = id + parallelStrips[i - 1].nColumns;
+        }
         lat = parallelStrips[i].latmin;
         lon = lonmin + parallelStrips[i].cellWidthInDeg * id;
         return Position.create(lat, lon);
     }
+    
+    // Each latitude strip is stored with the parameters below
+    private class LatitudeStrip {
+        int nColumns; // Number of columns in the strip
+        double latmin; // The lower latitude of the strip
+        double cellHeightInDeg; // The height of the latitude strip
+        double cellWidthInDeg; // the width of the cells in the strip
+    }
+
 }
