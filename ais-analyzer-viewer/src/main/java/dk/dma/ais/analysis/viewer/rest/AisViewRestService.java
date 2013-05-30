@@ -105,6 +105,13 @@ public class AisViewRestService {
     public AisViewHandlerStats stats() {
         return handler.getStat();
     }
+    
+    @GET
+    @Path("kml")
+    @Produces("application/vnd.google-earth.kml+xml")
+    public String kml() {
+        return handler.generateKml();
+    }
 
     private VesselListJsonResponse vesselList(QueryParams request, boolean anonymous) {
         VesselListFilter filter = new VesselListFilter(request);

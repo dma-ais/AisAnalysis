@@ -29,6 +29,7 @@ import org.apache.log4j.Logger;
 import dk.dma.ais.analysis.common.grid.Grid;
 import dk.dma.ais.analysis.common.grid.GridFactory;
 import dk.dma.ais.analysis.viewer.configuration.AisViewConfiguration;
+import dk.dma.ais.analysis.viewer.kml.KmlGenerator;
 import dk.dma.ais.analysis.viewer.rest.VesselListFilter;
 import dk.dma.ais.analysis.viewer.rest.json.AisViewHandlerStats;
 import dk.dma.ais.analysis.viewer.rest.json.BaseVesselList;
@@ -198,6 +199,11 @@ public class AisViewHandler extends Thread implements Consumer<AisPacket> {
         list.setInWorldCount(inWorld);
 
         return list;
+    }
+    
+    public synchronized String generateKml() {
+        KmlGenerator generator = new KmlGenerator(targetsMap, pastTrackMap);
+        return generator.generate();
     }
 
     /**

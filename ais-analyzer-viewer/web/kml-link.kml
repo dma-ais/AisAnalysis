@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2" xmlns:gx="http://www.google.com/kml/ext/2.2" xmlns:kml="http://www.opengis.net/kml/2.2" xmlns:atom="http://www.w3.org/2005/Atom">
+<NetworkLink>
+        <name>DMA SAIS</name>
+        <open>1</open>
+        <Camera>
+                <longitude>-35</longitude>
+                <latitude>70</latitude>
+                <altitude>4200000</altitude>
+                <heading>0</heading>
+                <tilt>0</tilt>
+                <roll>0</roll>
+        </Camera>
+        <flyToView>1</flyToView>
+        <Link>
+                <href>http://localhost:8081/aisview/rest/kml</href>
+                <refreshMode>onInterval</refreshMode>
+                <refreshInterval>900</refreshInterval>
+        </Link>
+</NetworkLink>
+</kml>
