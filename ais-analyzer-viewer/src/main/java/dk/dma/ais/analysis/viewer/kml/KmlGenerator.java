@@ -18,6 +18,13 @@ package dk.dma.ais.analysis.viewer.kml;
 import java.util.Map;
 
 import dk.dma.ais.analysis.viewer.handler.AisTargetEntry;
+import dk.dma.ais.data.AisClassAPosition;
+import dk.dma.ais.data.AisClassAStatic;
+import dk.dma.ais.data.AisClassATarget;
+import dk.dma.ais.data.AisTarget;
+import dk.dma.ais.data.AisVesselPosition;
+import dk.dma.ais.data.AisVesselStatic;
+import dk.dma.ais.data.AisVesselTarget;
 import dk.dma.ais.data.IPastTrack;
 
 public class KmlGenerator {
@@ -34,6 +41,29 @@ public class KmlGenerator {
         StringBuilder str = new StringBuilder();
         str.append("<kml>\n<Document>");
         str.append(generateCamera());
+        for (AisTargetEntry entry : targetsMap.values()) {
+            AisTarget target = entry.getTarget();
+            if (!(target instanceof AisVesselTarget)) {
+                continue;
+            }            
+            AisVesselTarget vesselTarget = (AisVesselTarget)target;            
+            IPastTrack pastTrack = pastTrackMap.get(vesselTarget.getMmsi());
+            
+            AisVesselPosition vesselPosition = vesselTarget.getVesselPosition();
+            AisVesselStatic vesselStatic = vesselTarget.getVesselStatic();
+            
+            // Additional class A information
+            if (vesselTarget instanceof AisClassATarget) {
+                AisClassATarget classAtarget = (AisClassATarget)vesselTarget;
+                AisClassAPosition classAPosition = classAtarget.getClassAPosition();
+                AisClassAStatic classAStatic = classAtarget.getClassAStatic();
+            }
+            
+            
+        }
+        
+        
+        
         str.append("</Document></kml>");
         return str.toString();
     }
