@@ -28,10 +28,12 @@ public class VesselViewKML {
 
 	public void addStyle(String stylename, String iconUri, String iconColor, double iconScale, String ballonText){
 		Style style = document.createAndAddStyle();
+		style.withId(stylename);
 		style.createAndSetIconStyle()
-		.withColor(iconColor)
+//		.withColor(iconColor)
 		.withScale(iconScale)
 		.withIcon(new Icon().withHref(iconUri));
+
 		
 		style.createAndSetBalloonStyle()
 		.withText(ballonText);
