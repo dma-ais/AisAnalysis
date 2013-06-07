@@ -15,6 +15,9 @@
  */
 package dk.dma.ais.analysis.viewer.kml;
 
+import java.io.ByteArrayOutputStream;
+import java.io.FileNotFoundException;
+import java.util.List;
 import java.util.Map;
 
 import dk.dma.ais.analysis.viewer.handler.AisTargetEntry;
@@ -26,6 +29,7 @@ import dk.dma.ais.data.AisVesselPosition;
 import dk.dma.ais.data.AisVesselStatic;
 import dk.dma.ais.data.AisVesselTarget;
 import dk.dma.ais.data.IPastTrack;
+import dk.dma.ais.data.PastTrackPoint;
 
 public class KmlGenerator {
 
@@ -36,11 +40,26 @@ public class KmlGenerator {
         this.targetsMap = targetsMap;
         this.pastTrackMap = pastTrackMap;
     }
-
     public String generate() {
-        StringBuilder str = new StringBuilder();
-        str.append("<kml>\n<Document>");
-        str.append(generateCamera());
+    	VesselViewKML vvk = new VesselViewKML();
+    	
+    	vvk.addStyle("Passenger", "/yees.png", "ff0000ff", 10.8, "<![CDATA[$[name]$[description]]]>");
+    	vvk.addStyle("Cargo", "/yees.png", "ff0000ff", 10.8, "<![CDATA[$[name]$[description]]]>");
+    	vvk.addStyle("Tanker", "/yees.png", "ff0000ff", 10.8, "<![CDATA[$[name]$[description]]]>");
+    	vvk.addStyle("HighspeedcraftandWIG", "/yees.png", "ff0000ff", 10.8, "<![CDATA[$[name]$[description]]]>");
+    	vvk.addStyle("Fishing", "/yees.png", "ff0000ff", 10.8, "<![CDATA[$[name]$[description]]]>");
+    	vvk.addStyle("Sailingandpleasure", "/yees.png", "ff0000ff", 10.8, "<![CDATA[$[name]$[description]]]>");
+    	vvk.addStyle("Pilottugandothers", "/yees.png", "ff0000ff", 10.8, "<![CDATA[$[name]$[description]]]>");
+    	vvk.addStyle("Undefinedunkown", "/yees.png", "ff0000ff", 10.8, "<![CDATA[$[name]$[description]]]>");
+    	vvk.addStyle("Sailing", "/yees.png", "ff0000ff", 10.8, "<![CDATA[$[name]$[description]]]>");
+    	vvk.addStyle("AnchoredMoored", "/yees.png", "ff0000ff", 10.8, "<![CDATA[$[name]$[description]]]>");
+    	
+		
+		
+    	
+    	
+    	
+//        str.append(generateCamera());
         for (AisTargetEntry entry : targetsMap.values()) {
             AisTarget target = entry.getTarget();
             if (!(target instanceof AisVesselTarget)) {
@@ -48,6 +67,8 @@ public class KmlGenerator {
             }            
             AisVesselTarget vesselTarget = (AisVesselTarget)target;            
             IPastTrack pastTrack = pastTrackMap.get(vesselTarget.getMmsi());
+            List<PastTrackPoint> trackPoints = pastTrack.getPoints();
+
             
             AisVesselPosition vesselPosition = vesselTarget.getVesselPosition();
             AisVesselStatic vesselStatic = vesselTarget.getVesselStatic();
@@ -58,14 +79,21 @@ public class KmlGenerator {
                 AisClassAPosition classAPosition = classAtarget.getClassAPosition();
                 AisClassAStatic classAStatic = classAtarget.getClassAStatic();
             }
-            
+//            vesselTarget.
+            vvk.addVessel("red", "skibsnavn", "stort skiw", trackPoints);
             
         }
+       
         
         
-        
-        str.append("</Document></kml>");
-        return str.toString();
+        try {
+			return vvk.marshall();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
+		}
+
     }
 
     private String generateCamera() {

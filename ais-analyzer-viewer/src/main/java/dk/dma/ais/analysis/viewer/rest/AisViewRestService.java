@@ -15,6 +15,11 @@
  */
 package dk.dma.ais.analysis.viewer.rest;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -109,7 +114,11 @@ public class AisViewRestService {
     @GET
     @Path("kml")
     @Produces("application/vnd.google-earth.kml+xml")
-    public String kml() {
+    public String kml(@Context HttpServletResponse response) {
+    	DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+		Date date = new Date();
+    	String filename = ("aistargets-" + dateFormat.format(date)+ ".kml");
+    	response.setHeader("Content-Disposition", "attachment; filename=" + filename);
         return handler.generateKml();
     }
 
