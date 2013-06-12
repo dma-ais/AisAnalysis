@@ -87,8 +87,8 @@ public class KmlGenerator {
 		addStyle("FishingMoored", resourceUrl + "vessel_orange_moored.png",	"ff0000ff", .8, "<![CDATA[$[name]$[description]]]>", 0);
 		addStyle("SailingandpleasureMoored", resourceUrl+ "vessel_puple_moored.png", "ff0000ff", .8,	"<![CDATA[$[name]$[description]]]>", 0);
 		addStyle("PilottugandothersMoored", resourceUrl + "vessel_turquoise_moored.png", "ff0000ff", .8,	"<![CDATA[$[name]$[description]]]>", 0);
-		addStyle("UndefinedunkownMoored", resourceUrl + "vessel_gray_moored.png", "ff0000ff", .8, "<![CDATA[$[name]$[description]]]>", 0);
-		addStyle("SailingMoored", resourceUrl + "vessel_white_moored.png",	"ff0000ff", .8, "<![CDATA[$[name]$[description]]]>", 0);
+		addStyle("UndefinedunknownMoored", resourceUrl + "vessel_gray_moored.png", "ff0000ff", .8, "<![CDATA[$[name]$[description]]]>", 0);
+		addStyle("SailingandpleasureMoored", resourceUrl + "vessel_white_moored.png",	"ff0000ff", .8, "<![CDATA[$[name]$[description]]]>", 0);
 		addStyle("empty", "", "", .8, "", 0);
 
 		for (int i = 0; i < 360; i++) {
@@ -99,7 +99,7 @@ public class KmlGenerator {
 			addStyle(("Fishing-" + i), resourceUrl + "vessel_orange.png",	"ff0000ff", 1, "<![CDATA[$[name]$[description]]]>", i+270);
 			addStyle(("Sailingandpleasure-" + i), resourceUrl + "vessel_purple.png", "ff0000ff", 1,	"<![CDATA[$[name]$[description]]]>", i+270);
 			addStyle(("Pilottugandothers-" + i), resourceUrl + "vessel_turquoise.png", "ff0000ff", 1,	"<![CDATA[$[name]$[description]]]>", i+270);
-			addStyle(("Undefinedunkown-" + i), resourceUrl	+ "vessel_gray.png", "ff0000ff", 1,	"<![CDATA[$[name]$[description]]]>", i+270);
+			addStyle(("Undefinedunknown-" + i), resourceUrl	+ "vessel_gray.png", "ff0000ff", 1,	"<![CDATA[$[name]$[description]]]>", i+270);
 			addStyle(("Sailing-" + i), resourceUrl + "vessel_white.png", "ff0000ff", 1, "<![CDATA[$[name]$[description]]]>", i+270);
 		}
 
@@ -127,8 +127,8 @@ public class KmlGenerator {
 			//default ship information
 			String name = ""+vesselTarget.getMmsi();
 			String shiptype = "unknown";
-			String style = "Undefinedunkown";
-			String styleprefix = "Undefinedunkown";
+			String style = "Undefinedunknown";
+			String styleprefix = "Undefinedunknown";
 
 			//Extract information from vesselstatic
 			if (vesselStatic != null) {
@@ -171,9 +171,9 @@ public class KmlGenerator {
 	        				pickedfolder = other;
 	        				addshiptypeplacemark("Sailing", vesselPosition, shiptypesfolder);
 	        			}else{
-	        				styleprefix = "Undefinedunkown";
+	        				styleprefix = "Undefinedunknown";
 	        				pickedfolder = undefined;
-	        				addshiptypeplacemark("Undefinedunkown", vesselPosition, shiptypesfolder);
+	        				addshiptypeplacemark("Undefinedunknown", vesselPosition, shiptypesfolder);
 	        			}	
 	        		}
 					addshipnamefolder(name, vesselPosition, shipnamefolder);
@@ -255,9 +255,9 @@ public class KmlGenerator {
 		linestring2.withTessellate(new Boolean(true));
 
 		
-		Placemark placemark1 = folder.createAndAddPlacemark();
-		LineString linestring = placemark1.createAndSetLineString();
-		linestring.withTessellate(new Boolean(true));
+		Placemark placemark1 = folder.createAndAddPlacemark().withStyleUrl("empty");
+//		LineString linestring = placemark1.createAndSetLineString();
+//		linestring.withTessellate(new Boolean(true));
 		
 		//add pasttrack path
 		if(pastTrackPoints != null){
