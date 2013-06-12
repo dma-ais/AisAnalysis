@@ -63,8 +63,7 @@ public class KmlGenerator {
 //		VesselViewKML vvk = new VesselViewKML();
 		Folder outerfolder = document.createAndAddFolder().withName("Last known position");
 		
-		Folder shipnamefolder = document.createAndAddFolder().withName("Ship names")
-				.withVisibility(false);
+		Folder shipnamefolder = document.createAndAddFolder().withName("Ship names").withVisibility(false);
 		Folder shiptypesfolder = document.createAndAddFolder().withName("Ship types").withVisibility(false);
 		Folder Tanker = outerfolder.createAndAddFolder().withName("Tanker").withVisibility(false);
 		Folder cargo = outerfolder.createAndAddFolder().withName("Cargo").withVisibility(false);
@@ -76,6 +75,9 @@ public class KmlGenerator {
 		Folder undefined = outerfolder.createAndAddFolder().withName("Undefined").withVisibility(false);
 		Folder SART = outerfolder.createAndAddFolder().withName("SART").withVisibility(false);
 		Folder pickedfolder = null;
+		Folder pasttrackfolder = document.createAndAddFolder().withName("Tracks").withVisibility(false);
+		Folder twentyfourhourfolder = pasttrackfolder.createAndAddFolder().withName("24 hours").withVisibility(false);
+		Folder threedayfolder = pasttrackfolder.createAndAddFolder().withName("72 hours").withVisibility(false);
 
 
 		addStyle("PassengerMoored", resourceUrl + "vessel_blue_moored.png",	"ff0000ff", 1, "<![CDATA[$[name]$[description]]]>", 0);
@@ -211,7 +213,7 @@ public class KmlGenerator {
 					}
 					}
 				}
-				addVessel(style, name, "stort skiw", trackPoints, pickedfolder);
+				addVessel(style, name, "stort skiw", trackPoints, pickedfolder, twentyfourhourfolder, threedayfolder, vesselTarget.getMmsi());
 			}
 
 			// Additional class A information
@@ -262,11 +264,22 @@ public class KmlGenerator {
 		style.createAndSetBalloonStyle()
 		.withText(ballonText);
 	}
-	public void addVessel(String stylename, String name, String description, List<PastTrackPoint> pastTrackPoints, Folder Tanker){
+	public void addVessel(String stylename, String name, String description, List<PastTrackPoint> pastTrackPoints, Folder shiptypefolder, Folder twentyfourhour, Folder threeday, int mmsi){
 		if(pastTrackPoints.isEmpty())
 			return;
 		
-		Folder folder = Tanker.createAndAddFolder().withName(name);
+		Folder folder = shiptypefolder.createAndAddFolder().withName(name);
+		
+		Folder folder1 = twentyfourhour.createAndAddFolder().withName(""+mmsi).withVisibility(false);
+		Folder folder2 = threeday.createAndAddFolder().withName(""+mmsi).withVisibility(false);
+		
+		Placemark placemark2 = folder1.createAndAddPlacemark();
+		LineString linestring1 = placemark2.createAndSetLineString();
+		linestring1.withTessellate(new Boolean(true));
+		
+		Placemark placemark3 = folder2.createAndAddPlacemark();
+		LineString linestring2 = placemark3.createAndSetLineString();
+		linestring2.withTessellate(new Boolean(true));
 
 		
 		Placemark placemark1 = folder.createAndAddPlacemark();
@@ -289,13 +302,17 @@ public class KmlGenerator {
 //			System.out.println(pastTrackPoints.get(i).getTime());
 			int timeDif_Hours = (int)Math.abs((now.getTime()-pastTrackPoints.get(i).getTime().getTime())/1000/60/60);
 			
+			PastTrackPoint trackpoint = pastTrackPoints.get(i);
+			
 			//Put in 24hour folder
 			if(timeDif_Hours <= 24){
 				//TODO put in 24hour folder
+				linestring1.addToCoordinates(trackpoint.getLon(), trackpoint.getLat());
 			}
 			//Put in 72hour folder
 			if(timeDif_Hours <= 72){
 				//TODO put in 72hour folder
+				linestring2.addToCoordinates(trackpoint.getLon(), trackpoint.getLat());
 
 			}else{
 				break;

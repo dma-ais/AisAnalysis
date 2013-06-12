@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<aisViewConfiguration>
+<!-- 	<aisbus> -->
+<!-- 		<provider xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="tcpClientProviderConfiguration"> -->
+<!-- 			<hostPort>linux06.fomfrv.dk:9991</hostPort> -->
+<!-- 		</provider> -->
+<!--		<filter xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="downSampleFilterConfiguration"> -->
+<!-- 			<samplingRate>60</samplingRate> -->
+<!--		</filter> -->
+<!-- 	</aisbus> -->
+<!-- 	<aisbus> -->
+<!--         <busPullMaxElements>1000</busPullMaxElements> -->
+<!--         <busQueueSize>10000</busQueueSize> -->
+<!--         <provider xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="tcpClientProviderConfiguration"> -->
+<!--             <clientConf> -->
+<!--                 <bufferSize>8192</bufferSize> -->
+<!--                 <gzipBufferSize>2048</gzipBufferSize> -->
+<!--                 <gzipCompress>false</gzipCompress> -->
+<!--             </clientConf> -->
+<!--             <hostPort>ais163.sealan.dk:4712</hostPort> -->
+<!--             <reconnectInterval>10</reconnectInterval> -->
+<!--             <timeout>10</timeout> -->
+<!--         </provider> -->
+<!--     </aisbus> -->
+    
+	<aisbus>
+	
+		<provider xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="fileReaderProviderConfiguration">
+			<filename>D:\silentk\Desktop\ais-test-data.txt</filename>
+		</provider>
+		
+		
+		<consumer xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="distributerConsumerConfiguration">
+			<name>UNFILTERED</name>
+		</consumer>
+	</aisbus>
+	
+	
+	
+	<serverConfiguration>
+		<port>8081</port>
+		<webappPath>web</webappPath>
+		<contextPath>/aisview</contextPath>
+	</serverConfiguration>
+	<cleanupInterval>600</cleanupInterval>
+	<cleanupTtl>43200</cleanupTtl>
+	<liveTargetTtl>1200</liveTargetTtl>
+	<pastTrackLiveTtl>3600</pastTrackLiveTtl>
+	<pastTrackMinDist>100</pastTrackMinDist>
+	<pastTrackSatTtl>3600</pastTrackSatTtl>
+	<recordPastTrack>true</recordPastTrack>
+	<satTargetTtl>172800</satTargetTtl>
+</aisViewConfiguration>
