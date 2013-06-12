@@ -148,7 +148,7 @@ public class KmlGenerator {
 			String name = ""+vesselTarget.getMmsi();
 			String shiptype = "unknown";
 			String style = "Undefinedunknown";
-			String styleprefix = "Undefinedunkown";
+			String styleprefix = "Undefinedunknown";
 			String description = "";
 			
 			//Extract information from vesselstatic
