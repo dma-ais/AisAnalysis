@@ -18,6 +18,10 @@ package dk.dma.ais.analysis.viewer.kml;
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.util.Calendar;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -123,9 +127,15 @@ public class KmlGenerator {
 
 	public String generate() {
 		
-
-		// str.append(generateCamera());
+		List<AisTargetEntry> sortedByMMSI = new ArrayList<AisTargetEntry>();
+		List<AisVesselTarget> sortedByName = new ArrayList<AisVesselTarget>();
+		
 		for (AisTargetEntry entry : targetsMap.values()) {
+			sortedByMMSI.add(entry);
+		}
+		Collections.sort(sortedByMMSI, new SortByMMSIComparator());
+		// For each AIS target
+		for (AisTargetEntry entry : sortedByMMSI) {
 			
 			//Initial checks. Vessel has to have at least a position
 			AisTarget target = entry.getTarget();
@@ -155,6 +165,9 @@ public class KmlGenerator {
 			//Extract information from vesselstatic
 			AisVesselStatic vesselStatic = vesselTarget.getVesselStatic();
 			if (vesselStatic != null) {
+
+				//add to sortedbyname list
+				sortedByName.add(vesselTarget);
 				
 				name = vesselStatic.getName();
 				ShipType type = null;
@@ -190,10 +203,9 @@ public class KmlGenerator {
 	        				pickedfolder = undefined;
 	        			}	
 	        		}
-					addToShipTypeFolder(styleprefix, vesselPosition);
-					addToShipNameFolder(name, vesselPosition);
 				}
 			}
+			addToShipTypeFolder(styleprefix, vesselPosition);
 			
 			//Check if vessel is moored
 			Double sog = vesselPosition.getSog();
@@ -208,77 +220,66 @@ public class KmlGenerator {
 				
 				style = pickStyle(styleprefix, direction);	
 			}
+	        
 
-//			age = vesselTarget.getCreated()
-			
-			
 	        
-	        
-	       
-	        
-	        String destination = "Unknown";
-	        Double draught = 0.0;
-	        int imo = 0;
-	        
-	        
-			if (vesselTarget instanceof AisClassATarget) {
-				AisClassATarget classAtarget = (AisClassATarget) vesselTarget;
-				AisClassAPosition classAPosition = classAtarget
-						.getClassAPosition();
-				AisClassAStatic classAStatic = classAtarget.getClassAStatic();
-				
-				
-				if(classAStatic != null)
-				{
-				destination = classAStatic.getDestination();
-				draught = classAStatic.getDraught();
-				if(classAStatic.getImoNo() != null)
-				{
-					imo = classAStatic.getImoNo();
-				}
-				}
-				if(classAPosition != null)
-				{
-					classAPosition.getNavStatus();
-				}
-				
-			}
-	        
-	        
-				if(vesselTarget != null && vesselStatic != null)
-				{
-					
-					Date sDate = vesselTarget.getCreated();
-			        Date eDate = new Date();
-			        		
-			       
-			        Calendar cal3 = Calendar.getInstance();
-			        cal3.setTime(sDate);
-			        Calendar cal4 = Calendar.getInstance();
-			        cal4.setTime(eDate);
-			        long age = yearsBetween(cal3,cal4);
-			        
+	        //set description
+					Date lastReport = new Date();
+			        double age = 0.0;
+			        int mmsi = 0;
+			        int imo = 0;
+			        String callsign = "Unknown";
+			        String flag = "";
 			        int length = 0;
 			        int breadth = 0;
+			        double draught = 0.0;
+			        double grosston = 0.0;
+			        String navstatus = "";
+			        String destination = "Unknown";
+			        double heading = 0.0;
+			        double cog = 0.0;
+//			        double sog = 0.0;
+			        String aissource = "Unknown";
 			        
-			        if(vesselStatic.getDimensions() != null)
-			        {
-			        	length = vesselStatic.getDimensions().getDimBow() + vesselStatic.getDimensions().getDimStern();
-				        breadth = vesselStatic.getDimensions().getDimPort() + vesselStatic.getDimensions().getDimStarboard();
+			        //set length and breath
+			        if(vesselStatic != null)
+			        {	if(vesselStatic.getDimensions() != null)	
+			        		{
+			        			length = vesselStatic.getDimensions().getDimBow() + vesselStatic.getDimensions().getDimStern();
+			        			breadth = vesselStatic.getDimensions().getDimPort() + vesselStatic.getDimensions().getDimStarboard();
+			        }}
+			        //set flag (country)
+			        if(vesselTarget.getCountry() != null)	{	flag = vesselTarget.getCountry().toString();	}
+			        // if ship is an A class ship, set destination, draught, imo number and navigation status
+			        if (vesselTarget instanceof AisClassATarget) {
+						AisClassATarget classAtarget = (AisClassATarget) vesselTarget;
+						AisClassAPosition classAPosition = classAtarget.getClassAPosition();
+						AisClassAStatic classAStatic = classAtarget.getClassAStatic();
+						if(classAStatic != null)	{
+						if(classAStatic.getDestination() != null)	{	destination = classAStatic.getDestination();	}
+						if(classAStatic.getDraught() != null)	{	draught = classAStatic.getDraught();	}
+						if(classAStatic.getImoNo() != null)	{	imo = classAStatic.getImoNo();	}
+						if(classAPosition != null)	{	classAPosition.getNavStatus();	}
+						}
+					}
+			        if(vesselTarget.getLastReport() != null)	
+			        {	lastReport = vesselTarget.getLastReport();	
+			        	Date now = new Date();
+			        	age = ((now.getTime()-lastReport.getTime()) / (1000*60*60));
 			        }
-			        String flag = "";
-			        if(vesselTarget.getCountry() != null)
-			        {
-			        	flag = vesselTarget.getCountry().toString();
-			        }
-					 
+			        mmsi = vesselTarget.getMmsi();
+			        if(vesselStatic != null)	{callsign = vesselStatic.getCallsign();	}
+			        if(vesselPosition.getHeading() != null)	{	heading = vesselPosition.getHeading();	}
+			        if(vesselPosition.getCog() != null)	{	cog = vesselPosition.getCog();	}
+			        if(vesselPosition.getSog() != null)	{	sog = vesselPosition.getSog();	}
+			        	 
 					
-					description = "<font size= \"5\" color=\"black\">"+vesselTarget.getLastReport()+"Age "+age+"</font><table witdh=\"300\" align=\"centeret\"><tr>"+
-							"<td Align=\"Left\">" +"Ship name: </td> <td Align=\"right\">"+vesselStatic.getName()+"</td></tr><tr><td Align=\"Left\">" +
-							"mmsi: </td> <td Align=\"right\"><a href=\"http://www.marinetraffic.com/ais/showallphotos.aspx?mmsi="+vesselStatic.getMmsi()+"\"> "+vesselStatic.getMmsi() +
-							"</a></td></tr><tr><td Align=\"Left\"> imo: </td> <td Align=\"right\"><a href=\"http://www.marinetraffic.com/ais/showallphotos.aspx?mmsi="+vesselStatic.getMmsi()+"\">"+imo+"</a></td></tr>" +
+					description = "<font size= \"5\" color=\"black\">"+lastReport+" Age "+age+"h </font><table witdh=\"300\" align=\"centeret\"><tr>"+
+							"<td Align=\"Left\">" +"Ship name: </td> <td Align=\"right\">"+name+"</td></tr><tr><td Align=\"Left\">" +
+							"mmsi: </td> <td Align=\"right\"><a href=\"http://www.marinetraffic.com/ais/showallphotos.aspx?mmsi="+mmsi+"\"> "+mmsi +
+							"</a></td></tr><tr><td Align=\"Left\"> imo: </td> <td Align=\"right\"><a href=\"http://www.marinetraffic.com/ais/showallphotos.aspx?mmsi="+mmsi+"\">"+imo+"</a></td></tr>" +
 							"<tr><td Align=\"Left\"> Ship type: </td> <td Align=\"right\">"+shiptype+"</td></tr><tr>" +
-							"<td Align=\"Left\"> Call sign: </td> <td Align=\"right\">"+vesselStatic.getCallsign()+"</td></tr><tr>" +
+							"<td Align=\"Left\"> Call sign: </td> <td Align=\"right\">"+callsign+"</td></tr><tr>" +
 							"<td Align=\"Left\"> Flag: </td><td Align=\"right\">"+flag+"</td></tr><tr>"+
 							"<td Align=\"Left\"> </td><td Align=\"right\"> </td></tr><tr>" +
 							"<td Align=\"Left\"> Length (m): </td> <td Align=\"right\">"+ length+"</td></tr><tr>" +
@@ -288,68 +289,25 @@ public class KmlGenerator {
 							"<td Align=\"Left\"> </td><td Align=\"right\"> </td></tr><tr>"+
 							"<td Align=\"Left\"> Nav. status: </td><td Align=\"right\">"+"Unknown"+"</td></tr><tr>" + 
 							"<td Align=\"Left\"> Destination: </td><td Align=\"right\">"+destination+"</td></tr><tr>" + 
-							"<td Align=\"Left\"> Heading: </td> <td Align=\"right\"> "+vesselPosition.getHeading()+"</td></tr><tr>" +
-							"<td Align=\"Left\"> cog: </td> <td Align=\"right\"> "+vesselPosition.getCog()+"</td></tr><tr>" + 
-							"<td Align=\"Left\"> sog (knots): </td> <td Align=\"right\">"+vesselPosition.getSog()+"</td></tr><tr>" +
-							"<td Align=\"Left\"> AIS source: </td> <td Align=\"right\">??</td></tr></table>";
-				}
-					
-			
-			
-			
-
-//				//callsign
-//				vesselStatic.getCallsign();
-//				//forende + bagende
-//				vesselStatic.getDimensions().getDimBow();
-//				vesselStatic.getDimensions().getDimStern();
-//				//højre+venstra side
-//				vesselStatic.getDimensions().getDimPort();
-//				vesselStatic.getDimensions().getDimStarboard();
-//				
-//				
-//				vesselStatic.getName();
-//				
-//				vesselStatic.getShipTypeCargo().getShipType();
-//				
-//				vesselPosition.getCog();
-//				//heading
-//				vesselPosition.getHeading();
-//				//sog
-//				vesselPosition.getSog();
-//				//age ??
-//				vesselTarget.getCreated();
-//				//lst report
-//				vesselTarget.getLastReport();
-//				//flag
-//				vesselTarget.getCountry();
+							"<td Align=\"Left\"> Heading: </td> <td Align=\"right\"> "+heading+"</td></tr><tr>" +
+							"<td Align=\"Left\"> cog: </td> <td Align=\"right\"> "+cog+"</td></tr><tr>" + 
+							"<td Align=\"Left\"> sog (knots): </td> <td Align=\"right\">"+sog+"</td></tr><tr>" +
+							"<td Align=\"Left\"> AIS source: </td> <td Align=\"right\">"+aissource+"</td></tr></table>";
 				
-				
-				
-			
-//			// Additional class A information
-//			if (vesselTarget instanceof AisClassATarget) {
-//				AisClassATarget classAtarget = (AisClassATarget) vesselTarget;
-//				AisClassAPosition classAPosition = classAtarget
-//						.getClassAPosition();
-//				AisClassAStatic classAStatic = classAtarget.getClassAStatic();
-//				
-//				
-//				if(classAStatic != null)
-//				{
-//				classAPosition.getNavStatus();
-////				classAStatic.getDestination();
-////				classAStatic.getDraught();
-////				classAStatic.getImoNo();
-//				System.out.println("dte = " + classAStatic.getImoNo());
-//				}
-//				
-//			}
-			
-			
 			
 			addVessel(style, name, description, trackPoints, vesselPosition, twentyfourhourfolder, threedayfolder, vesselTarget.getMmsi());
 		}
+		
+		//sort by name and add to name folder
+		Collections.sort(sortedByName, new SortByNameComparator());
+		for (AisVesselTarget entry : sortedByName) {
+			AisVesselPosition vesselPosition = entry.getVesselPosition();
+//			if(entry.getVesselStatic()!=null){
+				String name = entry.getVesselStatic().getName();
+				addToShipNameFolder(name, vesselPosition);
+//			}
+		}
+		
 
 		try {
 			return marshall();
@@ -387,7 +345,7 @@ public class KmlGenerator {
 //		if(pastTrackPoints.isEmpty())
 //			return;
 		
-		Folder folder = pickedfolder.createAndAddFolder().withName(name);
+		Folder folder = pickedfolder.createAndAddFolder().withName(""+mmsi);
 		
 		Folder folder1 = twentyfourhour.createAndAddFolder().withName(""+mmsi).withVisibility(false);
 		Folder folder2 = threeday.createAndAddFolder().withName(""+mmsi).withVisibility(false);
@@ -467,15 +425,41 @@ public class KmlGenerator {
 		return bos.toString();
 	}
 	
-	public static long yearsBetween(Calendar startDate, Calendar endDate) {
-        Calendar date = (Calendar) startDate.clone();
-        long daysBetween = 0;
-        while (date.before(endDate)) {
-            date.add(Calendar.DAY_OF_MONTH, 1);
-            daysBetween++;
-        }
-        long years = daysBetween/365;
-        return years;
-    }
+
+
+
+	public class SortByMMSIComparator implements Comparator{
+
+	    public int compare(Object o1, Object o2) {
+	    	AisTargetEntry a1 = (AisTargetEntry) o1;
+	    	AisTargetEntry a2 = (AisTargetEntry) o2;
+	    	if(a1.getTarget().getMmsi() > a2.getTarget().getMmsi())
+	    		return 1;
+	    	else if(a1.getTarget().getMmsi() < a2.getTarget().getMmsi())
+	    		return -1;
+	    	else 
+	    		return 0;
+	    }
+	}
+	public class SortByNameComparator implements Comparator{
+
+	    public int compare(Object o1, Object o2) {
+	    	AisVesselTarget a1 = (AisVesselTarget) o1;
+	    	AisVesselTarget a2 = (AisVesselTarget) o2;
+	    	String s1 = a1.getVesselStatic().getName();
+	    	String s2 = a2.getVesselStatic().getName();
+	    	if(s1 == null)
+	    		s1 = "";
+	    	if(s2 == null)
+	    		s2 = "";
+	    	
+	    	return s1.compareTo(s2);
+
+	    }
+	}
+
+	
+	
+
 
 }
