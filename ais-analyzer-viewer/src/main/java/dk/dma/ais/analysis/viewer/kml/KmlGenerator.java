@@ -133,6 +133,7 @@ public class KmlGenerator {
 			//Extract information from vesselstatic
 			if (vesselStatic != null) {
 				
+				System.out.println(""+ vesselStatic.getDimensions());
 
 				name = vesselStatic.getName();
 				ShipType type = null;
