@@ -17,6 +17,7 @@ package dk.dma.ais.analysis.viewer.kml;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -245,7 +246,9 @@ public class KmlGenerator {
 		return "<Camera><longitude>-35</longitude><latitude>70</latitude><altitude>4200000</altitude><heading>0</heading></Camera>";
 	}
 	
-	
+	private void generateFolders(){
+		
+	}
 	public void addStyle(String stylename, String iconUri, String iconColor, double iconScale, String ballonText, int heading){
 		Style style = document.createAndAddStyle();
 		style.withId(stylename);
@@ -279,6 +282,28 @@ public class KmlGenerator {
 		PastTrackPoint lastPoint = pastTrackPoints.get(pastTrackPoints.size() - 1);
 		folder.createAndAddPlacemark().withStyleUrl(stylename)
 		.createAndSetPoint().addToCoordinates(lastPoint.getLon(), lastPoint.getLat());
+		
+		//check time of pathtrack points. Only keep points within 24 and 72 hours
+		Date now = new Date();
+		for (int i = pastTrackPoints.size()-1; i >= 0; i--) {
+//			System.out.println(pastTrackPoints.get(i).getTime());
+			int timeDif_Hours = (int)Math.abs((now.getTime()-pastTrackPoints.get(i).getTime().getTime())/1000/60/60);
+			
+			//Put in 24hour folder
+			if(timeDif_Hours <= 24){
+				//TODO put in 24hour folder
+			}
+			//Put in 72hour folder
+			if(timeDif_Hours <= 72){
+				//TODO put in 72hour folder
+
+			}else{
+				break;
+			}
+//			System.out.println("time from now: "+timeDif_Hours);
+		}
+
+		
 		
 //		addshipnamefolder(name, lastPoint, shipnamefolder);
 		
