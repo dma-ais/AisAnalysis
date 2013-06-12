@@ -75,19 +75,19 @@ public class KmlGenerator {
 		Folder classb = outerfolder.createAndAddFolder().withName("Classb").withVisibility(false);
 		Folder undefined = outerfolder.createAndAddFolder().withName("Undefined").withVisibility(false);
 		Folder SART = outerfolder.createAndAddFolder().withName("SART").withVisibility(false);
-		Folder pickedfolder = null;
+		Folder pickedfolder = undefined;
 
 
-		addStyle("PassengerMoored", resourceUrl + "vessel_blue_moored.png",	"ff0000ff", 1, "<![CDATA[$[name]$[description]]]>", 0);
-		addStyle("CargoMoored", resourceUrl + "vessel_green_moored.png","ff0000ff", 1, "<![CDATA[$[name]$[description]]]>", 0);
-		addStyle("TankerMoored", resourceUrl + "vessel_red_moored.png",	"ff0000ff", 1, "<![CDATA[$[name]$[description]]]>", 0);
-		addStyle("HighspeedcraftandWIGMoored", resourceUrl+ "vessel_yellow_moored.png", "ff0000ff", 1,	"<![CDATA[$[name]$[description]]]>", 0);
-		addStyle("FishingMoored", resourceUrl + "vessel_orange_moored.png",	"ff0000ff", 1, "<![CDATA[$[name]$[description]]]>", 0);
-		addStyle("SailingandpleasureMoored", resourceUrl+ "vessel_puple_moored.png", "ff0000ff", 1,	"<![CDATA[$[name]$[description]]]>", 0);
-		addStyle("PilottugandothersMoored", resourceUrl + "vessel_turquoise_moored.png", "ff0000ff", 1,	"<![CDATA[$[name]$[description]]]>", 0);
-		addStyle("UndefinedunkownMoored", resourceUrl + "vessel_gray_moored.png", "ff0000ff", 1, "<![CDATA[$[name]$[description]]]>", 0);
-		addStyle("SailingMoored", resourceUrl + "vessel_white_moored.png",	"ff0000ff", 1, "<![CDATA[$[name]$[description]]]>", 0);
-		addStyle("empty", "", "", 1, "", 0);
+		addStyle("PassengerMoored", resourceUrl + "vessel_blue_moored.png",	"ff0000ff", 0.8, "<![CDATA[$[name]$[description]]]>", 0);
+		addStyle("CargoMoored", resourceUrl + "vessel_green_moored.png","ff0000ff", .8, "<![CDATA[$[name]$[description]]]>", 0);
+		addStyle("TankerMoored", resourceUrl + "vessel_red_moored.png",	"ff0000ff", .8, "<![CDATA[$[name]$[description]]]>", 0);
+		addStyle("HighspeedcraftandWIGMoored", resourceUrl+ "vessel_yellow_moored.png", "ff0000ff", .8,	"<![CDATA[$[name]$[description]]]>", 0);
+		addStyle("FishingMoored", resourceUrl + "vessel_orange_moored.png",	"ff0000ff", .8, "<![CDATA[$[name]$[description]]]>", 0);
+		addStyle("SailingandpleasureMoored", resourceUrl+ "vessel_puple_moored.png", "ff0000ff", .8,	"<![CDATA[$[name]$[description]]]>", 0);
+		addStyle("PilottugandothersMoored", resourceUrl + "vessel_turquoise_moored.png", "ff0000ff", .8,	"<![CDATA[$[name]$[description]]]>", 0);
+		addStyle("UndefinedunkownMoored", resourceUrl + "vessel_gray_moored.png", "ff0000ff", .8, "<![CDATA[$[name]$[description]]]>", 0);
+		addStyle("SailingMoored", resourceUrl + "vessel_white_moored.png",	"ff0000ff", .8, "<![CDATA[$[name]$[description]]]>", 0);
+		addStyle("empty", "", "", .8, "", 0);
 
 		for (int i = 0; i < 360; i++) {
 			addStyle(("Passenger-" + i), resourceUrl + "vessel_blue.png", "ff0000ff", 1, "<![CDATA[$[name]$[description]]]>", i+270);
@@ -108,91 +108,96 @@ public class KmlGenerator {
 				continue;
 			}
 			AisVesselTarget vesselTarget = (AisVesselTarget) target;
-			IPastTrack pastTrack = pastTrackMap.get(vesselTarget.getMmsi());
-			List<PastTrackPoint> trackPoints = pastTrack.getPoints();
-
 			AisVesselPosition vesselPosition = vesselTarget.getVesselPosition();
+			if(vesselPosition == null)
+				continue;
+			if(vesselPosition.getPos()== null)
+				continue;
+			
+			//get past track
+			IPastTrack pastTrack = pastTrackMap.get(vesselTarget.getMmsi());
+			List<PastTrackPoint> trackPoints = null;
+			if(pastTrack != null)
+				trackPoints = pastTrack.getPoints();
+
 			AisVesselStatic vesselStatic = vesselTarget.getVesselStatic();
 
-			String name = "unknown";
+			//default ship information
+			String name = ""+vesselTarget.getMmsi();
 			String shiptype = "unknown";
-			String style = "UndefinedunkownMoored";
-			String styleprefix = "UndefinedunkownMoored";
+			String style = "Undefinedunkown";
+			String styleprefix = "Undefinedunkown";
 
-			
-
+			//Extract information from vesselstatic
 			if (vesselStatic != null) {
 
 				name = vesselStatic.getName();
 				ShipType type = null;
 
-				if (vesselTarget.getVesselPosition() != null) {
-				
+
 				if (vesselStatic.getShipTypeCargo() != null) {
 					type = vesselStatic.getShipTypeCargo().getShipType();
-					
-					
+
+
 					if(type != null){
-	        			shiptype = type.toString();
-	        			if(type.equals(ShipTypeCargo.ShipType.PASSENGER)){
-	        				styleprefix = "Passenger";
-	        				pickedfolder = passenger;
-	        				addshiptypeplacemark("Passenger", trackPoints, shiptypesfolder);
-	        			}else if(type.equals(ShipTypeCargo.ShipType.CARGO)){
-	        				styleprefix = "Cargo";
-	        				pickedfolder = cargo;
-	        				addshiptypeplacemark("Cargo", trackPoints, shiptypesfolder);
-	        			}else if(type.equals(ShipTypeCargo.ShipType.TANKER)){
-	        				styleprefix = "Tanker";
-	        				pickedfolder = Tanker;
-	        				addshiptypeplacemark("Tanker", trackPoints, shiptypesfolder);
-	        			}else if(type.equals(ShipTypeCargo.ShipType.HSC)){
-	        				styleprefix = "HighspeedcraftandWIG";
-	        				pickedfolder = other;
-	        				addshiptypeplacemark("HighspeedcraftandWIG", trackPoints, shiptypesfolder);
-	        			}else if(type.equals(ShipTypeCargo.ShipType.FISHING)){
-	        				styleprefix = "Fishing";
-	        				pickedfolder = fishing;
-	        				addshiptypeplacemark("Fishing", trackPoints, shiptypesfolder);
-	        			}else if(type.equals(ShipTypeCargo.ShipType.PILOT)){
-	        				styleprefix = "Pilottugandothers";
-	        				pickedfolder = other;
-	        				addshiptypeplacemark("Pilottugandothers", trackPoints, shiptypesfolder);
-	        			}else if(type.equals(ShipTypeCargo.ShipType.SAILING)){
-	        				styleprefix = "Sailing";
-	        				pickedfolder = other;
-	        				addshiptypeplacemark("Sailing", trackPoints, shiptypesfolder);
-	        			}else{
-	        				styleprefix = "Undefinedunkown";
-	        				pickedfolder = undefined;
-	        				addshiptypeplacemark("Undefinedunkown", trackPoints, shiptypesfolder);
-	        			}	
-	        		}
-					
-					addshipnamefolder(name, trackPoints, shipnamefolder);
-					
-					if (type != null) {
 						shiptype = type.toString();
+						if(type.equals(ShipTypeCargo.ShipType.PASSENGER)){
+							styleprefix = "Passenger";
+							pickedfolder = passenger;
+							addshiptypeplacemark("Passenger", vesselPosition, shiptypesfolder);
+						}else if(type.equals(ShipTypeCargo.ShipType.CARGO)){
+							styleprefix = "Cargo";
+							pickedfolder = cargo;
+							addshiptypeplacemark("Cargo", vesselPosition, shiptypesfolder);
+						}else if(type.equals(ShipTypeCargo.ShipType.TANKER)){
+							styleprefix = "Tanker";
+							pickedfolder = Tanker;
+							addshiptypeplacemark("Tanker", vesselPosition, shiptypesfolder);
+						}else if(type.equals(ShipTypeCargo.ShipType.HSC)){
+							styleprefix = "HighspeedcraftandWIG";
+							pickedfolder = other;
+							addshiptypeplacemark("HighspeedcraftandWIG", vesselPosition, shiptypesfolder);
+						}else if(type.equals(ShipTypeCargo.ShipType.FISHING)){
+							styleprefix = "Fishing";
+							pickedfolder = fishing;
+							addshiptypeplacemark("Fishing", vesselPosition, shiptypesfolder);
+						}else if(type.equals(ShipTypeCargo.ShipType.PILOT)){
+							styleprefix = "Pilottugandothers";
+							pickedfolder = other;
+							addshiptypeplacemark("Pilottugandothers", vesselPosition, shiptypesfolder);
+						}else if(type.equals(ShipTypeCargo.ShipType.SAILING)){
+							styleprefix = "Sailing";
+							pickedfolder = other;
+							addshiptypeplacemark("Sailing", vesselPosition, shiptypesfolder);
+						}else{
+							styleprefix = "Undefinedunkown";
+							pickedfolder = undefined;
+							addshiptypeplacemark("Undefinedunkown", vesselPosition, shiptypesfolder);
+						}	
 
-						
-//							if (vesselPosition.getSog() != null)
-//							{
-//								long speed = Math.round(vesselTarget.getVesselPosition().getSog());
-//								if(speed == 0)
-//								{
-//									style =  (styleprefix+"Moored");
-//								}
-//							}
-							
-							
-							if (vesselPosition.getCog() != null) {
-								int direction = (int) Math.round(vesselPosition.getCog());
-								style = pickStyle(styleprefix, direction);
-
-							}
-						}
+						shiptype = type.toString();
+					}else{
+						styleprefix = "Undefinedunkown";
+						pickedfolder = undefined;
+						addshiptypeplacemark("Undefinedunkown", vesselPosition, shiptypesfolder);
 					}
+
+					addshipnamefolder(name, vesselPosition, shipnamefolder);
+
 				}
+
+			}
+			
+			//Check if vessel is moored
+			Double sog = vesselPosition.getSog();
+			if(sog != null && sog < 1){
+				style = styleprefix+"Moored";
+			}
+			//If target is not moored, set direction
+			else if (vesselPosition.getCog() != null) {
+				int direction = (int) Math.round(vesselPosition.getCog());
+				style = pickStyle(styleprefix, direction);
+
 			}
 
 			// Additional class A information
@@ -202,7 +207,7 @@ public class KmlGenerator {
 						.getClassAPosition();
 				AisClassAStatic classAStatic = classAtarget.getClassAStatic();
 			}
-			addVessel(style, name, "stort skiw", trackPoints, pickedfolder);
+			addVessel(style, name, "stort skiw", trackPoints, pickedfolder, vesselPosition);
 
 		}
 
@@ -243,9 +248,9 @@ public class KmlGenerator {
 		style.createAndSetBalloonStyle()
 		.withText(ballonText);
 	}
-	public void addVessel(String stylename, String name, String description, List<PastTrackPoint> pastTrackPoints, Folder Tanker){
-		if(pastTrackPoints.isEmpty())
-			return;
+	public void addVessel(String stylename, String name, String description, List<PastTrackPoint> pastTrackPoints, Folder Tanker, AisVesselPosition vesselPosition){
+//		if(pastTrackPoints.isEmpty())
+//			return;
 		
 		Folder folder = Tanker.createAndAddFolder().withName(name);
 
@@ -253,36 +258,43 @@ public class KmlGenerator {
 		Placemark placemark1 = folder.createAndAddPlacemark();
 		LineString linestring = placemark1.createAndSetLineString();
 		linestring.withTessellate(new Boolean(true));
-		for (PastTrackPoint pastTrackPoint : pastTrackPoints) {
-			linestring.addToCoordinates(pastTrackPoint.getLon(), pastTrackPoint.getLat());
+		
+		//add pasttrack path
+		if(pastTrackPoints != null){
+			//replace this
+			for (PastTrackPoint pastTrackPoint : pastTrackPoints) {
+				linestring.addToCoordinates(pastTrackPoint.getLon(), pastTrackPoint.getLat());
+			}
+			
+			//check time of pathtrack points. Only keep points within 24 and 72 hours
+			Date now = new Date();
+			for (int i = pastTrackPoints.size()-1; i >= 0; i--) {
+	//			System.out.println(pastTrackPoints.get(i).getTime());
+				int timeDif_Hours = (int)Math.abs((now.getTime()-pastTrackPoints.get(i).getTime().getTime())/1000/60/60);
+				
+				//Put in 24hour folder
+				if(timeDif_Hours <= 24){
+					//TODO put in 24hour folder
+				}
+				//Put in 72hour folder
+				if(timeDif_Hours <= 72){
+					//TODO put in 72hour folder
+	
+				}else{
+					break;
+				}
+	//			System.out.println("time from now: "+timeDif_Hours);
+			}
 		}
 		if(description != null){
 			placemark1.withDescription(description);
 		}
 		
-		PastTrackPoint lastPoint = pastTrackPoints.get(pastTrackPoints.size() - 1);
 		folder.createAndAddPlacemark().withStyleUrl(stylename)
-		.createAndSetPoint().addToCoordinates(lastPoint.getLon(), lastPoint.getLat());
+		.createAndSetPoint().addToCoordinates(vesselPosition.getPos().getLongitude(), vesselPosition.getPos().getLatitude());
 		
-		//check time of pathtrack points. Only keep points within 24 and 72 hours
-		Date now = new Date();
-		for (int i = pastTrackPoints.size()-1; i >= 0; i--) {
-//			System.out.println(pastTrackPoints.get(i).getTime());
-			int timeDif_Hours = (int)Math.abs((now.getTime()-pastTrackPoints.get(i).getTime().getTime())/1000/60/60);
-			
-			//Put in 24hour folder
-			if(timeDif_Hours <= 24){
-				//TODO put in 24hour folder
-			}
-			//Put in 72hour folder
-			if(timeDif_Hours <= 72){
-				//TODO put in 72hour folder
-
-			}else{
-				break;
-			}
-//			System.out.println("time from now: "+timeDif_Hours);
-		}
+		
+		
 
 		
 		
@@ -292,27 +304,21 @@ public class KmlGenerator {
 
 	}
 	
-	public void addshipnamefolder(String name, List<PastTrackPoint> pasttrack, Folder shipnamefolder)
+	public void addshipnamefolder(String name, AisVesselPosition vesselPosition, Folder shipnamefolder)
 	{
-		if(pasttrack.isEmpty())
-			return;
 		
-		PastTrackPoint lastPoint = pasttrack.get(pasttrack.size() - 1);
 		Folder fold = shipnamefolder.createAndAddFolder().withName(name).withVisibility(false);
-		fold.createAndAddPlacemark().withName(name).withVisibility(false).withStyleUrl("empty").createAndSetPoint().addToCoordinates(lastPoint.getLon(), lastPoint.getLat());
+		fold.createAndAddPlacemark().withName(name).withVisibility(false).withStyleUrl("empty").createAndSetPoint().addToCoordinates(vesselPosition.getPos().getLongitude(), vesselPosition.getPos().getLatitude());
 		
 		
 
 	}
 	
-	public void addshiptypeplacemark(String name, List<PastTrackPoint> pasttrack, Folder shiptypefolder)
+	public void addshiptypeplacemark(String name, AisVesselPosition vesselPosition, Folder shiptypefolder)
 	{
-		if(pasttrack.isEmpty())
-			return;
 		
-		PastTrackPoint lastPoint = pasttrack.get(pasttrack.size() - 1);
 		Folder fold = shiptypefolder.createAndAddFolder().withName(name).withVisibility(false);
-		fold.createAndAddPlacemark().withName(name).withVisibility(false).withStyleUrl("empty").createAndSetPoint().addToCoordinates(lastPoint.getLon(), lastPoint.getLat());
+		fold.createAndAddPlacemark().withName(name).withVisibility(false).withStyleUrl("empty").createAndSetPoint().addToCoordinates(vesselPosition.getPos().getLongitude(), vesselPosition.getPos().getLatitude());
 		
 	}
 	
