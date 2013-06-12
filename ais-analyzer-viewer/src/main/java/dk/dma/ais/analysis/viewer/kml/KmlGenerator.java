@@ -17,6 +17,7 @@ package dk.dma.ais.analysis.viewer.kml;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -154,11 +155,6 @@ public class KmlGenerator {
 			//Extract information from vesselstatic
 			AisVesselStatic vesselStatic = vesselTarget.getVesselStatic();
 			if (vesselStatic != null) {
-
-				if(vesselStatic.getDimensions() != null)
-				{
-					System.out.println(vesselStatic.getDimensions().getDimBow());
-				}
 				
 				name = vesselStatic.getName();
 				ShipType type = null;
@@ -213,13 +209,144 @@ public class KmlGenerator {
 				style = pickStyle(styleprefix, direction);	
 			}
 
-			// Additional class A information
+//			age = vesselTarget.getCreated()
+			
+			
+	        
+	        
+	       
+	        
+	        String destination = "Unknown";
+	        Double draught = 0.0;
+	        int imo = 0;
+	        
+	        
 			if (vesselTarget instanceof AisClassATarget) {
 				AisClassATarget classAtarget = (AisClassATarget) vesselTarget;
 				AisClassAPosition classAPosition = classAtarget
 						.getClassAPosition();
 				AisClassAStatic classAStatic = classAtarget.getClassAStatic();
+				
+				
+				if(classAStatic != null)
+				{
+				destination = classAStatic.getDestination();
+				draught = classAStatic.getDraught();
+				if(classAStatic.getImoNo() != null)
+				{
+					imo = classAStatic.getImoNo();
+				}
+				}
+				if(classAPosition != null)
+				{
+					classAPosition.getNavStatus();
+				}
+				
 			}
+	        
+	        
+				if(vesselTarget != null && vesselStatic != null)
+				{
+					
+					Date sDate = vesselTarget.getCreated();
+			        Date eDate = new Date();
+			        		
+			       
+			        Calendar cal3 = Calendar.getInstance();
+			        cal3.setTime(sDate);
+			        Calendar cal4 = Calendar.getInstance();
+			        cal4.setTime(eDate);
+			        long age = yearsBetween(cal3,cal4);
+			        
+			        int length = 0;
+			        int breadth = 0;
+			        
+			        if(vesselStatic.getDimensions() != null)
+			        {
+			        	length = vesselStatic.getDimensions().getDimBow() + vesselStatic.getDimensions().getDimStern();
+				        breadth = vesselStatic.getDimensions().getDimPort() + vesselStatic.getDimensions().getDimStarboard();
+			        }
+			        String flag = "";
+			        if(vesselTarget.getCountry() != null)
+			        {
+			        	flag = vesselTarget.getCountry().toString();
+			        }
+					 
+					
+					description = "<font size= \"5\" color=\"black\">"+vesselTarget.getLastReport()+"Age "+age+"</font><table witdh=\"300\" align=\"centeret\"><tr>"+
+							"<td Align=\"Left\">" +"Ship name: </td> <td Align=\"right\">"+vesselStatic.getName()+"</td></tr><tr><td Align=\"Left\">" +
+							"mmsi: </td> <td Align=\"right\"><a href=\"http://www.marinetraffic.com/ais/showallphotos.aspx?mmsi="+vesselStatic.getMmsi()+"\"> "+vesselStatic.getMmsi() +
+							"</a></td></tr><tr><td Align=\"Left\"> imo: </td> <td Align=\"right\"><a href=\"http://www.marinetraffic.com/ais/showallphotos.aspx?mmsi="+vesselStatic.getMmsi()+"\">"+imo+"</a></td></tr>" +
+							"<tr><td Align=\"Left\"> Ship type: </td> <td Align=\"right\">"+shiptype+"</td></tr><tr>" +
+							"<td Align=\"Left\"> Call sign: </td> <td Align=\"right\">"+vesselStatic.getCallsign()+"</td></tr><tr>" +
+							"<td Align=\"Left\"> Flag: </td><td Align=\"right\">"+flag+"</td></tr><tr>"+
+							"<td Align=\"Left\"> </td><td Align=\"right\"> </td></tr><tr>" +
+							"<td Align=\"Left\"> Length (m): </td> <td Align=\"right\">"+ length+"</td></tr><tr>" +
+							"<td Align=\"Left\"> Breadth (m): </td> <td Align=\"right\"> "+breadth+"</td></tr><tr>" + 
+							"<td Align=\"Left\"> Draught (m): </td> <td Align=\"right\">"+draught+"</td></tr><tr>" + 
+							"<td Align=\"Left\"> Gross ton (t): </td> <td Align=\"right\"> ??</td></tr><tr>" + 
+							"<td Align=\"Left\"> </td><td Align=\"right\"> </td></tr><tr>"+
+							"<td Align=\"Left\"> Nav. status: </td><td Align=\"right\">"+"Unknown"+"</td></tr><tr>" + 
+							"<td Align=\"Left\"> Destination: </td><td Align=\"right\">"+destination+"</td></tr><tr>" + 
+							"<td Align=\"Left\"> Heading: </td> <td Align=\"right\"> "+vesselPosition.getHeading()+"</td></tr><tr>" +
+							"<td Align=\"Left\"> cog: </td> <td Align=\"right\"> "+vesselPosition.getCog()+"</td></tr><tr>" + 
+							"<td Align=\"Left\"> sog (knots): </td> <td Align=\"right\">"+vesselPosition.getSog()+"</td></tr><tr>" +
+							"<td Align=\"Left\"> AIS source: </td> <td Align=\"right\">??</td></tr></table>";
+				}
+					
+			
+			
+			
+
+//				//callsign
+//				vesselStatic.getCallsign();
+//				//forende + bagende
+//				vesselStatic.getDimensions().getDimBow();
+//				vesselStatic.getDimensions().getDimStern();
+//				//højre+venstra side
+//				vesselStatic.getDimensions().getDimPort();
+//				vesselStatic.getDimensions().getDimStarboard();
+//				
+//				
+//				vesselStatic.getName();
+//				
+//				vesselStatic.getShipTypeCargo().getShipType();
+//				
+//				vesselPosition.getCog();
+//				//heading
+//				vesselPosition.getHeading();
+//				//sog
+//				vesselPosition.getSog();
+//				//age ??
+//				vesselTarget.getCreated();
+//				//lst report
+//				vesselTarget.getLastReport();
+//				//flag
+//				vesselTarget.getCountry();
+				
+				
+				
+			
+//			// Additional class A information
+//			if (vesselTarget instanceof AisClassATarget) {
+//				AisClassATarget classAtarget = (AisClassATarget) vesselTarget;
+//				AisClassAPosition classAPosition = classAtarget
+//						.getClassAPosition();
+//				AisClassAStatic classAStatic = classAtarget.getClassAStatic();
+//				
+//				
+//				if(classAStatic != null)
+//				{
+//				classAPosition.getNavStatus();
+////				classAStatic.getDestination();
+////				classAStatic.getDraught();
+////				classAStatic.getImoNo();
+//				System.out.println("dte = " + classAStatic.getImoNo());
+//				}
+//				
+//			}
+			
+			
 			
 			addVessel(style, name, description, trackPoints, vesselPosition, twentyfourhourfolder, threedayfolder, vesselTarget.getMmsi());
 		}
@@ -231,6 +358,7 @@ public class KmlGenerator {
 			e.printStackTrace();
 			return null;
 		}
+		
 
 	}
 
@@ -252,8 +380,7 @@ public class KmlGenerator {
 		.withIcon(new Icon().withHref(iconUri));
 
 		
-		style.createAndSetBalloonStyle()
-		.withText(ballonText);
+		style.createAndSetBalloonStyle().withText(ballonText);
 	}
 
 	private void addVessel(String stylename, String name, String description, List<PastTrackPoint> pastTrackPoints,AisVesselPosition vesselPosition, Folder twentyfourhour, Folder threeday, int mmsi){
@@ -272,9 +399,11 @@ public class KmlGenerator {
 		Placemark placemark3 = folder2.createAndAddPlacemark();
 		LineString linestring2 = placemark3.createAndSetLineString();
 		linestring2.withTessellate(new Boolean(true));
+		
+		
 
 		
-		Placemark placemark1 = folder.createAndAddPlacemark().withStyleUrl("empty");
+		Placemark placemark1 = folder.createAndAddPlacemark();
 //		LineString linestring = placemark1.createAndSetLineString();
 //		linestring.withTessellate(new Boolean(true));
 		
@@ -310,7 +439,7 @@ public class KmlGenerator {
 			placemark1.withDescription(description);
 		}
 		
-		folder.createAndAddPlacemark().withStyleUrl(stylename)
+		folder.createAndAddPlacemark().withStyleUrl(stylename).withDescription(description)
 		.createAndSetPoint().addToCoordinates(vesselPosition.getPos().getLongitude(), vesselPosition.getPos().getLatitude());
 		
 	}
@@ -338,6 +467,15 @@ public class KmlGenerator {
 		return bos.toString();
 	}
 	
-	
+	public static long yearsBetween(Calendar startDate, Calendar endDate) {
+        Calendar date = (Calendar) startDate.clone();
+        long daysBetween = 0;
+        while (date.before(endDate)) {
+            date.add(Calendar.DAY_OF_MONTH, 1);
+            daysBetween++;
+        }
+        long years = daysBetween/365;
+        return years;
+    }
 
 }
