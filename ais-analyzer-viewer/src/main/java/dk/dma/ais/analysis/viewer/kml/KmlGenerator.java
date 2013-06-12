@@ -17,6 +17,10 @@ package dk.dma.ais.analysis.viewer.kml;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -122,9 +126,15 @@ public class KmlGenerator {
 
 	public String generate() {
 		
-
-		// str.append(generateCamera());
+		List<AisTargetEntry> sortedByMMSI = new ArrayList<AisTargetEntry>();
+		List<AisVesselTarget> sortedByName = new ArrayList<AisVesselTarget>();
+		
 		for (AisTargetEntry entry : targetsMap.values()) {
+			sortedByMMSI.add(entry);
+		}
+		Collections.sort(sortedByMMSI, new SortByMMSIComparator());
+		// For each AIS target
+		for (AisTargetEntry entry : sortedByMMSI) {
 			
 			//Initial checks. Vessel has to have at least a position
 			AisTarget target = entry.getTarget();
@@ -154,6 +164,10 @@ public class KmlGenerator {
 			//Extract information from vesselstatic
 			AisVesselStatic vesselStatic = vesselTarget.getVesselStatic();
 			if (vesselStatic != null) {
+				
+				//add to sortedbyname list
+				sortedByName.add(vesselTarget);
+				
 				name = vesselStatic.getName();
 				ShipType type = null;
 
@@ -188,10 +202,9 @@ public class KmlGenerator {
 	        				pickedfolder = undefined;
 	        			}	
 	        		}
-					addToShipTypeFolder(styleprefix, vesselPosition);
-					addToShipNameFolder(name, vesselPosition);
 				}
 			}
+			addToShipTypeFolder(styleprefix, vesselPosition);
 			
 			//Check if vessel is moored
 			Double sog = vesselPosition.getSog();
@@ -217,6 +230,17 @@ public class KmlGenerator {
 			
 			addVessel(style, name, description, trackPoints, vesselPosition, twentyfourhourfolder, threedayfolder, vesselTarget.getMmsi());
 		}
+		
+		//sort by name and add to name folder
+		Collections.sort(sortedByName, new SortByNameComparator());
+		for (AisVesselTarget entry : sortedByName) {
+			AisVesselPosition vesselPosition = entry.getVesselPosition();
+//			if(entry.getVesselStatic()!=null){
+				String name = entry.getVesselStatic().getName();
+				addToShipNameFolder(name, vesselPosition);
+//			}
+		}
+		
 
 		try {
 			return marshall();
@@ -254,7 +278,7 @@ public class KmlGenerator {
 //		if(pastTrackPoints.isEmpty())
 //			return;
 		
-		Folder folder = pickedfolder.createAndAddFolder().withName(name);
+		Folder folder = pickedfolder.createAndAddFolder().withName(""+mmsi);
 		
 		Folder folder1 = twentyfourhour.createAndAddFolder().withName(""+mmsi).withVisibility(false);
 		Folder folder2 = threeday.createAndAddFolder().withName(""+mmsi).withVisibility(false);
@@ -331,6 +355,37 @@ public class KmlGenerator {
 		kml.marshal(bos);
 		return bos.toString();
 	}
+	
+	public class SortByMMSIComparator implements Comparator{
+
+	    public int compare(Object o1, Object o2) {
+	    	AisTargetEntry a1 = (AisTargetEntry) o1;
+	    	AisTargetEntry a2 = (AisTargetEntry) o2;
+	    	if(a1.getTarget().getMmsi() > a2.getTarget().getMmsi())
+	    		return 1;
+	    	else if(a1.getTarget().getMmsi() < a2.getTarget().getMmsi())
+	    		return -1;
+	    	else 
+	    		return 0;
+	    }
+	}
+	public class SortByNameComparator implements Comparator{
+
+	    public int compare(Object o1, Object o2) {
+	    	AisVesselTarget a1 = (AisVesselTarget) o1;
+	    	AisVesselTarget a2 = (AisVesselTarget) o2;
+	    	String s1 = a1.getVesselStatic().getName();
+	    	String s2 = a2.getVesselStatic().getName();
+	    	if(s1 == null)
+	    		s1 = "";
+	    	if(s2 == null)
+	    		s2 = "";
+	    	
+	    	return s1.compareTo(s2);
+
+	    }
+	}
+
 	
 	
 
