@@ -121,9 +121,15 @@ public class KmlGenerator {
 			
 
 			if (vesselStatic != null) {
+				
 
 				name = vesselStatic.getName();
 				ShipType type = null;
+				
+//				if(name == "FLEUR DE MER")
+//				{
+//					System.out.println(vesselStatic.getShipTypeCargo().getShipType());
+//				}
 
 				if (vesselTarget.getVesselPosition() != null) {
 				
@@ -131,8 +137,10 @@ public class KmlGenerator {
 					type = vesselStatic.getShipTypeCargo().getShipType();
 					
 					
+					
 					if(type != null){
 	        			shiptype = type.toString();
+//	        			System.out.println(shiptype);
 	        			if(type.equals(ShipTypeCargo.ShipType.PASSENGER)){
 	        				styleprefix = "Passenger";
 	        				pickedfolder = passenger;
@@ -145,7 +153,7 @@ public class KmlGenerator {
 	        				styleprefix = "Tanker";
 	        				pickedfolder = Tanker;
 	        				addshiptypeplacemark("Tanker", trackPoints, shiptypesfolder);
-	        			}else if(type.equals(ShipTypeCargo.ShipType.HSC)){
+	        			}else if(type.equals(ShipTypeCargo.ShipType.HSC) || type.equals(ShipTypeCargo.ShipType.WIG)){
 	        				styleprefix = "HighspeedcraftandWIG";
 	        				pickedfolder = other;
 	        				addshiptypeplacemark("HighspeedcraftandWIG", trackPoints, shiptypesfolder);
@@ -153,12 +161,12 @@ public class KmlGenerator {
 	        				styleprefix = "Fishing";
 	        				pickedfolder = fishing;
 	        				addshiptypeplacemark("Fishing", trackPoints, shiptypesfolder);
-	        			}else if(type.equals(ShipTypeCargo.ShipType.PILOT)){
+	        			}else if(type.equals(ShipTypeCargo.ShipType.PILOT) || type.equals(ShipTypeCargo.ShipType.MILITARY) || type.equals(ShipTypeCargo.ShipType.SAR) || type.equals(ShipTypeCargo.ShipType.DREDGING) || type.equals(ShipTypeCargo.ShipType.TUG) || type.equals(ShipTypeCargo.ShipType.TOWING) || type.equals(ShipTypeCargo.ShipType.TOWING_LONG_WIDE) || type.equals(ShipTypeCargo.ShipType.ANTI_POLLUTION) || type.equals(ShipTypeCargo.ShipType.LAW_ENFORCEMENT) || type.equals(ShipTypeCargo.ShipType.PORT_TENDER)){
 	        				styleprefix = "Pilottugandothers";
 	        				pickedfolder = other;
 	        				addshiptypeplacemark("Pilottugandothers", trackPoints, shiptypesfolder);
-	        			}else if(type.equals(ShipTypeCargo.ShipType.SAILING)){
-	        				styleprefix = "Sailing";
+	        			}else if(type.equals(ShipTypeCargo.ShipType.SAILING) || type.equals(ShipTypeCargo.ShipType.PLEASURE)){
+	        				styleprefix = "Sailingandpleasure";
 	        				pickedfolder = other;
 	        				addshiptypeplacemark("Sailing", trackPoints, shiptypesfolder);
 	        			}else{
@@ -167,7 +175,10 @@ public class KmlGenerator {
 	        				addshiptypeplacemark("Undefinedunkown", trackPoints, shiptypesfolder);
 	        			}	
 	        		}
-					
+					else
+					{
+						System.out.println("vesselstatic null");
+					}
 					addshipnamefolder(name, trackPoints, shipnamefolder);
 					
 					if (type != null) {
@@ -189,9 +200,17 @@ public class KmlGenerator {
 								style = pickStyle(styleprefix, direction);
 
 							}
+							else {
+								System.out.println("cog = null");
+							}
 						}
+					else
+					{
+						System.out.println("type was null");
+					}
 					}
 				}
+				addVessel(style, name, "stort skiw", trackPoints, pickedfolder);
 			}
 
 			// Additional class A information
@@ -201,7 +220,7 @@ public class KmlGenerator {
 						.getClassAPosition();
 				AisClassAStatic classAStatic = classAtarget.getClassAStatic();
 			}
-			addVessel(style, name, "stort skiw", trackPoints, pickedfolder);
+			
 
 		}
 
