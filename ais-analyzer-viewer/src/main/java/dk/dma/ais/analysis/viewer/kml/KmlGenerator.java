@@ -361,7 +361,7 @@ public class KmlGenerator {
 		
 
 		
-		Placemark placemark1 = folder.createAndAddPlacemark();
+//		Placemark placemark1 = folder.createAndAddPlacemark();
 //		LineString linestring = placemark1.createAndSetLineString();
 //		linestring.withTessellate(new Boolean(true));
 		
@@ -393,9 +393,9 @@ public class KmlGenerator {
 //				System.out.println("time from now: "+timeDif_Hours);
 			}
 		}
-		if(description != null){
-			placemark1.withDescription(description);
-		}
+//		if(description != null){
+//			placemark1.withDescription(description);
+//		}
 		
 		folder.createAndAddPlacemark().withStyleUrl(stylename).withDescription(description)
 		.createAndSetPoint().addToCoordinates(vesselPosition.getPos().getLongitude(), vesselPosition.getPos().getLatitude());
