@@ -44,6 +44,7 @@ import dk.dma.ais.data.AisVesselStatic;
 import dk.dma.ais.data.AisVesselTarget;
 import dk.dma.ais.data.IPastTrack;
 import dk.dma.ais.data.PastTrackPoint;
+import dk.dma.ais.message.NavigationalStatus;
 import dk.dma.ais.message.ShipTypeCargo;
 import dk.dma.ais.message.ShipTypeCargo.ShipType;
 
@@ -168,13 +169,11 @@ public class KmlGenerator {
 	        int length = 0;
 	        int breadth = 0;
 	        double draught = 0.0;
-	        double grosston = 0.0;
 	        String navstatus = "";
 	        String destination = "Unknown";
 	        double heading = 0.0;
 	        double cog = 0.0;
 	        double sog = 0.0;
-	        String aissource = "Unknown";
 	        boolean isMoored = false;
 			
 			//Extract information from vesselstatic
@@ -245,8 +244,11 @@ public class KmlGenerator {
 					if(classAStatic.getDraught() != null)	{	draught = classAStatic.getDraught();	}
 					if(classAStatic.getImoNo() != null)	{	imo = classAStatic.getImoNo();	}
 					if(classAPosition != null)	{
+						NavigationalStatus navigationalStatus = new NavigationalStatus(classAPosition.getNavStatus());
+						navstatus = navigationalStatus.prettyStatus();
+							if(navstatus == "")	{	navstatus = "Unknown";	}
 						if(classAPosition.getNavStatus() == 1 || classAPosition.getNavStatus() == 5 ){
-						isMoored = true;
+							isMoored = true;
 						}
 					}
 
@@ -280,44 +282,7 @@ public class KmlGenerator {
 				
 				style = pickStyle(styleprefix, direction);	
 			}
-	        
-
-			        
-			        
-			        
-			        //set length and breath
-			        if(vesselStatic != null)
-			        {	if(vesselStatic.getDimensions() != null)	
-			        		{
-			        			length = vesselStatic.getDimensions().getDimBow() + vesselStatic.getDimensions().getDimStern();
-			        			breadth = vesselStatic.getDimensions().getDimPort() + vesselStatic.getDimensions().getDimStarboard();
-			        }}
-			        //set flag (country)
-			        if(vesselTarget.getCountry() != null)	{	flag = vesselTarget.getCountry().toString();	}
-			        // if ship is an A class ship, set destination, draught, imo number and navigation status
-			        if (vesselTarget instanceof AisClassATarget) {
-						AisClassATarget classAtarget = (AisClassATarget) vesselTarget;
-						AisClassAPosition classAPosition = classAtarget.getClassAPosition();
-						AisClassAStatic classAStatic = classAtarget.getClassAStatic();
-						if(classAStatic != null)	{
-						if(classAStatic.getDestination() != null)	{	destination = classAStatic.getDestination();	}
-						if(classAStatic.getDraught() != null)	{	draught = classAStatic.getDraught();	}
-						if(classAStatic.getImoNo() != null)	{	imo = classAStatic.getImoNo();	}
-						if(classAPosition != null)	{	classAPosition.getNavStatus();	}
-						}
-					}
-			        if(vesselTarget.getLastReport() != null)	
-			        {	lastReport = vesselTarget.getLastReport();	
-			        	Date now = new Date();
-			        	age = ((now.getTime()-lastReport.getTime()) / (1000*60*60));
-			        }
-			        mmsi = vesselTarget.getMmsi();
-			        if(vesselStatic != null)	{callsign = vesselStatic.getCallsign();	}
-			        if(vesselPosition.getHeading() != null)	{	heading = vesselPosition.getHeading();	}
-			        if(vesselPosition.getCog() != null)	{	cog = vesselPosition.getCog();	}
-			        if(vesselPosition.getSog() != null)	{	sog = vesselPosition.getSog();	}
-			        	 
-					
+				
 
 	        //Extract description
 			description = "<font size= \"5\" color=\"black\">"+lastReport+" Age "+age+"h </font><table witdh=\"300\" align=\"centeret\"><tr>"+
@@ -331,14 +296,13 @@ public class KmlGenerator {
 					"<td Align=\"Left\"> Length (m): </td> <td Align=\"right\">"+ length+"</td></tr><tr>" +
 					"<td Align=\"Left\"> Breadth (m): </td> <td Align=\"right\"> "+breadth+"</td></tr><tr>" + 
 					"<td Align=\"Left\"> Draught (m): </td> <td Align=\"right\">"+draught+"</td></tr><tr>" + 
-					"<td Align=\"Left\"> Gross ton (t): </td> <td Align=\"right\"> ??</td></tr><tr>" + 
 					"<td Align=\"Left\"> </td><td Align=\"right\"> </td></tr><tr>"+
-					"<td Align=\"Left\"> Nav. status: </td><td Align=\"right\">"+"Unknown"+"</td></tr><tr>" + 
+					"<td Align=\"Left\"> Nav. status: </td><td Align=\"right\">"+navstatus+"</td></tr><tr>" + 
 					"<td Align=\"Left\"> Destination: </td><td Align=\"right\">"+destination+"</td></tr><tr>" + 
 					"<td Align=\"Left\"> Heading: </td> <td Align=\"right\"> "+heading+"</td></tr><tr>" +
 					"<td Align=\"Left\"> cog: </td> <td Align=\"right\"> "+cog+"</td></tr><tr>" + 
 					"<td Align=\"Left\"> sog (knots): </td> <td Align=\"right\">"+sog+"</td></tr><tr>" +
-					"<td Align=\"Left\"> AIS source: </td> <td Align=\"right\">"+aissource+"</td></tr></table>";
+					"</table>";
 
 				
 			addToShipTypeFolder(styleprefix, vesselPosition);
