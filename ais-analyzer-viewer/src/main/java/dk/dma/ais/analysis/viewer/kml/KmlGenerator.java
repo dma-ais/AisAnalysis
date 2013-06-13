@@ -111,7 +111,7 @@ public class KmlGenerator {
 		addStyle("SailingandpleasureMoored", resourceUrl + "vessel_white_moored.png",	"ff0000ff", .8, "<![CDATA[$[name]$[description]", 0);
 		addStyle("empty", "", "", .8, "", 0);
 
-		for (int i = 0; i < 360; i++) {
+		for (int i = 0; i <= 360; i++) {
 			addStyle(("Passenger-" + i), resourceUrl + "vessel_blue.png", "ff0000ff", 1, "<![CDATA[$[name]$[description]", i+270);
 			addStyle(("Cargo-" + i), resourceUrl + "vessel_green.png",	"ff0000ff", 1, "<![CDATA[$[name]$[description]", i+270);
 			addStyle(("Tanker-" + i), resourceUrl + "vessel_red.png",	"ff0000ff", 1, "<![CDATA[$[name]$[description]", i+270);
