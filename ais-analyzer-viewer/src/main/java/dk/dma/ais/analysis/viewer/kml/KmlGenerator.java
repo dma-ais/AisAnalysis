@@ -246,7 +246,6 @@ public class KmlGenerator {
 					if(classAPosition != null)	{
 						NavigationalStatus navigationalStatus = new NavigationalStatus(classAPosition.getNavStatus());
 						navstatus = navigationalStatus.prettyStatus();
-							if(navstatus == "")	{	navstatus = "Unknown";	}
 						if(classAPosition.getNavStatus() == 1 || classAPosition.getNavStatus() == 5 ){
 							isMoored = true;
 						}
