@@ -17,9 +17,7 @@ package dk.dma.ais.analysis.viewer.kml;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
-import java.util.Calendar;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -57,7 +55,7 @@ public class KmlGenerator {
 	final Document document;
 	
 	//static folders
-	private final Folder outerfolder;
+	private final Folder lastKnownPositions;
 	private final Folder shipnamefolder;
 	private final Folder shiptypesfolder;
 	private final Folder tanker;
@@ -72,6 +70,7 @@ public class KmlGenerator {
 	private final Folder pasttrackfolder;
 	private final Folder twentyfourhourfolder;
 	private final Folder threedayfolder;
+	private Folder sart;
 	
 
 	public KmlGenerator(Map<Integer, AisTargetEntry> targetsMap,
@@ -83,17 +82,18 @@ public class KmlGenerator {
 		document = kml.createAndSetDocument();
 		
 		//create the static folders
-		outerfolder = document.createAndAddFolder().withName("Last known position");
+		lastKnownPositions = document.createAndAddFolder().withName("Last known position");
 		shipnamefolder = document.createAndAddFolder().withName("Ship names").withVisibility(false);
 		shiptypesfolder = document.createAndAddFolder().withName("Ship types").withVisibility(false);
-		tanker = outerfolder.createAndAddFolder().withName("Tanker").withVisibility(false);
-		cargo = outerfolder.createAndAddFolder().withName("Cargo").withVisibility(false);
-		passenger = outerfolder.createAndAddFolder().withName("Passenger").withVisibility(false);
-		fishing = outerfolder.createAndAddFolder().withName("Fishing").withVisibility(false);
-		undefined = outerfolder.createAndAddFolder().withName("Undefined").withVisibility(false);
-		highspeedcraftandWIG = outerfolder.createAndAddFolder().withName("High speed craft and Wig").withVisibility(false);
-		sailingandpleasure = outerfolder.createAndAddFolder().withName("Sailing and pleasure").withVisibility(false);
-		pilottugandothers = outerfolder.createAndAddFolder().withName("Pilot, TUG and other").withVisibility(false);
+		tanker = lastKnownPositions.createAndAddFolder().withName("Tanker").withVisibility(false);
+		cargo = lastKnownPositions.createAndAddFolder().withName("Cargo").withVisibility(false);
+		passenger = lastKnownPositions.createAndAddFolder().withName("Passenger").withVisibility(false);
+		fishing = lastKnownPositions.createAndAddFolder().withName("Fishing").withVisibility(false);
+		undefined = lastKnownPositions.createAndAddFolder().withName("Undefined").withVisibility(false);
+		highspeedcraftandWIG = lastKnownPositions.createAndAddFolder().withName("High speed craft and Wig").withVisibility(false);
+		sailingandpleasure = lastKnownPositions.createAndAddFolder().withName("Sailing and pleasure").withVisibility(false);
+		pilottugandothers = lastKnownPositions.createAndAddFolder().withName("Pilot, TUG and other").withVisibility(false);
+		sart = lastKnownPositions.createAndAddFolder().withName("SART").withVisibility(false);
 		pickedfolder = undefined;
 		pasttrackfolder = document.createAndAddFolder().withName("Tracks").withVisibility(false);
 		twentyfourhourfolder = pasttrackfolder.createAndAddFolder().withName("24 hours").withVisibility(false);
@@ -109,6 +109,8 @@ public class KmlGenerator {
 		addStyle("PilottugandothersMoored", resourceUrl + "vessel_turquoise_moored.png", "ff0000ff", .8,	"<![CDATA[$[name]$[description]", 0);
 		addStyle("UndefinedunknownMoored", resourceUrl + "vessel_gray_moored.png", "ff0000ff", .8, "<![CDATA[$[name]$[description]", 0);
 		addStyle("SailingandpleasureMoored", resourceUrl + "vessel_white_moored.png",	"ff0000ff", .8, "<![CDATA[$[name]$[description]", 0);
+		addStyle("SART_ACTIVE", resourceUrl + "SART_red.ico",	"ff0000ff", .8, "<![CDATA[$[name]$[description]", 0);
+		addStyle("SART_TEST", resourceUrl + "SART_grey.ico",	"ff0000ff", .8, "<![CDATA[$[name]$[description]", 0);
 		addStyle("empty", "", "", .8, "", 0);
 
 		for (int i = 0; i <= 360; i++) {
@@ -175,6 +177,10 @@ public class KmlGenerator {
 	        double cog = 0.0;
 	        double sog = 0.0;
 	        boolean isMoored = false;
+	        boolean isSART = false;
+	        boolean isSARTTEST = false;
+	        String sartDescription = "";
+	        
 			
 			//Extract information from vesselstatic
 			AisVesselStatic vesselStatic = vesselTarget.getVesselStatic();
@@ -249,6 +255,12 @@ public class KmlGenerator {
 						if(classAPosition.getNavStatus() == 1 || classAPosition.getNavStatus() == 5 ){
 							isMoored = true;
 						}
+						if(mmsi >=970000000 && mmsi < 980000000){
+							if(classAPosition.getNavStatus()==14)
+								isSART = true;
+							else if(classAPosition.getNavStatus()==15)
+								isSARTTEST = true;
+						}
 					}
 
 				}
@@ -266,7 +278,6 @@ public class KmlGenerator {
 	        if(vesselPosition.getSog() != null)	{	sog = vesselPosition.getSog();	}
 			
 	        
-	        
 			//Check if vessel is moored
 //			Double sog = vesselPosition.getSog();
 //			if(sog != null && sog < 1){
@@ -281,11 +292,20 @@ public class KmlGenerator {
 				
 				style = pickStyle(styleprefix, direction);	
 			}
-				
+			if(isSART){
+				style="SART_ACTIVE";
+				pickedfolder = sart;
+				sartDescription = "<td Align=\"Left\"> </td><td Align=\"right\"> </td></tr><tr><td Align=\"Left\"><b>SART: </b></td> <td Align=\"right\"><b>THIS IS AN EMERGENCY!</b></td></tr><tr>";
+			}else if(isSARTTEST){
+				style="SART_TEST";
+				pickedfolder = sart;
+				sartDescription = "<td Align=\"Left\"> </td><td Align=\"right\"> </td></tr><tr><td Align=\"Left\"><b>SART: </b></td> <td Align=\"right\"><b>This is a test!</b></td></tr><tr>";
+			}	
 
-	        //Extract description
-			description = "<font size= \"5\" color=\"black\">"+lastReport+" Age "+age+"h </font><table witdh=\"300\" align=\"centeret\"><tr>"+
-					"<td Align=\"Left\">" +"Ship name: </td> <td Align=\"right\">"+name+"</td></tr><tr><td Align=\"Left\">" +
+	        
+			//Extract description
+			description = "<font size= \"5\" color=\"black\">"+lastReport+" Age "+age+"h </font><table width=\"275\" align=\"centeret\"><tr>"+
+					"<td width=\"100\" Align=\"Left\">" +"Ship name: </td> <td Align=\"right\">"+name+"</td></tr><tr><td Align=\"Left\">" +
 					"mmsi: </td> <td Align=\"right\"><a href=\"http://www.marinetraffic.com/ais/showallphotos.aspx?mmsi="+mmsi+"\"> "+mmsi +
 					"</a></td></tr><tr><td Align=\"Left\"> imo: </td> <td Align=\"right\"><a href=\"http://www.marinetraffic.com/ais/showallphotos.aspx?mmsi="+mmsi+"\">"+imo+"</a></td></tr>" +
 					"<tr><td Align=\"Left\"> Ship type: </td> <td Align=\"right\">"+shiptype+"</td></tr><tr>" +
@@ -301,6 +321,7 @@ public class KmlGenerator {
 					"<td Align=\"Left\"> Heading: </td> <td Align=\"right\"> "+heading+"</td></tr><tr>" +
 					"<td Align=\"Left\"> cog: </td> <td Align=\"right\"> "+cog+"</td></tr><tr>" + 
 					"<td Align=\"Left\"> sog (knots): </td> <td Align=\"right\">"+sog+"</td></tr><tr>" +
+					sartDescription +
 					"</table>";
 
 				
