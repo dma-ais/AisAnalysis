@@ -22,8 +22,8 @@ import java.util.Map;
 
 import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.packet.AisPacket;
-import dk.dma.ais.packet.AisPacketTagging;
-import dk.dma.ais.packet.AisPacketTagging.SourceType;
+import dk.dma.ais.packet.AisPacketTags;
+import dk.dma.ais.packet.AisPacketTags.SourceType;
 import dk.dma.ais.proprietary.GatehouseSourceTag;
 import dk.dma.ais.proprietary.IProprietaryTag;
 import dk.dma.enav.model.Country;
@@ -35,36 +35,35 @@ public class TargetSourceData implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private AisPacketTagging lastTagging = new AisPacketTagging();
+    private AisPacketTags lastTagging = new AisPacketTags();
     private String lastSourceRegion;
     private final Date created;
-    
+
     /**
      * Map from source type to last time of reception
      */
     private final Map<String, Long> sourceTypeTime = new HashMap<>();
-    
+
     /**
      * Map from source country to last time of reception
      */
     private final Map<String, Long> sourceCountryTime = new HashMap<>();
-    
+
     /**
      * Map from source region to last time of reception
      */
     private final Map<String, Long> sourceRegionTime = new HashMap<>();
-    
+
     /**
      * Map from source base station to last time of reception
-     */    
+     */
     private final Map<String, Long> sourceBsTime = new HashMap<>();
-    
+
     /**
      * Map from source system to last time of reception
-     */    
+     */
     private final Map<String, Long> sourceSystemTime = new HashMap<>();
-    
-    
+
     public TargetSourceData() {
         this.created = new Date();
     }
@@ -74,7 +73,7 @@ public class TargetSourceData implements Serializable {
         if (message == null) {
             return;
         }
-        
+
         this.lastSourceRegion = null;
         // Get source region from Gatehouse tag
         if (message.getTags() != null) {
@@ -85,41 +84,41 @@ public class TargetSourceData implements Serializable {
                 }
             }
         }
-        this.lastTagging = AisPacketTagging.parse(message.getVdm());
-        
+        this.lastTagging = packet.getTags();
+
         // Update times of reception of time
         Long now = System.currentTimeMillis();
-        
+
         SourceType sourceType = lastTagging.getSourceType();
         if (sourceType == null) {
             sourceType = SourceType.TERRESTRIAL;
         }
         sourceTypeTime.put(sourceType.encode(), now);
-        
+
         Country srcCnt = lastTagging.getSourceCountry();
         if (srcCnt != null) {
             sourceCountryTime.put(srcCnt.getThreeLetter(), now);
         }
-        
+
         if (lastSourceRegion != null) {
             sourceRegionTime.put(lastSourceRegion, now);
         }
-        
+
         if (lastTagging.getSourceBs() != null) {
             sourceBsTime.put(Integer.toString(lastTagging.getSourceBs()), now);
         }
-        
+
         if (lastTagging.getSourceId() != null) {
             sourceSystemTime.put(lastTagging.getSourceId(), now);
         }
-        
+
     }
 
-    public AisPacketTagging getTagging() {
+    public AisPacketTags getTagging() {
         return lastTagging;
     }
 
-    public void setTagging(AisPacketTagging tagging) {
+    public void setTagging(AisPacketTags tagging) {
         this.lastTagging = tagging;
     }
 
@@ -139,7 +138,7 @@ public class TargetSourceData implements Serializable {
         SourceType sourceType = lastTagging.getSourceType();
         return sourceType != null && sourceType == SourceType.SATELLITE;
     }
-    
+
     public String getSourceType() {
         SourceType sourceType = lastTagging.getSourceType();
         if (sourceType != null && sourceType == SourceType.SATELLITE) {
@@ -156,24 +155,24 @@ public class TargetSourceData implements Serializable {
         }
         int ttl = liveTargetTtl;
         if (sourceType == SourceType.SATELLITE) {
-            ttl = satTargetTtl;                    
+            ttl = satTargetTtl;
         }
-        
+
         return isFresh(sourceTypeTime, st, ttl);
     }
 
     public boolean isCountry(String cnt, int ttl) {
         return isFresh(sourceCountryTime, cnt, ttl);
     }
-    
+
     public boolean isRegion(String region, int ttl) {
         return isFresh(sourceRegionTime, region, ttl);
     }
-    
+
     public boolean isBs(String bs, int ttl) {
         return isFresh(sourceBsTime, bs, ttl);
     }
-    
+
     public boolean isSystem(String sys, int ttl) {
         return isFresh(sourceSystemTime, sys, ttl);
     }
