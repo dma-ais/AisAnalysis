@@ -247,7 +247,7 @@ public class KmlGenerator {
 
             // set flag (country)
             if (vesselTarget.getCountry() != null) {
-                flag = vesselTarget.getCountry().toString();
+                flag = vesselTarget.getCountry().getName();
             }
 
             // Extract class A information
