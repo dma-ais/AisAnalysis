@@ -20,7 +20,6 @@ import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -31,7 +30,6 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.PathSegment;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
@@ -115,20 +113,19 @@ public class AisViewRestService {
     public AisViewHandlerStats stats() {
         return handler.getStat();
     }
-    
+
     @GET
     @Path("kml")
     @Produces("application/vnd.google-earth.kml+xml")
     public String kml(@Context HttpServletResponse response, @Context HttpServletRequest request) throws MalformedURLException {
-    	DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-		Date date = new Date();
-    	String filename = ("aistargets-" + dateFormat.format(date)+ ".kml");
-    	response.setHeader("Content-Disposition", "attachment; filename=" + filename);
+        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+        Date date = new Date();
+        String filename = ("aistargets-" + dateFormat.format(date) + ".kml");
+        response.setHeader("Content-Disposition", "attachment; filename=" + filename);
 
-    	URL domain = new URL(request.getRequestURL().toString());
-		String resources = "http://"+domain.getHost()+":"+domain.getPort()+"/aisview/img/";
+        URL domain = new URL(request.getRequestURL().toString());
+        String resources = "http://" + domain.getHost() + ":" + domain.getPort() + "/aisview/img/";
 
-    	
         return handler.generateKml(resources);
     }
 

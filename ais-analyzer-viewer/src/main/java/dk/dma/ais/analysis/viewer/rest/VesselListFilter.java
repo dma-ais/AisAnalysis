@@ -48,5 +48,5 @@ public class VesselListFilter {
     public Map<String, HashSet<String>> getFilterMap() {
         return filterMap;
     }
-    
+
 }
