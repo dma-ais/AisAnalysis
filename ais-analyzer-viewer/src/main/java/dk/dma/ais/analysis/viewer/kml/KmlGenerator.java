@@ -27,8 +27,11 @@ import java.util.Map;
 import de.micromata.opengis.kml.v_2_2_0.Document;
 import de.micromata.opengis.kml.v_2_2_0.Folder;
 import de.micromata.opengis.kml.v_2_2_0.Icon;
+import de.micromata.opengis.kml.v_2_2_0.ItemIconState;
 import de.micromata.opengis.kml.v_2_2_0.Kml;
 import de.micromata.opengis.kml.v_2_2_0.LineString;
+import de.micromata.opengis.kml.v_2_2_0.ListItemType;
+import de.micromata.opengis.kml.v_2_2_0.ListStyle;
 import de.micromata.opengis.kml.v_2_2_0.Placemark;
 import de.micromata.opengis.kml.v_2_2_0.Style;
 import dk.dma.ais.analysis.viewer.handler.AisTargetEntry;
@@ -77,20 +80,33 @@ public class KmlGenerator {
         this.resourceUrl = resourceURL;
         kml = new Kml();
         document = kml.createAndSetDocument();
+        
+        //Add folderstyles
+        addFolderStyle("PassengerFolder",  resourceUrl + "vessel_blue.png");
+        addFolderStyle("CargoFolder",  resourceUrl + "vessel_green.png");
+        addFolderStyle("TankerFolder",  resourceUrl + "vessel_red.png");
+        addFolderStyle("HighspeedcraftandWIGFolder",  resourceUrl + "vessel_yellow.png");
+        addFolderStyle("FishingFolder",  resourceUrl + "vessel_orange.png");
+        addFolderStyle("SailingandpleasureFolder",  resourceUrl + "vessel_purple.png");
+        addFolderStyle("PilottugandothersFolder",  resourceUrl + "vessel_turquoise.png");
+        addFolderStyle("UndefinedunknownFolder",  resourceUrl + "vessel_gray.png");
+        addFolderStyle("sartFolder",  resourceUrl + "SART_red.ico");
+
+        
 
         // create the static folders
         lastKnownPositions = document.createAndAddFolder().withName("Last known position");
         shipnamefolder = document.createAndAddFolder().withName("Ship names").withVisibility(false);
         shiptypesfolder = document.createAndAddFolder().withName("Ship types").withVisibility(false);
-        tanker = lastKnownPositions.createAndAddFolder().withName("Tanker").withVisibility(false);
-        cargo = lastKnownPositions.createAndAddFolder().withName("Cargo").withVisibility(false);
-        passenger = lastKnownPositions.createAndAddFolder().withName("Passenger").withVisibility(false);
-        fishing = lastKnownPositions.createAndAddFolder().withName("Fishing").withVisibility(false);
-        undefined = lastKnownPositions.createAndAddFolder().withName("Undefined").withVisibility(false);
-        highspeedcraftandWIG = lastKnownPositions.createAndAddFolder().withName("High speed craft and Wig").withVisibility(false);
-        sailingandpleasure = lastKnownPositions.createAndAddFolder().withName("Sailing and pleasure").withVisibility(false);
-        pilottugandothers = lastKnownPositions.createAndAddFolder().withName("Pilot, TUG and other").withVisibility(false);
-        sart = lastKnownPositions.createAndAddFolder().withName("SART").withVisibility(false);
+        tanker = lastKnownPositions.createAndAddFolder().withName("Tanker").withVisibility(false).withStyleUrl("TankerFolder");
+        cargo = lastKnownPositions.createAndAddFolder().withName("Cargo").withVisibility(false).withStyleUrl("CargoFolder");
+        passenger = lastKnownPositions.createAndAddFolder().withName("Passenger").withVisibility(false).withStyleUrl("PassengerFolder");
+        fishing = lastKnownPositions.createAndAddFolder().withName("Fishing").withVisibility(false).withStyleUrl("FishingFolder");
+        undefined = lastKnownPositions.createAndAddFolder().withName("Undefined").withVisibility(false).withStyleUrl("UndefinedunknownFolder");
+        highspeedcraftandWIG = lastKnownPositions.createAndAddFolder().withName("High speed craft and Wig").withVisibility(false).withStyleUrl("HighspeedcraftandWIGFolder");
+        sailingandpleasure = lastKnownPositions.createAndAddFolder().withName("Sailing and pleasure").withVisibility(false).withStyleUrl("SailingandpleasureFolder");
+        pilottugandothers = lastKnownPositions.createAndAddFolder().withName("Pilot, TUG and other").withVisibility(false).withStyleUrl("PilottugandothersFolder");
+        sart = lastKnownPositions.createAndAddFolder().withName("SART").withVisibility(false).withStyleUrl("sartFolder");
         pickedfolder = undefined;
         pasttrackfolder = document.createAndAddFolder().withName("Tracks").withVisibility(false);
         twentyfourhourfolder = pasttrackfolder.createAndAddFolder().withName("24 hours").withVisibility(false);
@@ -103,14 +119,14 @@ public class KmlGenerator {
         addStyle("HighspeedcraftandWIGMoored", resourceUrl + "vessel_yellow_moored.png", "ff0000ff", .8,
                 "<![CDATA[$[name]$[description]", 0);
         addStyle("FishingMoored", resourceUrl + "vessel_orange_moored.png", "ff0000ff", .8, "<![CDATA[$[name]$[description]", 0);
-        addStyle("SailingandpleasureMoored", resourceUrl + "vessel_puple_moored.png", "ff0000ff", .8,
+        addStyle("SailingandpleasureMoored", resourceUrl + "vessel_purple_moored.png", "ff0000ff", .8,
                 "<![CDATA[$[name]$[description]", 0);
         addStyle("PilottugandothersMoored", resourceUrl + "vessel_turquoise_moored.png", "ff0000ff", .8,
                 "<![CDATA[$[name]$[description]", 0);
         addStyle("UndefinedunknownMoored", resourceUrl + "vessel_gray_moored.png", "ff0000ff", .8,
                 "<![CDATA[$[name]$[description]", 0);
-        addStyle("SailingandpleasureMoored", resourceUrl + "vessel_white_moored.png", "ff0000ff", .8,
-                "<![CDATA[$[name]$[description]", 0);
+//        addStyle("SailingandpleasureMoored", resourceUrl + "vessel_white_moored.png", "ff0000ff", .8,
+//                "<![CDATA[$[name]$[description]", 0);
         addStyle("SART_ACTIVE", resourceUrl + "SART_red.ico", "ff0000ff", .8, "<![CDATA[$[name]$[description]", 0);
         addStyle("SART_TEST", resourceUrl + "SART_grey.ico", "ff0000ff", .8, "<![CDATA[$[name]$[description]", 0);
         addStyle("empty", "", "", .8, "", 0);
@@ -163,6 +179,7 @@ public class KmlGenerator {
                 trackPoints = pastTrack.getPoints();
 
             // Extract ship information
+            pickedfolder = undefined;
             String name = "" + vesselTarget.getMmsi();
             String shiptype = "unknown";
             String style = "Undefinedunknown";
@@ -225,18 +242,23 @@ public class KmlGenerator {
                                 || type.equals(ShipTypeCargo.ShipType.TOWING_LONG_WIDE)
                                 || type.equals(ShipTypeCargo.ShipType.ANTI_POLLUTION)
                                 || type.equals(ShipTypeCargo.ShipType.LAW_ENFORCEMENT)
-                                || type.equals(ShipTypeCargo.ShipType.PORT_TENDER)) {
+                                || type.equals(ShipTypeCargo.ShipType.PORT_TENDER)
+                                || type.equals(ShipTypeCargo.ShipType.DIVING)) {
                             styleprefix = "Pilottugandothers";
                             pickedfolder = pilottugandothers;
                         } else if (type.equals(ShipTypeCargo.ShipType.SAILING) || type.equals(ShipTypeCargo.ShipType.PLEASURE)) {
                             styleprefix = "Sailingandpleasure";
                             pickedfolder = sailingandpleasure;
+                        } else if (type.equals(ShipTypeCargo.ShipType.UNKNOWN)) {
+                        	styleprefix = "Undefinedunknown";
+                            pickedfolder = undefined;
                         } else {
                             styleprefix = "Undefinedunknown";
                             pickedfolder = undefined;
                         }
                     }
                 }
+                
 
                 // Extract length and breadth
                 if (vesselStatic.getDimensions() != null) {
@@ -357,8 +379,9 @@ public class KmlGenerator {
                     + "<td Align=\"Left\"> sog (knots): </td> <td Align=\"right\">" + sog + "</td></tr><tr>" + sartDescription
                     + "</table>";
 
+                    
             addToShipTypeFolder(styleprefix, vesselPosition);
-            addVessel(style, name, description, trackPoints, vesselPosition, twentyfourhourfolder, threedayfolder,
+            addVessel(style, styleprefix, name, description, trackPoints, vesselPosition, twentyfourhourfolder, threedayfolder,
                     vesselTarget.getMmsi());
         }
 
@@ -395,13 +418,24 @@ public class KmlGenerator {
 
         style.createAndSetBalloonStyle().withText(ballonText);
     }
+    
+    private void addFolderStyle(String stylename, String iconUri)
+    {
+//    	Style style = document.createAndAddStyle().createAndSetListStyle().w
+    	ListStyle listStyle = document.createAndAddStyle().withId(stylename).createAndSetListStyle().withListItemType(ListItemType.CHECK);
+    	listStyle.createAndAddItemIcon().addToState(ItemIconState.CLOSED).withHref(iconUri);
+    }
 
-    private void addVessel(String stylename, String name, String description, List<PastTrackPoint> pastTrackPoints,
+    private void addVessel(String stylename, String styleprefix, String name, String description, List<PastTrackPoint> pastTrackPoints,
             AisVesselPosition vesselPosition, Folder twentyfourhour, Folder threeday, int mmsi) {
         // if(pastTrackPoints.isEmpty())
         // return;
+//    	System.out.println(pickedfolder.getName());
+//    	if (pickedfolder.getName().equals("Fishing")) {
+//			System.out.println(stylename);
+//		}
 
-        Folder folder = pickedfolder.createAndAddFolder().withName("" + mmsi);
+        Folder folder = pickedfolder.createAndAddFolder().withName("" + mmsi).withStyleUrl(styleprefix+"Folder");
 
         Folder folder1 = twentyfourhour.createAndAddFolder().withName("" + mmsi).withVisibility(false);
         Folder folder2 = threeday.createAndAddFolder().withName("" + mmsi).withVisibility(false);
