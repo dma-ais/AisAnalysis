@@ -119,7 +119,7 @@ public class VesselTargetDetails {
         
         // Class A position
         if (classAPos != null) {
-            NavigationalStatus navigationalStatus = new NavigationalStatus(classAPos.getNavStatus());
+            NavigationalStatus navigationalStatus = NavigationalStatus.get(classAPos.getNavStatus());
             this.navStatus = navigationalStatus.prettyStatus();
             this.moored = (classAPos.getNavStatus() == 1 || classAPos.getNavStatus() == 5);
             this.rot = formatDouble(classAPos.getRot(), 1);

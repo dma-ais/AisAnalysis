@@ -290,7 +290,7 @@ public class KmlGenerator {
                         imo = classAStatic.getImoNo();
                     }
                     if (classAPosition != null) {
-                        NavigationalStatus navigationalStatus = new NavigationalStatus(classAPosition.getNavStatus());
+                        NavigationalStatus navigationalStatus = NavigationalStatus.get(classAPosition.getNavStatus());
                         navstatus = navigationalStatus.prettyStatus();
                         if (classAPosition.getNavStatus() == 1 || classAPosition.getNavStatus() == 5) {
                             isMoored = true;
