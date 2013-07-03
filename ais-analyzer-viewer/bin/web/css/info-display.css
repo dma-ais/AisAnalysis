@@ -1,0 +1,21 @@
+button.zoomButton {
+	background-color:#698FB5;
+	-moz-border-radius:6px;
+	-webkit-border-radius:6px;
+	border-radius:6px;
+	border:3px solid #D2E2E2;
+	display:inline-block;
+	color:#ffffff;
+	font-family:arial;
+	font-size:12px;
+	font-weight:bold;
+	padding:4px 20px;
+	text-decoration:none;
+	text-shadow:1px 1px 0px #698fb5;
+	margin-top: 0px;
+}button.zoomButton:hover {
+	background-color:#4973A7;
+}button.zoomButton:active {
+	position:relative;
+	top:1px;
+}

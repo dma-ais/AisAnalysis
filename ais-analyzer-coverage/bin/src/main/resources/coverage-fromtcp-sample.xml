@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+
+<!--
+Reads AIS messages from two different sources. Connecting via TCP.
+Coverage data is saved memory only (the default).
+-->
+<aisCoverageConfiguration>
+	<aisbus>
+	
+		<provider xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="tcpClientProviderConfiguration">
+			<hostPort>127.0.0.1:1000</hostPort>
+		</provider>
+		
+		<provider xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="tcpClientProviderConfiguration">
+			<hostPort>127.0.0.1:2000</hostPort>
+		</provider>
+		
+		
+		<consumer xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="distributerConsumerConfiguration">
+			<name>UNFILTERED</name>
+		</consumer>
+	</aisbus>
+	
+	<!--Sets the grid granularity; the latitude and longitude minimum degree -->
+	<latSize>0.0225225225</latSize>
+    <lonSize>0.0386812541</lonSize>
+	
+	<!-- 	Access the frontend via http://localhost:8090/coverage  -->
+	<serverConfiguration>
+		<port>8090</port>
+		<webappPath>web</webappPath>
+		<contextPath>/coverage</contextPath>
+	</serverConfiguration>
+</aisCoverageConfiguration>

@@ -1,0 +1,695 @@
+<html>
+
+	<head>
+		<title>AisViewer</title>
+		<script type="text/javascript" src="js/jquery-1.9.1.min.js"></script>
+		<script src="js/browsercheck.js" type="text/javascript"></script>
+		<script src="http://openlayers.org/api/OpenLayers.js"></script>
+		<script type="text/javascript" src="js/OpenStreetMap.js"></script>
+		<script src="js/aisviewShipOwner.js" defer="defer" type="text/javascript"></script>
+		<script src="js/test.js" defer="defer" type="text/javascript"></script>
+		<script src="js/aisviewUI.js" defer="defer" type="text/javascript"></script>
+		<script src="js/vessel.js" defer="defer" type="text/javascript"></script>
+		<script src="js/cluster.js" defer="defer" type="text/javascript"></script>
+		<script src="js/abnormalEvent.js" defer="defer" type="text/javascript"></script>
+		<script src="js/tool.js" defer="defer" type="text/javascript"></script>
+		<script src="js/abnormalBehaviorFeed.js" defer="defer" type="text/javascript"></script>
+		<script src="js/html.js" defer="defer" type="text/javascript"></script>
+		<script src="js/jquery-ui.js"></script>
+		<script type="text/javascript" src="js/abnormal.js"></script>
+		<meta http-equiv="refresh" content="3600"/>
+		<link rel="stylesheet" type="text/css" href="css/style.css">
+		<link rel="stylesheet" type="text/css" href="css/info-display.css">
+		<link rel="stylesheet" href="css/jquery-ui.css" />
+		<script>
+		/***********************
+		 * Configurations
+		 **********************/
+		var initialLat = 35.00;
+		var initialLon = 10.00;
+		var initialZoom = 3;
+		var focusZoom = 15;					// The zoom level when focus is changed to specific vessel
+		var vesselZoomLevel = 8;			// The maximum zoom level for which to draw vessels
+
+		// Loading
+		var loadAllVessels = true;			// Whether or not to load all vessels in the world.
+		var loadFixedAreaSize = true;		// Whether or not to load a fixed area size when zoom level is higher than
+											// vesselZoomLevel. If set to false, it will always load the size of the
+											// viewport. If set to true it will always load the area size specified
+											// by the fixedLoadAreaSize variable below.
+		var fixedLoadAreaSize = 15;			// The size of the area to load in earth longitude and latitude.
+		var loadFrequence = 5*60*1000;		// The number of milliseconds between auto load
+		var loadDelay = 400;				// The number of milliseconds between movement and load
+		var loadCheckingFrequence = 100;	// The number of milliseconds between each check to see if it should load
+		var loadViewportOnly = true;
+
+		var reloadPageAfterTime = true;		// Whether or not to reload the page after being idle in some time
+		var reloadPageTime = 10*60*1000;	// The idle time to reload page
+		var repositionWhenReloading = true;	// Whether or not to reposition when reloading
+		var repositionLocation = 
+			{ 
+				latitude: initialLat,
+				longitude: initialLon,
+				zoom: initialZoom
+			};
+
+		// * When the need for a load is detected it still waits for the loadCheckingFrequence.
+
+		// JSON URLs
+		var listUrl = 'rest/anon_vessel_list';
+//		var clusterUrl = 'rest/vessel_clusters';
+		var detailsUrl = 'rest/vessel_target_details';
+//		var searchUrl = '/aisview/rest/vessel_search';
+//		var eventListUrl = "/abnormal/rest/list";
+
+		// Clustering
+		var includeClustering = true;
+		var clusterLimit = 10;
+		var showIndividualVessels = true;
+		var clusterSizes = [
+			{zoom: 1, size: 6},
+			{zoom: 2, size: 6},
+			{zoom: 3, size: 4.5},
+			{zoom: 4, size: 2.5},
+			{zoom: 5, size: 1.5},
+			{zoom: 6, size: 0.5},
+			{zoom: 7, size: 0.25},
+			{zoom: 8, size: 0.08},
+		];
+
+		// Event feeds
+		var includeEventFeed = false;			// Whether or not to load and show event feeds
+		var loadBehaviorsFrequence = 10000000;		// The number of milliseconds between each abnormal behavior load
+		var abnormalFeedLifeTime = 15;					// The number of minutes event feeds are kept alive
+		var includeEventDateTime = true;
+		var includeEventLocation = true;
+		var includeEventType = true; 
+		var includeEventVesselName = true; 
+		var includeEventVesselMMSI = true; 
+		var includeEventVesselType = true; 
+
+		// Searching
+		var searchResultsLimit = 1000;			// The number of search results that will be shown in the list
+		var searchResultsShowPositon = false;	// Whether or not to show the position in the search results
+
+		// Past tracks and time stamps
+		var includePastTracks = true;			// Whether or not to show past tracks of selected vessels
+		var includeTimeStamps = true;			// Whether or not to show time stamps on past tracks
+		var includeTimeStampsOnCL = false;			// Whether or not to show time stamps on past tracks
+		var tracksBetweenTimeStampsVL = 10;		// The number of tracks (single lines) between each timestamp on 
+												// vessel level
+		var tracksBetweenTimeStampsCL = 20;		// The number of tracks (single lines) between each timestamp on 
+												// cluster level
+
+
+		/***********************
+		 * Tools
+		 **********************/
+		var includeAdvancedTools = false;
+		var includeAbnormalBehaviorTool = false;
+
+
+		/***********************
+		 * Panels
+		 **********************/
+		var includeStatusPanel = true;
+		var includeLoadingPanel = true;
+		var includeLegendsPanel = true;
+		var includeSearchPanel = false;
+		var includeFilteringPanel = false;
+		var includeDetailsPanel = true;
+		var includeAbnormalFeedPanel = false;
+			var feedPanelExpandedWidth = '500px'	// CSS class .arrowUpWide needs to have same width minus 10
+		var includeZoomPanel = true;
+			var zoomPanelPositionLeft = '248px';
+			var zoomPanelPositionTop = '8px';
+		var includeAbnormalBehaviorPanel = false;// Whether or not to load and show the abnormal behavior panel
+
+
+		/***********************
+		 * Styling
+		 **********************/
+		var baseColorsOn = "count";
+		var clusterColors = [
+			{color: "#ffdd00", densityLimit: 0.0	, countLimit: 0},	// Yellow
+			{color: "#ff8800", densityLimit: 0.00125, countLimit: 50},	// Orange
+			{color: "#ff0000", densityLimit: 0.004	, countLimit: 250},	// Red
+			{color: "#ff00ff", densityLimit: 0.008	, countLimit: 1000}	// Purple
+		];
+
+		var clusterFillOpacity = 0.5;
+		var clusterStrokeColor = "#333333";
+		var clusterStrokeOpacity = 0.2;
+		var clusterStrokeWidth = 1;
+		var clusterFontColor = "#222222";
+		var clusterFontWeight = "bold";
+		var clusterFontSize = 8;
+		var clusterFontSizeFactor = 2;	// font size = map.zoom * factor
+		var clusterFontFamily = "'Lucida Grande', Verdana, Geneva, Lucida, Arial, Helvetica, sans-serif";
+
+		var indieVesselColor = "#550055";
+		var indieVesselStrokeColor = "#555555";
+		var indieVesselRadius = 2;
+		var indieVesselStrokeWidth = 1;
+
+		var pastTrackColor = "#CC2222";
+		var pastTrackOpacity = 1;
+		var pastTrackWidth = 3;
+
+		var timeStampColor = "#222222";
+		var timeStampFontSize = "11px";
+		var timeStampFontFamily = "'Lucida Grande', Verdana, Geneva, Lucida, Arial, Helvetica, sans-serif";
+		var timeStampFontWeight = "bold";
+		var timeStamtOutlineColor = "#eaeaea";
+
+		var warningColor = '#ff9999';
+		var succesColor = '#99ff99';
+		
+		var fixedFilterQuery = {country : "DNK"}; 	
+		
+		var detailsPanelHeight = 410;
+		
+		function zoomDK() {
+			recenter(10.8, 56, 7);
+		}
+		
+		function zoomWorld() {
+			recenter(repositionLocation.longitude, repositionLocation.latitude, repositionLocation.zoom);
+		}
+		
+		</script>
+	</head>
+	
+	<body onload="setupMap()">
+		<div id="container">
+			<div id="map">
+				
+			</div>
+			<div id="leftSide" class="shadowsIE">
+				<div id="legendsPanel" class="panel whiteOpacity arrowDown">
+					<div id="legendsHeader" class="panelHeader">Legends</div>
+					<div id="legendsContainer" class="container"></div>
+				</div>
+				<div style="position: absolute; left: 276px; top: 0px; white-space:nowrap;" >
+					<button class="zoomButton" onclick="zoomWorld();">Zoom World</button>
+				</div>				
+				<div style="position: absolute; left: 400px; top: 0px; white-space:nowrap;">
+					<button class="zoomButton" onclick="zoomDK();">Zoom DK</button>
+				</div>
+				<div id="searchPanel" class="panel whiteOpacity arrowDown">
+					<div id="searchHeader" class="panelHeader">Search</div>
+					<div id="searchContainer" class="container"></div>
+				</div>
+				<div id="filteringPanel" class="panel whiteOpacity arrowDown">
+					<div id="filteringHeader" class="panelHeader">Filtering</div>
+					<div id="filteringContainer" class="container"></div>
+				</div>
+				<div id="detailsPanel" class="panel whiteOpacity arrowDown">
+					<div id="detailsHeader" class="panelHeader">Vessel details</div>
+					<div id="detailsContainer" class="container"></div>
+				</div>
+			</div>
+			
+			
+			
+			<div id="legends">
+				<div class="panelText"><img src="img/vessel_blue.png" class="legendsIMG"/> Passenger</div>
+				<div class="panelText"><img src="img/vessel_green.png" class="legendsIMG"/> Cargo</div>
+				<div class="panelText"><img src="img/vessel_red.png" class="legendsIMG"/> Tanker</div>
+				<div class="panelText"><img src="img/vessel_yellow.png" class="legendsIMG"/> High speed craft and WIG</div>						
+				<div class="panelText"><img src="img/vessel_turquoise.png" class="legendsIMG"/> Pilot, tug and others</div>
+				<div class="panelText"><img src="img/vessel_white_moored.png" class="legendsIMG"/> Anchored/Moored</div>
+			</div>
+			
+			<div id="search">
+				<div id="searchMatch" class="information"></div>
+				<input id="searchField" type=text /> <img id="searchLoad" src="img\load.gif">
+				<div id="searchResults">
+					<div id="searchResultsTop">
+
+					</div>		
+					<div id="searchResultsContainer">
+
+					</div>
+				</div>
+			</div>
+
+			<div id="filtering">
+				<div class="smallText">Presets</div>
+				<select name="filter_preset" class="filteringSelect"
+						onchange="useFilterPreset(this);">
+					<option value="">None</option>
+					<option value="country=DNK">Danish ships</option>
+					<option
+						value="country=BEL,BGR,CYP,CZE,DNK,EST,FRO,FIN,AUT,FRA,DEU,GBR,GRC,HUN,IRL,ITA,LVA,LTU,LUX,MLT,NLD,POL,PRT,ROU,SVK,SVN,ESP,SWE">
+						EU ships
+					</option>
+					<option value="country=CHN">Chinese ships</option>
+					<option value="sourceType=SAT">Satellite</option>
+					<option value="sourceRegion=804">Satellite (NO)</option>
+					<option value="sourceRegion=802">Satellite (ExactEarth)</option>
+					<option value="sourceRegion=808">Satellite (ORBCOMM)</option>
+					<option value="sourceCountry=DNK">Source DK</option>
+					<option value="sourceSystem=AISD">AISD</option>
+					<option value="sourceSystem=IALA">IALA.net</option>
+					<option value="sourceSystem=MSSIS">MSSIS</option>
+					<option value="sourceSystem=TEST">AIS-TEST</option>
+				</select>
+					
+				<form name="targetFilter">
+					<hr>
+					<div id="sidebarTable">					
+						<div class="detailsRow">
+							<div class="smallText">Target country</div>
+							<div class="detailsRightCol">
+								<input id="country" type="text" class="filteringInput" />
+							</div>
+						</div>
+						<div class="detailsRow">
+							<div class="smallText">Source country</div>
+							<div class="detailsRightCol">
+								<input id="sourceCountry" type="text" class="filteringInput" />
+							</div>
+						</div>
+						<div class="detailsRow">
+							<div class="smallText">Source type</div>
+							<div class="detailsRightCol">
+								<input id="sourceType" type="text" class="filteringInput" />
+							</div>
+						</div>
+						<div class="detailsRow">
+							<div class="smallText">Source region</div>
+							<div class="detailsRightCol">
+								<input id="sourceRegion" type="text" class="filteringInput" />
+							</div>
+						</div>
+						<div class="detailsRow">
+							<div class="smallText">Source BS</div>
+							<div class="detailsRightCol">
+								<input id="sourceBs" type="text" class="filteringInput" />
+							</div>
+						</div>
+						<div class="detailsRow">
+							<div class="smallText">Source system</div>
+							<div class="detailsRightCol">
+								<input id="sourceSystem" type="text" class="filteringInput" />
+							</div>
+						</div>
+						<div class="detailsRow">
+							<div class="smallText">Vessel class</div>
+							<div class="detailsRightCol">
+								<input id="vesselClass" type="text" class="filteringInput" />
+							</div>
+						</div>				
+					</div>
+				</form>
+				
+				<p><input type="button" value="Apply filter" onclick="applyFilter();"/> 
+				<input type="button" value="Clear filter" onclick="clearFilters();applyFilter();"/></p>				
+			</div>
+			
+			<div id="vesselDetails">
+				<div class="table">
+					<div class="row">
+						<div class="smallText cell">MMSI</div>
+						<div id="vd_mmsi" class="information cellRight"></div>
+					</div>
+					<div class="row">
+						<div class="smallText cell">Class</div>
+						<div id="vd_class" class="information cellRight"></div>
+					</div>
+					<div class="row">
+						<div class="smallText cell">Name</div>
+						<div id="vd_name" class="information cellRight"></div>
+					</div>
+					<div class="row">
+						<div class="smallText cell">Callsign</div>
+						<div id="vd_callsign" class="information cellRight"></div>
+					</div>
+					<div class="row">
+						<div class="smallText cell">Lat</div>
+						<div id="vd_lat" class="information cellRight"></div>
+					</div>
+					<div class="row">
+						<div class="smallText cell">Lon</div>
+						<div id="vd_lon" class="information cellRight"></div>
+					</div>
+					<div class="row">
+						<div class="smallText cell">IMO</div>
+						<div id="vd_imo" class="information cellRight"></div>
+					</div>					
+					<div class="row">
+						<div class="smallText cell">Type</div>
+						<div id="vd_type" class="information cellRight"></div>
+					</div>
+					<div class="row">
+						<div class="smallText cell">Cargo</div>
+						<div id="vd_cargo" class="information cellRight"></div>
+					</div>
+					<div class="row">
+						<div class="smallText cell">Country</div>
+						<div id="vd_country" class="information cellRight"></div>
+					</div>
+					<div class="row">
+						<div class="smallText cell">SOG</div>
+						<div id="vd_sog" class="information cellRight"></div>
+					</div>
+					<div class="row">
+						<div class="smallText cell">COG</div>
+						<div id="vd_cog" class="information cellRight"></div>
+					</div>
+					<div class="row">
+						<div class="smallText cell">Heading</div>
+						<div id="vd_heading" class="information cellRight"></div>
+					</div>
+					<div class="row">
+						<div class="smallText cell">Draught</div>
+						<div id="vd_draught" class="information cellRight"></div>
+					</div>
+					<div class="row">
+						<div class="smallText cell">ROT</div>
+						<div id="vd_rot" class="information cellRight"></div>
+					</div>
+					<div class="row">
+						<div class="smallText cell">Width</div>
+						<div id="vd_width" class="information cellRight"></div>
+					</div>
+					<div class="row">
+						<div class="smallText cell">Length</div>
+						<div id="vd_length" class="information cellRight"></div>
+					</div>
+					<div class="row">
+						<div class="smallText cell">Destination</div>
+						<div id="vd_destination" class="information cellRight"></div>
+					</div>
+					<div class="row">
+						<div class="smallText cell">Nav status</div>
+						<div id="vd_navStatus" class="information cellRight"></div>
+					</div>
+					<div class="row">
+						<div class="smallText cell">ETA</div>
+						<div id="vd_eta" class="information cellRight"></div>
+					</div>
+<!-- 					<div class="row">
+						<div class="smallText cell">Pos acc</div>
+						<div id="vd_posAcc" class="information cellRight"></div>
+					</div>  -->
+					<div class="row">
+						<div class="smallText cell">Last report</div>
+						<div id="vd_lastReport" class="information cellRight"></div>
+					</div>
+<!--
+					<div class="row">
+						<div class="smallText cell">Source</div>
+						<div id="vd_source_system" class="information cellRight"></div>
+					</div>
+					<div class="row">
+						<div class="smallText cell">Source type</div>
+						<div id="vd_source" class="information cellRight"></div>
+					</div>
+					<div class="row">
+						<div class="smallText cell">Source country</div>
+						<div id="vd_source_country" class="information cellRight"></div>
+					</div>					
+					<div class="row">
+						<div class="smallText cell">Source region</div>
+						<div id="vd_source_region" class="information cellRight"></div>
+					</div>
+					<div class="row">
+						<div class="smallText cell">Source BS</div>
+						<div id="vd_source_bs" class="information cellRight"></div>
+					</div>
+ 					<div class="row">
+						<div class="smallText cell">More information</div>
+						<div id="vd_link" class="information cellRight"></div>
+					</div>  -->
+				</div>
+			</div>
+
+			<div id="lightBoxEffect">
+				
+			</div>
+
+			<div id="abnormalPanel" class="panel whiteOpacity shadowsIE">
+				<div id="abnormalHeader" class="panelHeader"><img src="img/abnormal_small.png"> Abnormal behaviors
+					<div id="exitAbnormal" class="exit"></div>
+					<br/>
+					<hr />
+				</div>
+				
+				<div id="abnormalContainer" class="container">
+
+					<div class="formContainer">
+						<form>
+
+							<div class="formBox">
+								<div class="panelHeader">
+									<b>From</b> <br>
+								</div>
+								<hr>
+								<div class="smallText">
+									Date<br>
+								</div>
+								<input type="text" id="eventFromDate" class="abnormalInput" />
+								<br /><br />
+								<div class="smallText">
+									Time (hour/min) 
+								</div>
+								<select id="eventFromHour" class="abnormalInput">
+									<option value="0">0</option>
+									<option value="1">1</option>
+									<option value="2">2</option>
+									<option value="3">3</option>
+									<option value="4">4</option>
+									<option value="5">5</option>
+									<option value="6">6</option>
+									<option value="7">7</option>
+									<option value="8">8</option>
+									<option value="9">9</option>
+									<option value="10">10</option>
+									<option value="11">11</option>
+									<option value="12">12</option>
+									<option value="13">13</option>
+									<option value="14">14</option>
+									<option value="15">15</option>
+									<option value="16">16</option>
+									<option value="17">17</option>
+									<option value="18">18</option>
+									<option value="19">19</option>
+									<option value="20">20</option>
+									<option value="21">21</option>
+									<option value="22">22</option>
+									<option value="23">23</option>
+								</select>
+								<select id="eventFromMin" class="abnormalInput">
+									<option value="0">0</option>
+									<option value="5">5</option>
+									<option value="10">10</option>
+									<option value="15">15</option>
+									<option value="20">20</option>
+									<option value="25">25</option>
+									<option value="30">30</option>
+									<option value="35">35</option>
+									<option value="40">40</option>
+									<option value="45">45</option>
+									<option value="50">50</option>
+									<option value="55">55</option>
+								</select>
+							</div>
+							<div class="formBox">
+								<div class="panelHeader">
+									<b>To</b>
+								</div>
+								<hr>
+								<div class="smallText">
+									Date:
+								</div>
+								<input type="text" id="eventToDate" class="abnormalInput" />
+								<br /><br />
+								<div class="smallText">
+									Time (hour/min)
+								</div>
+								<select id="eventToHour" class="abnormalInput">
+									<option value="0">0</option>
+									<option value="1">1</option>
+									<option value="2">2</option>
+									<option value="3">3</option>
+									<option value="4">4</option>
+									<option value="5">5</option>
+									<option value="6">6</option>
+									<option value="7">7</option>
+									<option value="8">8</option>
+									<option value="9">9</option>
+									<option value="10">10</option>
+									<option value="11">11</option>
+									<option value="12">12</option>
+									<option value="13">13</option>
+									<option value="14">14</option>
+									<option value="15">15</option>
+									<option value="16">16</option>
+									<option value="17">17</option>
+									<option value="18">18</option>
+									<option value="19">19</option>
+									<option value="20">20</option>
+									<option value="21">21</option>
+									<option value="22">22</option>
+									<option value="23">23</option>
+								</select>
+								<select id="eventToMin" class="abnormalInput">
+									<option value="0">0</option>
+									<option value="5">5</option>
+									<option value="10">10</option>
+									<option value="15">15</option>
+									<option value="20">20</option>
+									<option value="25">25</option>
+									<option value="30">30</option>
+									<option value="35">35</option>
+									<option value="40">40</option>
+									<option value="45">45</option>
+									<option value="50">50</option>
+									<option value="55">55</option>
+								</select>
+							</div>
+
+							<div class="formBox">
+								<div class="panelHeader">
+									<b>Types</b>
+								</div>
+								<hr>
+								<div class="smallText">	
+									<input type="checkbox" id="eventTypeCOG" class="abnormalInput" checked="checked"  > 
+									Course over ground 
+								</div>
+								<div class="smallText">	
+									<input type="checkbox" id="eventTypeSOG" class="abnormalInput" checked="checked">
+									Speed over ground
+								</div>
+								<div class="smallText">	
+									<input type="checkbox" id="eventTypeSSC" class="abnormalInput" checked="checked">
+									Sudden speed change
+								</div>
+								<div class="smallText">	
+									<input type="checkbox" id="eventTypeCE" class="abnormalInput" checked="checked">
+									Close encounters
+								</div>
+							</div>
+
+							<div class="formBox">
+								<div class="panelHeader">
+									<b>Other</b>
+								</div>
+								<hr>
+								<div class="smallText">
+									MMSI<br>
+								</div>
+								<input type="text" id="eventMMSI" class="abnormalInput"><br>
+								<br><br>
+								<input type="button" value="Refresh" onclick="loadEvents();" style="float: right;">
+							</div>
+						</form>
+					</div>
+
+					<div id="flash"></div>
+
+					<div id="eventContainer">
+		
+						<table id="eventTable" border="1">
+							<thead>
+								<tr>
+
+									<th width="150px">Date</th>
+									<th>Type</th>
+									<th>Description</th>
+									<th>Vessel name</th>
+									<th>Vessel type</th>
+									<th width="100px">Vessel MMSI</th>
+									<th>Location</th>
+									<!--<th>Vessel length</th>-->
+									<!--<th>Vessel type</th>-->
+									<!--<th>Involved vessels</th>-->
+				
+								</tr>
+							</thead>
+			
+							<tbody id="eventTableBody">
+
+							
+
+							</tbody>
+			
+						</table>
+
+					</div>
+					
+				</div>
+			</div>
+
+			<div id="rightSide">
+				<div id="statusPanel" class="panel whiteOpacity shadowsIE">
+									<div align="center">
+
+						<img  src="img/shopownerlogo.png">
+					</div>
+					<div>
+											<div style="font-size: 10px;">
+											<br>
+							<b>Provided by:</b>
+						</div>
+					
+						<img src="img/logo.png" height=50 align="center">
+					</div>
+					<div style="text-align: center; padding-top: 10px; padding-bottom: 10px;">
+						<div style="font-size: 12px;">
+							<b>DANISH VESSELS</b>
+						</div>
+						<div style="padding-top: 10px; font-size: 11px;">
+							Tracked with terrestrial and satellite AIS (Automatic Identification System)
+						</div>						
+					</div>
+					<div style="display:none;" id="location" class="information">0.0000, 0.0000</div>
+					<div class="smallText">Tracked vessels</div>
+					<div id="vesselsTotal" class="information">0</div>
+					<div id="vesselsViewText" class="smallText">Vessels in view</div>
+					<div id="vesselsView" class="information">0</div>
+					<div id="toolboxHeader" class="smallText">Tools</div>
+					<div id="toolbox"></div>
+				</div>
+
+				<div id="feedPanel" class="panel whiteOpacity shadowsIE arrowDown">
+					<div id="feedHeader" class="panelHeader">Abnormal behaviors</div>
+					
+					<div id="feedContainer" class="container">
+						
+					</div>
+				</div>
+			</div>
+
+			<div id="feedContent">
+			</div>
+
+			<div id="loadingPanel" class="whiteOpacity shadowsIE">
+				&nbsp &nbsp Loading vessels <img src="img\load.gif">
+			</div>
+
+			<div id="vesselNameBox" class="whiteOpacity shadowsIE">			
+				
+			</div>
+		</div>	</body>
+		
+		<script>
+		$("#legendsContainer").css('display', 'none');
+		$("#legendsHeader").html("Legends<br /><hr class='tight'>");
+		$("#legendsContainer").html($("#legends").html());
+		$("#legendsContainer").slideDown(
+			{
+				complete:function(){
+					legendsOpen = true;
+					$("#legendsPanel").removeClass("arrowDown");
+					$("#legendsPanel").addClass("arrowUp");
+					checkForPanelOverflow();
+				}
+			}
+		);
+		</script>
+	
+</html>
