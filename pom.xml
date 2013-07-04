@@ -4,7 +4,7 @@
   <parent>
     <groupId>dk.dma</groupId>
     <artifactId>dma-root-pom</artifactId>
-    <version>5</version>
+    <version>8</version>
   </parent>
 
   <modelVersion>4.0.0</modelVersion>
@@ -31,8 +31,8 @@
   <dependencies>
     <dependency>
       <groupId>dk.dma.ais</groupId>
-      <artifactId>ais-communication</artifactId>
-      <version>0.1-SNAPSHOT</version>
+      <artifactId>ais-lib-communication</artifactId>
+      <version>2.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>dk.dma.commons</groupId>
