@@ -1,13 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <aisViewConfiguration>
-<!-- 	<aisbus> -->
-<!-- 		<provider xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="tcpClientProviderConfiguration"> -->
-<!-- 			<hostPort>linux06.fomfrv.dk:9991</hostPort> -->
-<!-- 		</provider> -->
-<!-- <!-- 		<filter xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="downSampleFilterConfiguration"> --> -->
-<!-- <!-- 			<samplingRate>60</samplingRate> --> -->
-<!-- <!-- 		</filter> --> -->
-<!-- 	</aisbus> -->
 	<aisbus>
         <busPullMaxElements>1000</busPullMaxElements>
         <busQueueSize>10000</busQueueSize>
@@ -17,7 +9,7 @@
                 <gzipBufferSize>2048</gzipBufferSize>
                 <gzipCompress>false</gzipCompress>
             </clientConf>
-            <hostPort>ais163.sealan.dk:4712</hostPort>
+            <hostPort>linux06.fomfrv.dk:9001</hostPort>
             <reconnectInterval>10</reconnectInterval>
             <timeout>10</timeout>
         </provider>

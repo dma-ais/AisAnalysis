@@ -79,7 +79,7 @@ public class AisViewHandler extends Thread implements Consumer<AisPacket> {
             return;
         }
         // We only want to handle messages containing targets data
-        // #1-#3, #4, #5, #18, #21, #24
+        // #1-#3, #4, #5, #18, #19, #21, #24
         if (!AisTarget.isTargetDataMessage(aisMessage)) {
             return;
         }
