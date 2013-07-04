@@ -16,9 +16,9 @@
   <description>AisAnalysis parent module</description>
 
   <scm>
-    <connection>scm:git:git@github.com:dma-dk/AisAnalysis.git</connection>
-    <developerConnection>scm:git:git@github.com:dma-dk/AisAnalysis.git</developerConnection>
-    <url>https://github.com/dma-dk/AisAnalysis</url>
+    <connection>scm:git:git@github.com:dma-ais/AisAnalysis.git</connection>
+    <developerConnection>scm:git:git@github.com:dma-ais/AisAnalysis.git</developerConnection>
+    <url>https://github.com/dma-ais/AisAnalysis</url>
   </scm>
 
   <modules>
