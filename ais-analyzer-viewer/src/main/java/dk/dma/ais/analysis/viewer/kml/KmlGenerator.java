@@ -21,8 +21,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import de.micromata.opengis.kml.v_2_2_0.Document;
 import de.micromata.opengis.kml.v_2_2_0.Folder;
@@ -34,7 +36,9 @@ import de.micromata.opengis.kml.v_2_2_0.ListItemType;
 import de.micromata.opengis.kml.v_2_2_0.ListStyle;
 import de.micromata.opengis.kml.v_2_2_0.Placemark;
 import de.micromata.opengis.kml.v_2_2_0.Style;
+import dk.dma.ais.analysis.viewer.configuration.AisViewConfiguration;
 import dk.dma.ais.analysis.viewer.handler.AisTargetEntry;
+import dk.dma.ais.analysis.viewer.handler.TargetSourceData;
 import dk.dma.ais.data.AisClassAPosition;
 import dk.dma.ais.data.AisClassAStatic;
 import dk.dma.ais.data.AisClassATarget;
@@ -55,6 +59,7 @@ public class KmlGenerator {
     private String resourceUrl;
     final Kml kml;
     final Document document;
+    private AisViewConfiguration conf;
 
     // static folders
     private final Folder lastKnownPositions;
@@ -74,12 +79,13 @@ public class KmlGenerator {
     private final Folder threedayfolder;
     private Folder sart;
 
-    public KmlGenerator(Map<Integer, AisTargetEntry> targetsMap, Map<Integer, IPastTrack> pastTrackMap, String resourceURL) {
+    public KmlGenerator(Map<Integer, AisTargetEntry> targetsMap, Map<Integer, IPastTrack> pastTrackMap, String resourceURL, AisViewConfiguration conf) {
         this.targetsMap = targetsMap;
         this.pastTrackMap = pastTrackMap;
         this.resourceUrl = resourceURL;
         kml = new Kml();
         document = kml.createAndSetDocument();
+        this.conf = conf;
         
         //Add folderstyles
         addFolderStyle("PassengerFolder",  resourceUrl + "vessel_blue.png");
@@ -172,6 +178,30 @@ public class KmlGenerator {
             if (vesselPosition.getPos() == null)
                 continue;
 
+            
+
+            
+//            TargetSourceData sourceData = entry.getSourceData();
+
+//            System.out.println(entry.getSourceData().getSourceType());
+
+            // Determine TTL
+            boolean lastIsSatData = entry.getSourceData().isSatData();
+
+            int ttl = (lastIsSatData) ? conf.getSatTargetTtl() : conf.getLiveTargetTtl();
+
+            // If SAT the ttl will be forced to sat ttl
+            if (entry.getSourceData().getSourceType().equals("SAT") )
+                ttl = conf.getSatTargetTtl();
+
+            // Is it alive
+            if (!target.isAlive(ttl)) 
+            	continue;
+//            	System.out.println("target was dead");
+
+            
+            
+            
             // get past track
             IPastTrack pastTrack = pastTrackMap.get(vesselTarget.getMmsi());
             List<PastTrackPoint> trackPoints = null;

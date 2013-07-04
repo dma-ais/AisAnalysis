@@ -202,7 +202,7 @@ public class AisViewHandler extends Thread implements Consumer<AisPacket> {
     }
     
     public synchronized String generateKml(String resourceURL) {
-        KmlGenerator generator = new KmlGenerator(targetsMap, pastTrackMap, resourceURL);
+        KmlGenerator generator = new KmlGenerator(targetsMap, pastTrackMap, resourceURL, conf);
         return generator.generate();
     }
 
