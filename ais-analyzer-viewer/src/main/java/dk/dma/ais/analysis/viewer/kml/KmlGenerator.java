@@ -17,6 +17,8 @@ package dk.dma.ais.analysis.viewer.kml;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -86,6 +88,8 @@ public class KmlGenerator {
         kml = new Kml();
         document = kml.createAndSetDocument();
         this.conf = conf;
+        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+        Date date = new Date();
         
         //Add folderstyles
         addFolderStyle("PassengerFolder",  resourceUrl + "vessel_blue.png");
@@ -98,10 +102,10 @@ public class KmlGenerator {
         addFolderStyle("UndefinedunknownFolder",  resourceUrl + "vessel_gray.png");
         addFolderStyle("sartFolder",  resourceUrl + "SART_red.ico");
 
-        
+        document.withOpen(true);
 
         // create the static folders
-        lastKnownPositions = document.createAndAddFolder().withName("Last known position");
+        lastKnownPositions = document.createAndAddFolder().withName("Last known position - " + dateFormat.format(date)).withOpen(true);
         shipnamefolder = document.createAndAddFolder().withName("Ship names").withVisibility(false);
         shiptypesfolder = document.createAndAddFolder().withName("Ship types").withVisibility(false);
         tanker = lastKnownPositions.createAndAddFolder().withName("Tanker").withVisibility(false).withStyleUrl("TankerFolder");
@@ -114,7 +118,7 @@ public class KmlGenerator {
         pilottugandothers = lastKnownPositions.createAndAddFolder().withName("Pilot, TUG and other").withVisibility(false).withStyleUrl("PilottugandothersFolder");
         sart = lastKnownPositions.createAndAddFolder().withName("SART").withVisibility(false).withStyleUrl("sartFolder");
         pickedfolder = undefined;
-        pasttrackfolder = document.createAndAddFolder().withName("Tracks").withVisibility(false);
+        pasttrackfolder = document.createAndAddFolder().withName("Tracks").withVisibility(false).withOpen(true);
         twentyfourhourfolder = pasttrackfolder.createAndAddFolder().withName("24 hours").withVisibility(false);
         threedayfolder = pasttrackfolder.createAndAddFolder().withName("72 hours").withVisibility(false);
 
@@ -186,18 +190,21 @@ public class KmlGenerator {
 //            System.out.println(entry.getSourceData().getSourceType());
 
             // Determine TTL
-            boolean lastIsSatData = entry.getSourceData().isSatData();
-
-            int ttl = (lastIsSatData) ? conf.getSatTargetTtl() : conf.getLiveTargetTtl();
-
-            // If SAT the ttl will be forced to sat ttl
-            if (entry.getSourceData().getSourceType().equals("SAT") )
-                ttl = conf.getSatTargetTtl();
-
-            // Is it alive
-            if (!target.isAlive(ttl)) 
-            	continue;
-//            	System.out.println("target was dead");
+//            boolean lastIsSatData = entry.getSourceData().isSatData();
+//
+//            int ttl = (lastIsSatData) ? conf.getSatTargetTtl() : conf.getLiveTargetTtl();
+//
+//            // If SAT the ttl will be forced to sat ttl
+//            if (entry.getSourceData().getSourceType().equals("SAT") )
+//                ttl = conf.getSatTargetTtl();
+//            if (entry.getSourceData().getSourceType().equals("SAT")) {
+//				System.out.println("sat");
+//			}
+//
+//            // Is it alive
+//            if (!target.isAlive(ttl)) 
+//            	continue;
+////            	System.out.println("target was dead");
 
             
             
@@ -467,14 +474,14 @@ public class KmlGenerator {
 
         Folder folder = pickedfolder.createAndAddFolder().withName("" + mmsi).withStyleUrl(styleprefix+"Folder");
 
-        Folder folder1 = twentyfourhour.createAndAddFolder().withName("" + mmsi).withVisibility(false);
-        Folder folder2 = threeday.createAndAddFolder().withName("" + mmsi).withVisibility(false);
+        Folder folder1 = twentyfourhour.createAndAddFolder().withName("" + mmsi);
+        Folder folder2 = threeday.createAndAddFolder().withName("" + mmsi);
 
-        Placemark placemark2 = folder1.createAndAddPlacemark();
+        Placemark placemark2 = folder1.createAndAddPlacemark().withVisibility(false);
         LineString linestring1 = placemark2.createAndSetLineString();
         linestring1.withTessellate(new Boolean(true));
 
-        Placemark placemark3 = folder2.createAndAddPlacemark();
+        Placemark placemark3 = folder2.createAndAddPlacemark().withVisibility(false);
         LineString linestring2 = placemark3.createAndSetLineString();
         linestring2.withTessellate(new Boolean(true));
 
