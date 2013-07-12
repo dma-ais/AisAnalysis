@@ -181,15 +181,12 @@ public class KmlGenerator {
             }
             AisVesselTarget vesselTarget = (AisVesselTarget) target;
             AisVesselPosition vesselPosition = vesselTarget.getVesselPosition();
-            if (vesselPosition == null)
+            if (vesselPosition == null || vesselPosition.getPos() == null) {
                 continue;
-            if (vesselPosition.getPos() == null)
-                continue;
-
+            }
             if (!target.isAlive(ttl)) {
                 continue;
             }
-            // // System.out.println("target was dead");
 
             // get past track
             IPastTrack pastTrack = pastTrackMap.get(vesselTarget.getMmsi());
