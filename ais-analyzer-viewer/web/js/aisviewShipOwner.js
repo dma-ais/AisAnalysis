@@ -41,7 +41,6 @@ function setupMap() {
 	map = new OpenLayers.Map({
 		div : "map",
 		projection : "EPSG:900913",
-		fractionalZoom : true
 	});
 
 	addLayers();
