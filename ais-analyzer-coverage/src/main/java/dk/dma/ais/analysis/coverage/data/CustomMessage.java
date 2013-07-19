@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Date;
 
 import dk.dma.ais.message.AisMessage;
+import dk.dma.ais.packet.AisPacketTags.SourceType;
 
 
 public class CustomMessage implements Serializable {
@@ -19,7 +20,14 @@ public class CustomMessage implements Serializable {
 	private long shipMMSI;
 	private long timeSinceLastMsg;
 	private String key;
+	private SourceType sourceType;
 	
+	public SourceType getSourceType() {
+		return sourceType;
+	}
+	public void setSourceType(SourceType sourceType) {
+		this.sourceType = sourceType;
+	}
 	public String getKey() {
 		return key;
 	}

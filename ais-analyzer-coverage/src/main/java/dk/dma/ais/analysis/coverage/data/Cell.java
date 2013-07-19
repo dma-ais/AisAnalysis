@@ -16,6 +16,8 @@
 package dk.dma.ais.analysis.coverage.data;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -33,10 +35,17 @@ public class Cell {
 	private double latitude;
 	private double longitude;
 	private String id;
-	private BaseStation grid;
+	private Source grid;
 	private int shipCount = 0;
+	private List<TimeSpan> timeSpans;
 	
-	public Cell(BaseStation grid, double lat, double lon, String id){
+	public List<TimeSpan> getTimeSpans() {
+		return timeSpans;
+	}
+	public void setTimeSpans(List<TimeSpan> timeSpans) {
+		this.timeSpans = timeSpans;
+	}
+	public Cell(Source grid, double lat, double lon, String id){
 		this.latitude = lat;
 		this.longitude = lon;
 		this.grid = grid;
@@ -96,11 +105,11 @@ public class Cell {
 		this.id = id;
 	}
 
-	public BaseStation getGrid() {
+	public Source getGrid() {
 		return grid;
 	}
 
-	public void setGrid(BaseStation grid) {
+	public void setGrid(Source grid) {
 		this.grid = grid;
 	}
 

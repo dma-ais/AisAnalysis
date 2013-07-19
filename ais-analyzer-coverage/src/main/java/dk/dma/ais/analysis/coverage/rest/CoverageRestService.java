@@ -34,7 +34,7 @@ import javax.ws.rs.core.UriInfo;
 
 import dk.dma.ais.analysis.coverage.AisCoverage;
 import dk.dma.ais.analysis.coverage.CoverageHandler;
-import dk.dma.ais.analysis.coverage.data.BaseStation;
+import dk.dma.ais.analysis.coverage.data.Source;
 import dk.dma.ais.analysis.coverage.data.Cell;
 import dk.dma.ais.analysis.coverage.data.ICoverageData;
 import dk.dma.ais.analysis.coverage.data.OnlyMemoryData;
@@ -90,7 +90,7 @@ public class CoverageRestService {
     public Map<String, JsonSource> sources(@Context UriInfo uriInfo) {
         Objects.requireNonNull(handler);
         System.out.println("get sources");
-		Collection<BaseStation> sources = handler.getDistributeCalc().getDataHandler().getSources();
+		Collection<Source> sources = handler.getDistributeCalc().getDataHandler().getSources();
 		return JsonConverter.toJsonSources(sources);
     }
     
@@ -142,19 +142,19 @@ public class CoverageRestService {
 		ICoverageData dh = new OnlyMemoryData();
 		
 		
-		Collection<BaseStation> sources = handler.getDistributeCalc().getDataHandler().getSources();
+		Collection<Source> sources = handler.getDistributeCalc().getDataHandler().getSources();
 		
 //		Collection<BaseStation> superSource = covH.getSupersourceCalculator().getDataHandler().getSources();
 		
-		BaseStation superbs = handler.getSupersourceCalc().getDataHandler().getSource("supersource");	
+		Source superbs = handler.getSupersourceCalc().getDataHandler().getSource("supersource");	
 		
 		System.out.println("super source loaded " + superbs.getLatSize());
 		
 		System.out.println(sources.size());
 		
 		
-		for (BaseStation bs : sources) {
-			BaseStation summedbs = dh.createSource(bs.getIdentifier());
+		for (Source bs : sources) {
+			Source summedbs = dh.createSource(bs.getIdentifier());
 			summedbs.setLatSize(bs.getLatSize()*multiplicity);
 			summedbs.setLonSize(bs.getLonSize()*multiplicity);
 			dh.setLatSize(bs.getLatSize()*multiplicity);
@@ -191,6 +191,24 @@ public class CoverageRestService {
 		//TODO print cells to kml with larger cellsize then the standart one (multiplication factor)
 	
 		KMLGenerator.generateKML(dh.getSources(), dh.getLatSize(), dh.getLonSize(), response);
+		return null;
+    }
+    
+    
+    @GET
+    @Path("satExport")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Object satExport(@QueryParam("test") String test,  @Context HttpServletResponse response) {
+    	double latTop = 62.47;
+    	double latBottom = 57.5;
+    	double lonRight = -35;
+    	double lonLeft = -55;
+    	
+    	
+		
+    	Collection<Cell> cells = handler.getSatCalc().getCells(latTop, lonLeft, latBottom, lonRight);
+    	System.out.println(cells.size());
+    	System.out.println(test);
 		return null;
     }
 }

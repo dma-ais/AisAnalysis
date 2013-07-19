@@ -14,8 +14,8 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 
-import dk.dma.ais.analysis.coverage.data.BaseStation;
-import dk.dma.ais.analysis.coverage.data.BaseStation.ReceiverType;
+import dk.dma.ais.analysis.coverage.data.Source;
+import dk.dma.ais.analysis.coverage.data.Source.ReceiverType;
 import dk.dma.ais.analysis.coverage.data.Cell;
 import dk.dma.ais.analysis.coverage.data.CustomMessage;
 import dk.dma.ais.analysis.coverage.data.Ship;
@@ -92,6 +92,7 @@ public class SupersourceCoverageCalculator extends AbstractCalculator {
 		
 	}
 	
+	public boolean debug = false;
 	/**
 	 * This is called whenever a message is received
 	 */
@@ -114,8 +115,7 @@ public class SupersourceCoverageCalculator extends AbstractCalculator {
 			}
 			
 			return;
-		}
-		
+		}		
 
 		// Time difference between first and last message in buffer
 		CustomMessage firstMessage = ship.getFirstMessageInBuffer();
@@ -163,7 +163,7 @@ public class SupersourceCoverageCalculator extends AbstractCalculator {
 	private void calculateMissingPoints(CustomMessage m1, CustomMessage m2,
 			boolean rotating) {
 		
-		BaseStation source = dataHandler.getSource(m1.getSourceMMSI());
+		Source source = dataHandler.getSource(m1.getSourceMMSI());
 		Ship ship = dataHandler.getShip(m1.getSourceMMSI(), m1.getShipMMSI());
 		
 		// Get cell from first message and increment message count
@@ -171,7 +171,6 @@ public class SupersourceCoverageCalculator extends AbstractCalculator {
 		if (cell == null) {
 			cell = dataHandler.createCell(source.getIdentifier(), m1.getLatitude(), m1.getLongitude());
 		}
-		
 		dataHandler.getSource(source.getIdentifier()).incrementMessageCount();
 		cell.incrementNOofReceivedSignals();
 		dataHandler.updateCell(cell);
@@ -193,7 +192,6 @@ public class SupersourceCoverageCalculator extends AbstractCalculator {
 		int sog = (int) m2.getSog();
 		double expectedTransmittingFrequency = getExpectedTransmittingFrequency(
 				sog, rotating, ship.getShipClass());
-
 		/*
 		 * Calculate missing messages and increment missing signal to
 		 * corresponding cell. Lat-lon points are calculated to metric x-y
@@ -211,7 +209,6 @@ public class SupersourceCoverageCalculator extends AbstractCalculator {
 			// Finds lat/lon of each missing point and adds "missing signal" to
 			// corresponding cell
 			for (int i = 1; i <= missingMessages; i++) {
-
 				double xMissing = getX((i * expectedTransmittingFrequency),
 						p1Time, p2Time, p1X, p2X);
 				double yMissing = getY(i * expectedTransmittingFrequency,
@@ -317,7 +314,7 @@ public class SupersourceCoverageCalculator extends AbstractCalculator {
 
 		// Extract Base station
 //		BaseStation baseStation = extractBaseStation(baseId, receiverType);
-		BaseStation baseStation = extractBaseStation("supersource", ReceiverType.NOTDEFINED);
+		Source baseStation = extractBaseStation("supersource", ReceiverType.NOTDEFINED);
 
 		// Extract ship
 		Ship ship = extractShip(aisMessage.getUserId(), shipClass, baseStation);

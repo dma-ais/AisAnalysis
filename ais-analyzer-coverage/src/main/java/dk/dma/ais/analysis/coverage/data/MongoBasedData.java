@@ -20,7 +20,7 @@ import dk.dma.ais.analysis.coverage.data.Ship.ShipClass;
 
 
 public class MongoBasedData implements ICoverageData{
-	public BaseStationHandler gridHandler = new BaseStationHandler(null);
+	public SourceHandler gridHandler = new SourceHandler(null);
 	public Mongo mongo;
 	public DB db;
 	private String dbname = "cells";
@@ -48,11 +48,11 @@ public class MongoBasedData implements ICoverageData{
 		@Override
 		public Ship createShip(String sourceMmsi, long shipMmsi, ShipClass shipClass) {	return gridHandler.getGrid(sourceMmsi).createShip(shipMmsi, shipClass);	}
 		@Override
-		public BaseStation getSource(String sourceId) {	return gridHandler.getBaseStations().get(sourceId);	}
+		public Source getSource(String sourceId) {	return gridHandler.getBaseStations().get(sourceId);	}
 		@Override
-		public BaseStation createSource(String sourceId) {	return gridHandler.createGrid(sourceId);	}
+		public Source createSource(String sourceId) {	return gridHandler.createGrid(sourceId);	}
 		@Override
-		public Collection<BaseStation> getSources() {	return gridHandler.getBaseStations().values();	}
+		public Collection<Source> getSources() {	return gridHandler.getBaseStations().values();	}
 		
 		
 		
@@ -175,15 +175,15 @@ public class MongoBasedData implements ICoverageData{
 //			System.out.println("ceeeels");
 //			System.out.println(latStart + " " +lonStart);
 			List<Cell> cells = new ArrayList<Cell>();
-			Collection<BaseStation> basestations = gridHandler.getBaseStations().values();
-			for (BaseStation basestation : basestations) {
+			Collection<Source> basestations = gridHandler.getBaseStations().values();
+			for (Source basestation : basestations) {
 				if ( sources.containsKey(basestation.getIdentifier()) ) {	
 //					System.out.println(basestation.getIdentifier());
 					
 					//find collection
 					DBCollection collection = db.getCollection(basestation.getIdentifier());	
 					
-					BaseStation tempSource = new BaseStation(basestation.getIdentifier(), gridHandler.getLatSize()*multiplicationFactor, gridHandler.getLonSize()*multiplicationFactor);
+					Source tempSource = new Source(basestation.getIdentifier(), gridHandler.getLatSize()*multiplicationFactor, gridHandler.getLonSize()*multiplicationFactor);
 					// For each cell
 					Long starttime = System.currentTimeMillis();
 					System.out.println("started get ranged cells " + starttime);
@@ -194,7 +194,7 @@ public class MongoBasedData implements ICoverageData{
 					while (cursor.hasNext()) {
 						DBObject dbo = cursor.next();
 						//extract cell
-						Cell cell = new Cell(new BaseStation(), (double) dbo.get("lat"),(double) dbo.get("lon"),(String) dbo.get("id"));
+						Cell cell = new Cell(new Source(), (double) dbo.get("lat"),(double) dbo.get("lon"),(String) dbo.get("id"));
 						String value = dbo.get("NOofReceivedSignals").toString();
 						Long NOofReceivedSignals = Long.parseLong(value);
 						String value2 = dbo.get("NOofMissingSignals").toString();

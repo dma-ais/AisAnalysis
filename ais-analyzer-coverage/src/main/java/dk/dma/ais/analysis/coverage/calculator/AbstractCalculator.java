@@ -10,8 +10,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import dk.dma.ais.analysis.coverage.calculator.geotools.GeoConverter;
 import dk.dma.ais.analysis.coverage.calculator.geotools.SphereProjection;
-import dk.dma.ais.analysis.coverage.data.BaseStation;
-import dk.dma.ais.analysis.coverage.data.BaseStation.ReceiverType;
+import dk.dma.ais.analysis.coverage.data.Source;
+import dk.dma.ais.analysis.coverage.data.Source.ReceiverType;
 import dk.dma.ais.analysis.coverage.data.CustomMessage;
 import dk.dma.ais.analysis.coverage.data.ICoverageData;
 import dk.dma.ais.analysis.coverage.data.OnlyMemoryData;
@@ -26,6 +26,7 @@ import dk.dma.ais.message.AisMessage5;
 import dk.dma.ais.message.AisPositionMessage;
 import dk.dma.ais.message.ShipTypeCargo;
 import dk.dma.ais.message.ShipTypeCargo.ShipType;
+import dk.dma.ais.packet.AisPacket;
 import dk.dma.ais.proprietary.IProprietarySourceTag;
 import dk.dma.enav.model.geometry.Position;
 
@@ -90,9 +91,17 @@ public abstract class AbstractCalculator implements Serializable {
 	/**
 	 * This is called by message handlers whenever a new message is received.
 	 */
-	public synchronized void processMessage(AisMessage aisMessage, String defaultID) {
-		CustomMessage newMessage = aisToCustom(aisMessage, defaultID);
+	public void processMessage(AisPacket packet, String defaultID) {
+		
+		AisMessage message = packet.tryGetAisMessage();
+        if (message == null) {
+            return;
+        }
+        
+		
+		CustomMessage newMessage = aisToCustom(message, defaultID);
 		if(newMessage != null){
+			newMessage.setSourceType(packet.getTags().getSourceType());
 			calculate(newMessage);
 		}
 	}
@@ -173,7 +182,7 @@ public abstract class AbstractCalculator implements Serializable {
 	}
 
 	protected void extractBaseStationPosition(AisMessage4 m){
-		BaseStation b = dataHandler.getSource(m.getUserId()+"");
+		Source b = dataHandler.getSource(m.getUserId()+"");
 
 		if (b != null) {
 			Position pos = m.getPos().getGeoLocation();
@@ -237,8 +246,8 @@ public abstract class AbstractCalculator implements Serializable {
 	 * Check if grid exists (If a message with that bsmmsi has been received before)
 	 * Otherwise create a grid for corresponding base station.
 	 */
-	protected BaseStation extractBaseStation(String baseId, ReceiverType receiverType){
-		BaseStation grid = dataHandler.getSource(baseId);
+	protected Source extractBaseStation(String baseId, ReceiverType receiverType){
+		Source grid = dataHandler.getSource(baseId);
 		if (grid == null) {
 			grid = dataHandler.createSource(baseId);
 			grid.setReceiverType(receiverType);
@@ -251,7 +260,7 @@ public abstract class AbstractCalculator implements Serializable {
 	 *	base statino that received message
 	 */
 //	HashMap<Long,Long> test = new HashMap<Long,Long>();
-	protected Ship extractShip(long mmsi, ShipClass shipClass, BaseStation baseStation){
+	protected Ship extractShip(long mmsi, ShipClass shipClass, Source baseStation){
 //		test.put(mmsi, mmsi);
 //		System.out.println(test.size());
 //		System.out.println(baseStation.getIdentifier());
@@ -268,6 +277,8 @@ public abstract class AbstractCalculator implements Serializable {
 	 * ship instances and to set up references between these. Override it if you want to handle this in a different way.
 	 */
 	public CustomMessage aisToCustom(AisMessage aisMessage, String defaultID){
+		
+		
 		
 		//Stops analysis if project has been running longer than timeout
 //		long timeSinceStart = project.getRunningTime();
@@ -348,7 +359,7 @@ public abstract class AbstractCalculator implements Serializable {
 //		}
 
 		// Extract Base station
-		BaseStation baseStation = extractBaseStation(baseId, receiverType);
+		Source baseStation = extractBaseStation(baseId, receiverType);
 
 		// Extract ship
 		Ship ship = extractShip(aisMessage.getUserId(), shipClass, baseStation);
@@ -406,10 +417,10 @@ public abstract class AbstractCalculator implements Serializable {
 	 * Time difference between two messages in seconds
 	 */
 	public double getTimeDifference(CustomMessage m1, CustomMessage m2){
-		return (double) ((m2.getTimestamp().getTime() - m1.getTimestamp().getTime()) / 1000);
+		return (double) Math.abs(((m2.getTimestamp().getTime() - m1.getTimestamp().getTime())) / 1000);
 	}
 	public double getTimeDifference(Long m1, Long m2){
-		return  ((double)(m2 - m1) / 1000);
+		return  ((double)Math.abs((m2 - m1)) / 1000);
 	}
 	public Map<ShipClass, ShipClass> getAllowedShipClasses() {
 		return allowedShipClasses;

@@ -76,13 +76,13 @@ public class AisCoverageDaemon extends AbstractDaemon {
     }
 
     public static void main(String[] args) throws Exception {
-        Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler() {            
-            @Override
-            public void uncaughtException(Thread t, Throwable e) {
-                LOG.error("Uncaught exception in thread " + t.getClass().getCanonicalName() + ": " + e.getMessage(), t);
-                System.exit(-1);
-            }
-        });
+//        Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler() {            
+//            @Override
+//            public void uncaughtException(Thread t, Throwable e) {
+//                LOG.error("Uncaught exception in thread " + t.getClass().getCanonicalName() + ": " + e.getMessage(), t);
+//                System.exit(-1);
+//            }
+//        });
         new AisCoverageDaemon().execute(args);
     }
 

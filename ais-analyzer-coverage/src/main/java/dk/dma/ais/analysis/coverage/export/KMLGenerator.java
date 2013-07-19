@@ -8,7 +8,7 @@ import java.util.Date;
 
 import javax.servlet.http.HttpServletResponse;
 
-import dk.dma.ais.analysis.coverage.data.BaseStation;
+import dk.dma.ais.analysis.coverage.data.Source;
 import dk.dma.ais.analysis.coverage.data.Cell;
 
 
@@ -21,7 +21,7 @@ public class KMLGenerator {
 
 
 //	public static void generateKML(CoverageCalculator calc, String path) {
-	public static void generateKML(Collection<BaseStation> grids, double latSize, double lonSize, HttpServletResponse response) {
+	public static void generateKML(Collection<Source> grids, double latSize, double lonSize, HttpServletResponse response) {
 
 		
 		
@@ -98,7 +98,7 @@ public class KMLGenerator {
 			writeLine("</PolyStyle>", out);
 			writeLine("</Style>", out);
 
-			for (BaseStation grid : grids) {
+			for (Source grid : grids) {
 				generateGrid(grid.getIdentifier(), grid.getGrid().values(), out, latSize, lonSize);
 			}
 

@@ -10,7 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import dk.dma.ais.analysis.coverage.AisCoverage;
-import dk.dma.ais.analysis.coverage.data.BaseStation;
+import dk.dma.ais.analysis.coverage.data.Source;
 import dk.dma.ais.analysis.coverage.data.Cell;
 import dk.dma.ais.analysis.coverage.data.CustomMessage;
 import dk.dma.ais.analysis.coverage.event.AisEvent;
@@ -70,7 +70,7 @@ public class DistributeOnlyCalculator extends AbstractCalculator implements IAis
 			Map<String, CustomMessage> approvedMessages = receivedMessages.get(key);
 			for (CustomMessage customMessage : approvedMessages.values()) {
 				//increment cell in each source
-				BaseStation source = dataHandler.getSource(customMessage.getSourceMMSI());
+				Source source = dataHandler.getSource(customMessage.getSourceMMSI());
 				
 				Cell cell = dataHandler.getCell(source.getIdentifier(), customMessage.getLatitude(), customMessage.getLongitude());
 				if (cell == null) {
@@ -89,7 +89,6 @@ public class DistributeOnlyCalculator extends AbstractCalculator implements IAis
 			LOG.error("Supersource approved a message, but it was not found in any sources "+key);
 		}
 	}
-
 	/*
 	 * When supersource approves a message, we need to find all sources that
 	 * received the message and increment "received message counter" for corresponding cell
@@ -141,6 +140,7 @@ public class DistributeOnlyCalculator extends AbstractCalculator implements IAis
 
 	@Override
 	public void calculate(CustomMessage m) {
+		
 		messagesProcessed++;
 		Map<String, CustomMessage> list;
 		String key = m.getKey();

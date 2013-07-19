@@ -13,7 +13,7 @@ import dk.dma.ais.analysis.coverage.data.Ship.ShipClass;
 
 public class OnlyMemoryData implements ICoverageData{
 	
-	protected BaseStationHandler gridHandler = new BaseStationHandler(null);
+	protected SourceHandler gridHandler = new SourceHandler(null);
 	
 	@Override
 	public Ship getShip(String sourceMmsi, long shipMmsi) {
@@ -39,8 +39,8 @@ public class OnlyMemoryData implements ICoverageData{
 	@Override
 	public List<Cell> getCells() {
 		List<Cell> cells = new ArrayList<Cell>();
-		Collection<BaseStation> basestations = gridHandler.getBaseStations().values();
-		for (BaseStation basestation : basestations) {
+		Collection<Source> basestations = gridHandler.getBaseStations().values();
+		for (Source basestation : basestations) {
 			if (basestation.isVisible()) {
 				
 				// For each cell
@@ -65,12 +65,12 @@ public class OnlyMemoryData implements ICoverageData{
 	}
 
 	@Override
-	public BaseStation getSource(String sourceId) {
+	public Source getSource(String sourceId) {
 		return gridHandler.getBaseStations().get(sourceId);
 	}
 
 	@Override
-	public BaseStation createSource(String sourceId) {
+	public Source createSource(String sourceId) {
 		return gridHandler.createGrid(sourceId);
 	}
 
@@ -99,7 +99,7 @@ public class OnlyMemoryData implements ICoverageData{
 	}
 
 	@Override
-	public Collection<BaseStation> getSources() {
+	public Collection<Source> getSources() {
 		return gridHandler.getBaseStations().values();
 	}
 
@@ -118,12 +118,12 @@ public class OnlyMemoryData implements ICoverageData{
 			double lonEnd, Map<String, Boolean> sources, int multiplicationFactor) {
 		
 		List<Cell> cells = new ArrayList<Cell>();
-		Collection<BaseStation> basestations = gridHandler.getBaseStations().values();
+		Collection<Source> basestations = gridHandler.getBaseStations().values();
 		
-		for (BaseStation basestation : basestations) {
+		for (Source basestation : basestations) {
 			if ( sources.containsKey(basestation.getIdentifier()) ) {	
 				
-				BaseStation tempSource = new BaseStation(basestation.getIdentifier(), gridHandler.getLatSize()*multiplicationFactor, gridHandler.getLonSize()*multiplicationFactor);
+				Source tempSource = new Source(basestation.getIdentifier(), gridHandler.getLatSize()*multiplicationFactor, gridHandler.getLonSize()*multiplicationFactor);
 				// For each cell
 				Collection<Cell> bscells = basestation.getGrid().values();
 				for (Cell cell : bscells) {
@@ -143,6 +143,7 @@ public class OnlyMemoryData implements ICoverageData{
 							cells.add(cell);
 						}
 					}
+					
 				}
 				
 //				// For each cell

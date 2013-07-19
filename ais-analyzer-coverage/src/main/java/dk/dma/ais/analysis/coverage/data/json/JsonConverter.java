@@ -4,16 +4,16 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import dk.dma.ais.analysis.coverage.data.BaseStation;
+import dk.dma.ais.analysis.coverage.data.Source;
 import dk.dma.ais.analysis.coverage.data.Cell;
 
 
 
 public class JsonConverter {
 
-	public static Map<String,JsonSource> toJsonSources(Collection<BaseStation> sources){
+	public static Map<String,JsonSource> toJsonSources(Collection<Source> sources){
 		Map<String,JsonSource> sourcesMap = new HashMap<String,JsonSource>();
-		for (BaseStation baseStation : sources) {
+		for (Source baseStation : sources) {
 			JsonSource s = new JsonSource();
 			s.mmsi=baseStation.getIdentifier();
 			

@@ -37,7 +37,7 @@ public class SimpleDiskBasedData extends OnlyMemoryData {
 		long starttime = System.currentTimeMillis();
 		try {
 			ObjectInputStream in = new ObjectInputStream(new BufferedInputStream(new FileInputStream(filename)));
-			BaseStationHandler handler = (BaseStationHandler) in.readObject();
+			SourceHandler handler = (SourceHandler) in.readObject();
 			this.gridHandler = handler;
 			System.out.println("DB loaded in " + (System.currentTimeMillis()-starttime));
 		} catch (Exception e) {

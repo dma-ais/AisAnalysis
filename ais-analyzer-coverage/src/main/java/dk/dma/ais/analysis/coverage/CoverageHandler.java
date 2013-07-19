@@ -15,11 +15,13 @@
  */
 package dk.dma.ais.analysis.coverage;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import dk.dma.ais.analysis.coverage.calculator.DistributeOnlyCalculator;
+import dk.dma.ais.analysis.coverage.calculator.SatCalculator;
 import dk.dma.ais.analysis.coverage.calculator.SupersourceCoverageCalculator;
 import dk.dma.ais.analysis.coverage.configuration.AisCoverageConfiguration;
 import dk.dma.ais.analysis.coverage.data.Cell;
@@ -30,6 +32,8 @@ import dk.dma.ais.analysis.coverage.data.json.JsonCell;
 import dk.dma.ais.analysis.coverage.data.json.JsonConverter;
 import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.packet.AisPacket;
+import dk.dma.ais.packet.AisPacketTags.SourceType;
+import dk.dma.ais.transform.SourceTypeSatTransformer;
 
 /**
  * Handler for received AisPackets 
@@ -39,9 +43,9 @@ public class CoverageHandler {
     private final AisCoverageConfiguration conf;
     private SupersourceCoverageCalculator superCalc;
     private DistributeOnlyCalculator distributeOnlyCalc;
+    private SatCalculator satCalc;
     private int cellSize=2500;
    
-    
     public CoverageHandler(AisCoverageConfiguration conf) {
         this.conf = conf;
         
@@ -52,11 +56,15 @@ public class CoverageHandler {
 		distributeOnlyCalc.setCellSize(cellSize);	
 		superCalc.addListener(distributeOnlyCalc);
 		
+		satCalc = new SatCalculator();
+		satCalc.setCellSize(cellSize);
+		
 		
 		//Setting data handlers
 		if(conf.getDatabaseConfiguration().getType().toLowerCase().equals("memoryonly")){
 			distributeOnlyCalc.setDataHandler(new OnlyMemoryData());
 			superCalc.setDataHandler(new OnlyMemoryData());
+			satCalc.setDataHandler(new OnlyMemoryData());	
 		}else{
 			distributeOnlyCalc.setDataHandler(new MongoBasedData(conf.getDatabaseConfiguration()));
 			superCalc.setDataHandler(new MongoBasedData(conf.getDatabaseConfiguration()));
@@ -68,18 +76,17 @@ public class CoverageHandler {
 		distributeOnlyCalc.getDataHandler().setLonSize(conf.getLonSize());
 		superCalc.getDataHandler().setLatSize(conf.getLatSize());
 		superCalc.getDataHandler().setLonSize(conf.getLonSize());
+		satCalc.getDataHandler().setLatSize(conf.getLatSize());
+		satCalc.getDataHandler().setLonSize(conf.getLonSize());
 		
     }
-
+    int pr=0;
     public void receiveUnfiltered(AisPacket packet) {
-        AisMessage message = packet.tryGetAisMessage();
-        if (message == null) {
-            return;
-        }
-        superCalc.processMessage(message, "supersource");
-        distributeOnlyCalc.processMessage(message, "1");	
 
-        
+    	superCalc.processMessage(packet, "supersource");
+    	distributeOnlyCalc.processMessage(packet, "1");    
+//          satCalc.processMessage(packet, "sat");
+
     }
     
     int filtCount = 0;
@@ -140,6 +147,9 @@ public class CoverageHandler {
     public SupersourceCoverageCalculator getSupersourceCalc(){
     	return superCalc;
     }
+	public SatCalculator getSatCalc(){
+		return satCalc;
+	}
 
 
 }
