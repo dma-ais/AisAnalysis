@@ -34,4 +34,14 @@ public class TimeSpan {
 		this.messageCounter = messageCounter;
 	}
 	private int messageCounter = 0;
+	
+	public TimeSpan copy(){
+		TimeSpan copy = new TimeSpan(this.firstMessage);
+		copy.setLastMessage(this.getLastMessage());
+		copy.setMessageCounter(this.getMessageCounter());
+		for (String s : this.distinctShips.keySet()) {
+			copy.distinctShips.put(s, true);
+		}
+		return copy;
+	}
 }

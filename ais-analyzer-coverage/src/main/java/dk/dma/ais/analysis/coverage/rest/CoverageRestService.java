@@ -15,11 +15,20 @@
  */
 package dk.dma.ais.analysis.coverage.rest;
 
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.GET;
@@ -38,10 +47,12 @@ import dk.dma.ais.analysis.coverage.data.Source;
 import dk.dma.ais.analysis.coverage.data.Cell;
 import dk.dma.ais.analysis.coverage.data.ICoverageData;
 import dk.dma.ais.analysis.coverage.data.OnlyMemoryData;
+import dk.dma.ais.analysis.coverage.data.TimeSpan;
 import dk.dma.ais.analysis.coverage.data.json.JSonCoverageMap;
 import dk.dma.ais.analysis.coverage.data.json.JsonConverter;
 import dk.dma.ais.analysis.coverage.data.json.JsonSource;
 import dk.dma.ais.analysis.coverage.export.KMLGenerator;
+import dk.dma.ais.data.AisVesselTarget;
 
 /**
  * JAX-RS rest services
@@ -198,17 +209,40 @@ public class CoverageRestService {
     @GET
     @Path("satExport")
     @Produces(MediaType.APPLICATION_JSON)
-    public Object satExport(@QueryParam("test") String test,  @Context HttpServletResponse response) {
+    public Object satExport(@QueryParam("test") String test,  @Context HttpServletResponse response) throws IOException {
     	double latTop = 62.47;
     	double latBottom = 57.5;
     	double lonRight = -35;
     	double lonLeft = -55;
     	
-    	
+
+    	SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy HH:mm");
+		response.setContentType("text/plain");
+		response.setHeader("Content-Disposition", "attachment; filename=" + "satexport.txt");
+		ServletOutputStream out = response.getOutputStream();
 		
-    	Collection<Cell> cells = handler.getSatCalc().getCells(latTop, lonLeft, latBottom, lonRight);
-    	System.out.println(cells.size());
-    	System.out.println(test);
+		List<TimeSpan> timeSpans = handler.getSatCalc().getTimeSpans(latTop, lonLeft, latBottom, lonRight);
+		Date first = null;
+		for (TimeSpan timeSpan : timeSpans) {
+			if(first == null)
+				first = timeSpan.getFirstMessage();
+			
+			//from time, to time, data time, time since last package, accumulated time, signals, distinct ships
+			String outstring = 	formatter.format(timeSpan.getFirstMessage())+","+
+								formatter.format(timeSpan.getLastMessage())+","+	//last is determined by the order of receival, but it is not guaranteed that the tag is actually the last
+								Math.abs(timeSpan.getLastMessage().getTime()-timeSpan.getFirstMessage().getTime())/1000/60+","+
+								Math.abs(new Date().getTime()-timeSpan.getLastMessage().getTime())/1000/60+","+
+								Math.abs(timeSpan.getLastMessage().getTime()-first.getTime())/1000/60+","+
+								timeSpan.getMessageCounter()+ ","+
+								timeSpan.getDistinctShips().size()+
+								"\n";
+			out.write(outstring.getBytes());
+
+		}
+		out.flush();
+
 		return null;
     }
+    
+   
 }

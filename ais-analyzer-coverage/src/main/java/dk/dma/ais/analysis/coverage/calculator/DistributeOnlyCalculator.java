@@ -36,7 +36,7 @@ public class DistributeOnlyCalculator extends AbstractCalculator implements IAis
 	     protected boolean removeEldestEntry(Map.Entry eldest)
 	     {
 			((Map<String, CustomMessage>) eldest.getValue()).clear(); //seems to be necessary in order to keep application from performance degration.
-	        return this.size() > 100000;   
+	        return this.size() > 200000;   
 	     }
 	  };
 	

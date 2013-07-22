@@ -85,7 +85,7 @@ public class CoverageHandler {
 
     	superCalc.processMessage(packet, "supersource");
     	distributeOnlyCalc.processMessage(packet, "1");    
-//          satCalc.processMessage(packet, "sat");
+          satCalc.processMessage(packet, "sat");
 
     }
     

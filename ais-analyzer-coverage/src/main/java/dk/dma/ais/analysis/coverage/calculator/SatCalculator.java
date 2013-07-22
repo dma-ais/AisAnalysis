@@ -2,9 +2,14 @@ package dk.dma.ais.analysis.coverage.calculator;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import dk.dma.ais.analysis.coverage.data.Cell;
 import dk.dma.ais.analysis.coverage.data.Source;
@@ -26,6 +31,53 @@ public class SatCalculator extends AbstractCalculator {
 	     }
 	};	
 	
+	public List<TimeSpan> getTimeSpans(double latStart, double lonStart, double latEnd, double lonEnd){
+		List<TimeSpan> spans = new ArrayList<TimeSpan>();
+    	Collection<Cell> cells = dataHandler.getCells();
+		List<Cell> areaFiltered = new ArrayList<Cell>();
+		for (Cell cell : cells) {
+			if(cell.getLatitude() <= latStart && cell.getLatitude() >= latEnd ){
+				if(cell.getLongitude() >= lonStart && cell.getLongitude() <= lonEnd ){
+					areaFiltered.add(cell);
+				}
+			}
+		}
+    	for (Cell cell : areaFiltered) {
+			List<TimeSpan> individualSpan = cell.getTimeSpans();
+			for (TimeSpan timeSpan : individualSpan) {
+				spans.add(timeSpan);
+			}
+		}	
+    	Collections.sort(spans, new SortByDate());
+    	List<TimeSpan> merged = new ArrayList<TimeSpan>();
+    	TimeSpan current = null;
+    	for (int i = 0; i < spans.size(); i++) {
+    		if(current == null){
+    			current = spans.get(i).copy();
+    			merged.add(current);
+    		}else{
+    			TimeSpan next = spans.get(i);
+    			if(Math.abs(current.getLastMessage().getTime()-next.getLastMessage().getTime()) > timeMargin){
+    				current = next.copy();
+    				merged.add(current);
+    			}else{
+    				//merge two timespans
+    				current.setLastMessage(next.getLastMessage());
+    				current.setMessageCounter(current.getMessageCounter()+next.getMessageCounter());
+    				Map<String, Boolean> distinctShips = current.getDistinctShips();
+    				Set<String> nextDistinctShips = next.getDistinctShips().keySet();
+    				for (String string : nextDistinctShips) {
+    					distinctShips.put(string, true);
+					}
+    			}
+    		}
+    		
+    		
+    		System.out.println(spans.get(i).getFirstMessage()+" "+spans.get(i).getLastMessage()+" "+spans.get(i).getMessageCounter()+ " "+spans.get(i).getDistinctShips().size());
+		}
+    	System.out.println();
+    	return merged;
+	}
 	public Collection<Cell> getCells(double latStart, double lonStart, double latEnd, double lonEnd){
 		Map<String, Boolean> sourcesMap = new HashMap<String, Boolean>();
 		sourcesMap.put("sat", true);
@@ -53,12 +105,14 @@ public class SatCalculator extends AbstractCalculator {
 		
 		//If timespan does not exist, create it
 		if(timeSpan == null){
+//			System.out.println("CREATE");
 			timeSpan = new TimeSpan(m.getTimestamp());
 			c.getTimeSpans().add(timeSpan);
 		}
 		
 		//if timespan is outdated, create new
 		if(Math.abs(m.getTimestamp().getTime()-timeSpan.getLastMessage().getTime()) > timeMargin){
+//			System.out.println("CREATE");
 			timeSpan = new TimeSpan(m.getTimestamp());
 			c.getTimeSpans().add(timeSpan);
 		}
@@ -117,5 +171,17 @@ public class SatCalculator extends AbstractCalculator {
 			return false;
 			
 		}
+	
+	 public class SortByDate implements Comparator<TimeSpan> {
+
+	        public int compare(TimeSpan a1, TimeSpan a2) {
+	            Date s1 = a1.getFirstMessage();
+	            Date s2 = a2.getFirstMessage();
+	            if(!s1.before(s2))
+	            	return 1;
+	            
+	            return -1;
+	        }
+	    }
 
 }
