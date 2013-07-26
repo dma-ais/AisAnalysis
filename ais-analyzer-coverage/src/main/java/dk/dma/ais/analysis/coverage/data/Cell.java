@@ -59,7 +59,11 @@ public class Cell {
 	}
 
 	
-	public void incrementNOofReceivedSignals(){
+	public Cell(BaseStation baseStation, double lat, double lon, String id) {
+	    this(lat, lon, id);
+        }
+	
+    public void incrementNOofReceivedSignals(){
 		NOofReceivedSignals++;
 	}
 	public void incrementNOofMissingSignals(){
