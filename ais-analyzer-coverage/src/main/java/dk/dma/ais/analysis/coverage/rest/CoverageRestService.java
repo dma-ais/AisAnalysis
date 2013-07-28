@@ -207,6 +207,19 @@ public class CoverageRestService {
     
     
     @GET
+    @Path("satCoverage")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Object satCoverage(@Context HttpServletRequest request) {
+    	double latTop = 62.47;
+    	double latBottom = 57.5;
+    	double lonRight = -35;
+    	double lonLeft = -55;
+    	
+    	return JsonConverter.toJsonTimeSpan(handler.getSatCalc().getTimeSpans(latTop, lonLeft, latBottom, lonRight));
+    	
+    	
+    }
+    @GET
     @Path("satExport")
     @Produces(MediaType.APPLICATION_JSON)
     public Object satExport(@QueryParam("test") String test,  @Context HttpServletResponse response) throws IOException {
@@ -221,22 +234,30 @@ public class CoverageRestService {
 		response.setHeader("Content-Disposition", "attachment; filename=" + "satexport.txt");
 		ServletOutputStream out = response.getOutputStream();
 		
+		
 		List<TimeSpan> timeSpans = handler.getSatCalc().getTimeSpans(latTop, lonLeft, latBottom, lonRight);
-		Date first = null;
+		TimeSpan first = null;
+		TimeSpan previous = null;
 		for (TimeSpan timeSpan : timeSpans) {
 			if(first == null)
-				first = timeSpan.getFirstMessage();
+				first = timeSpan;
 			
-			//from time, to time, data time, time since last package, accumulated time, signals, distinct ships
-			String outstring = 	formatter.format(timeSpan.getFirstMessage())+","+
-								formatter.format(timeSpan.getLastMessage())+","+	//last is determined by the order of receival, but it is not guaranteed that the tag is actually the last
-								Math.abs(timeSpan.getLastMessage().getTime()-timeSpan.getFirstMessage().getTime())/1000/60+","+
-								Math.abs(new Date().getTime()-timeSpan.getLastMessage().getTime())/1000/60+","+
-								Math.abs(timeSpan.getLastMessage().getTime()-first.getTime())/1000/60+","+
-								timeSpan.getMessageCounter()+ ","+
-								timeSpan.getDistinctShips().size()+
+			long timeSinceLastTimeSpan = 0;
+			if(previous != null)
+				timeSinceLastTimeSpan=Math.abs(timeSpan.getFirstMessage().getTime() - previous.getLastMessage().getTime())/1000/60;
+				
+			//last is determined by the order of receival, but it is not guaranteed that the tag is actually the last
+			//from time, to time, data time, time since last timespan, accumulated time, signals, distinct ships
+			String outstring = 	formatter.format(timeSpan.getFirstMessage())+","+	//from time
+								formatter.format(timeSpan.getLastMessage())+","+	//to time 
+								Math.abs(timeSpan.getLastMessage().getTime()-timeSpan.getFirstMessage().getTime())/1000/60+","+		//Timespan length
+								timeSinceLastTimeSpan+","+		// Time since last timestamp
+								Math.abs(timeSpan.getLastMessage().getTime()-first.getLastMessage().getTime())/1000/60+","+		//accumulated time
+								timeSpan.getMessageCounter()+ ","+	//signals
+								timeSpan.getDistinctShips().size()+	//distinct ships
 								"\n";
 			out.write(outstring.getBytes());
+			previous=timeSpan;
 
 		}
 		out.flush();

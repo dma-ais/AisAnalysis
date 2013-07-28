@@ -7,6 +7,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class TimeSpan {
 	private Map<String, Boolean> distinctShips = new ConcurrentHashMap<String, Boolean>();
 	private Date firstMessage, lastMessage;
+	private int messageCounter = 0;
 	
 	public TimeSpan(Date firstMessage){
 		this.firstMessage=firstMessage;
@@ -33,7 +34,7 @@ public class TimeSpan {
 	public void setMessageCounter(int messageCounter) {
 		this.messageCounter = messageCounter;
 	}
-	private int messageCounter = 0;
+	
 	
 	public TimeSpan copy(){
 		TimeSpan copy = new TimeSpan(this.firstMessage);
