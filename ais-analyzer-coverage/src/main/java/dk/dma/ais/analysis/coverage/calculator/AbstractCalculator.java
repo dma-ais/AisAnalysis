@@ -17,6 +17,7 @@ import dk.dma.ais.analysis.coverage.data.ICoverageData;
 import dk.dma.ais.analysis.coverage.data.OnlyMemoryData;
 import dk.dma.ais.analysis.coverage.data.Ship;
 import dk.dma.ais.analysis.coverage.data.Ship.ShipClass;
+import dk.dma.ais.analysis.coverage.data.Station;
 import dk.dma.ais.analysis.coverage.event.AisEvent;
 import dk.dma.ais.analysis.coverage.event.EventBroadcaster;
 import dk.dma.ais.message.AisMessage;
@@ -51,6 +52,12 @@ public abstract class AbstractCalculator implements Serializable {
 	protected ICoverageData dataHandler = new OnlyMemoryData();
 	protected double filterTimeDifference;
 	protected int maxDistanceBetweenFirstAndLast = 2000;
+	public HashMap<String, Station> sourcenames;
+	
+	
+	
+	
+	
 	public double getFilterTimeDifference() {
 		return filterTimeDifference;
 	}
@@ -286,6 +293,7 @@ public abstract class AbstractCalculator implements Serializable {
 //			project.stopAnalysis();
 
 		String baseId = null;
+		String name = "";
 		ReceiverType receiverType = ReceiverType.NOTDEFINED;
 //		IGeneralPositionMessage posMessage = null;
 //		GeoLocation pos = null;
@@ -295,18 +303,58 @@ public abstract class AbstractCalculator implements Serializable {
 
 		// Get source tag properties
 		IProprietarySourceTag sourceTag = aisMessage.getSourceTag();
-		if (sourceTag != null) {
+		if (sourceTag != null && defaultID != "sat") {
 			Integer bsmmsi = sourceTag.getBaseMmsi();
 			timestamp = sourceTag.getTimestamp();
 //			srcCountry = sourceTag.getCountry();
 			String region = sourceTag.getRegion();
+			
 			if(bsmmsi == null){
 				if(!region.equals("")){
-					baseId = region;
+					if (sourcenames.containsKey(region)) {
+						name = sourcenames.get(region).getName(); 
+						Source b = dataHandler.getSource(region);
+
+						if (b != null) {
+								b.setLatitude( sourcenames.get(region).getLatitude() );
+								b.setLongitude( sourcenames.get(region).getLongitude() );
+								EventBroadcaster.getInstance().broadcastEvent(new AisEvent(AisEvent.Event.BS_POSITION_FOUND, this, b));	
+						}
+					}
+
+						baseId = region;
+
 					receiverType = ReceiverType.REGION;
 				}
-			}else{
-				baseId = bsmmsi+"";
+				
+			}
+//			else if (sourcenames.containsKey(bsmmsi.toString())) {
+//				baseId = sourcenames.get(bsmmsi).toString();
+//				receiverType = ReceiverType.BASESTATION;
+//			}
+			else{
+//				if (sourcenames.containsKey(bsmmsi.toString())) {
+////					System.out.println("fandt en = " + sourcenames.get(bsmmsi.toString()));
+//					baseId = sourcenames.get(bsmmsi.toString());
+//				}
+//				System.out.println(bsmmsi);
+//				System.out.println(bsmmsi.toString());
+//				System.out.println(sourcenames.size());
+//				System.out.println(sourcenames.get(2190051+"").getName());
+				if (sourcenames.containsKey(bsmmsi.toString())) {
+//					System.out.println("fandt en = " + sourcenames.get(bsmmsi.toString()).getName());
+					name = sourcenames.get(bsmmsi.toString()).getName();
+					Source b = dataHandler.getSource(bsmmsi+"");
+
+					if (b != null) {
+							b.setLatitude( sourcenames.get(bsmmsi.toString()).getLatitude() );
+							b.setLongitude( sourcenames.get(bsmmsi.toString()).getLongitude() );
+							EventBroadcaster.getInstance().broadcastEvent(new AisEvent(AisEvent.Event.BS_POSITION_FOUND, this, b));	
+					}
+				}
+//				else {
+					baseId = bsmmsi+"";
+//				}
 				receiverType = ReceiverType.BASESTATION;
 			}
 		}
@@ -360,6 +408,7 @@ public abstract class AbstractCalculator implements Serializable {
 
 		// Extract Base station
 		Source baseStation = extractBaseStation(baseId, receiverType);
+		baseStation.setName(name);
 
 		// Extract ship
 		Ship ship = extractShip(aisMessage.getUserId(), shipClass, baseStation);
@@ -439,6 +488,12 @@ public abstract class AbstractCalculator implements Serializable {
 //	}
 	public AbstractCalculator(){
 //		this.project = project;
+	}
+	public AbstractCalculator(HashMap<String, Station> sourcenamemap){
+//		this.project = project;
+		sourcenames = sourcenamemap;
+		System.out.println("sourcenamemapsize="+sourcenames.size());
+		System.out.println(sourcenames.isEmpty());
 	}
 	public CustomMessage getFirstMessage() {
 		return firstMessage;

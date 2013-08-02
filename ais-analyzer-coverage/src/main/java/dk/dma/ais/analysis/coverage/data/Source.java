@@ -26,6 +26,7 @@ public class Source implements Serializable {
 	private static final long serialVersionUID = 1L;
 	private ConcurrentHashMap<String, Cell> grid = new ConcurrentHashMap<String, Cell>();
 	private ConcurrentHashMap<Long, Ship> ships = new ConcurrentHashMap<Long, Ship>();
+	private String name = "";
 	private String identifier;
 	private double latSize;
 	private double lonSize;
@@ -148,6 +149,14 @@ public class Source implements Serializable {
 
 	public void setIdentifier(String identifier) {
 		this.identifier = identifier;
+	}
+	
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	public double getLatSize() {

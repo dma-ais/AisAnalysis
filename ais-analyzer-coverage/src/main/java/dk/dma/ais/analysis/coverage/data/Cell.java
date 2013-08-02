@@ -59,9 +59,9 @@ public class Cell {
 	}
 
 	
-	public Cell(BaseStation baseStation, double lat, double lon, String id) {
-	    this(lat, lon, id);
-        }
+//	public Cell(BaseStation baseStation, double lat, double lon, String id) {
+//	    this(lat, lon, id);
+//        }
 	
     public void incrementNOofReceivedSignals(){
 		NOofReceivedSignals++;

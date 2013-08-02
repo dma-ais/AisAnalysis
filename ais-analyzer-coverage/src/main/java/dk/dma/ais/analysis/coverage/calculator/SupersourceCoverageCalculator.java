@@ -20,6 +20,7 @@ import dk.dma.ais.analysis.coverage.data.Cell;
 import dk.dma.ais.analysis.coverage.data.CustomMessage;
 import dk.dma.ais.analysis.coverage.data.Ship;
 import dk.dma.ais.analysis.coverage.data.Ship.ShipClass;
+import dk.dma.ais.analysis.coverage.data.Station;
 import dk.dma.ais.analysis.coverage.event.AisEvent;
 import dk.dma.ais.analysis.coverage.event.AisEvent.Event;
 import dk.dma.ais.analysis.coverage.event.IAisEventListener;
@@ -71,8 +72,8 @@ public class SupersourceCoverageCalculator extends AbstractCalculator {
 //		
 //		
 //	}
-	public SupersourceCoverageCalculator(boolean ignoreRotation) {
-		super();
+	public SupersourceCoverageCalculator(boolean ignoreRotation, HashMap<String, Station> map) {
+		super(map);
 		this.ignoreRotation = ignoreRotation;
 		
 		

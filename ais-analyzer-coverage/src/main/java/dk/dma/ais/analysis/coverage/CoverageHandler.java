@@ -49,10 +49,10 @@ public class CoverageHandler {
     public CoverageHandler(AisCoverageConfiguration conf) {
         this.conf = conf;
         
-        superCalc = new SupersourceCoverageCalculator( false);
+        superCalc = new SupersourceCoverageCalculator( false, conf.getSourceNameMap());
 		superCalc.setCellSize(cellSize);	
 		
-		distributeOnlyCalc = new DistributeOnlyCalculator( false);
+		distributeOnlyCalc = new DistributeOnlyCalculator( false, conf.getSourceNameMap());
 		distributeOnlyCalc.setCellSize(cellSize);	
 		superCalc.addListener(distributeOnlyCalc);
 		
