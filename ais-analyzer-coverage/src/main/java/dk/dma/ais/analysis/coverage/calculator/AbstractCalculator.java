@@ -7,7 +7,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+
+import dk.dma.ais.analysis.coverage.AisCoverageGUI;
 import dk.dma.ais.analysis.coverage.calculator.geotools.GeoConverter;
 import dk.dma.ais.analysis.coverage.calculator.geotools.SphereProjection;
 import dk.dma.ais.analysis.coverage.data.Source;
@@ -53,7 +57,9 @@ public abstract class AbstractCalculator implements Serializable {
 	protected double filterTimeDifference;
 	protected int maxDistanceBetweenFirstAndLast = 2000;
 	public HashMap<String, Station> sourcenames;
-	
+	protected int minAllowedSpeed = 3;
+	protected int maxAllowedSpeed = 50;
+	private static final Logger LOG = LoggerFactory.getLogger(AisCoverageGUI.class);
 	
 	
 	
@@ -89,9 +95,6 @@ public abstract class AbstractCalculator implements Serializable {
 	public void setMaxAllowedSpeed(int maxAllowedSpeed) {
 		this.maxAllowedSpeed = maxAllowedSpeed;
 	}
-	protected int minAllowedSpeed = 3;
-	protected int maxAllowedSpeed = 50;
-
 
 	abstract public void calculate(CustomMessage m);
 	
@@ -101,9 +104,7 @@ public abstract class AbstractCalculator implements Serializable {
 	public void processMessage(AisPacket packet, String defaultID) {
 		
 		AisMessage message = packet.tryGetAisMessage();
-        if (message == null) {
-            return;
-        }
+        if (message == null) {	return;	}
         
 		
 		CustomMessage newMessage = aisToCustom(message, defaultID);
@@ -243,9 +244,8 @@ public abstract class AbstractCalculator implements Serializable {
 			double cellInMeters= getCellSize(); //cell size in meters
 			dataHandler.setLatSize(GeoConverter.metersToLatDegree(cellInMeters));
 			dataHandler.setLonSize(GeoConverter.metersToLonDegree(latitude, cellInMeters));
-			System.out.println("lat size: "+dataHandler.getLatSize());
-			System.out.println("lon size: "+dataHandler.getLonSize());
-			System.out.println("lon size: "+dataHandler.getLonSize());
+			LOG.info("lat size initiated with: "+dataHandler.getLatSize());
+			LOG.info("lon size initiated with: "+dataHandler.getLonSize());
 		}
 	}
 	
@@ -266,16 +266,10 @@ public abstract class AbstractCalculator implements Serializable {
 	 *	If it's the first message from that ship, create ship and put it in
 	 *	base statino that received message
 	 */
-//	HashMap<Long,Long> test = new HashMap<Long,Long>();
 	protected Ship extractShip(long mmsi, ShipClass shipClass, Source baseStation){
-//		test.put(mmsi, mmsi);
-//		System.out.println(test.size());
-//		System.out.println(baseStation.getIdentifier());
 		Ship ship = dataHandler.getShip(baseStation.getIdentifier(), mmsi);
 		if (ship == null) {
 			ship = dataHandler.createShip(baseStation.getIdentifier(), mmsi, shipClass);
-		}else{
-//			System.out.println(baseStation.getIdentifier());
 		}
 		return ship;
 	}
@@ -287,7 +281,7 @@ public abstract class AbstractCalculator implements Serializable {
 		
 		
 		
-		//Stops analysis if project has been running longer than timeout
+//		Stops analysis if project has been running longer than timeout
 //		long timeSinceStart = project.getRunningTime();
 //		if (project.getTimeout() != -1 && timeSinceStart > project.getTimeout())
 //			project.stopAnalysis();
@@ -321,28 +315,12 @@ public abstract class AbstractCalculator implements Serializable {
 								EventBroadcaster.getInstance().broadcastEvent(new AisEvent(AisEvent.Event.BS_POSITION_FOUND, this, b));	
 						}
 					}
-
 						baseId = region;
-
 					receiverType = ReceiverType.REGION;
 				}
-				
 			}
-//			else if (sourcenames.containsKey(bsmmsi.toString())) {
-//				baseId = sourcenames.get(bsmmsi).toString();
-//				receiverType = ReceiverType.BASESTATION;
-//			}
 			else{
-//				if (sourcenames.containsKey(bsmmsi.toString())) {
-////					System.out.println("fandt en = " + sourcenames.get(bsmmsi.toString()));
-//					baseId = sourcenames.get(bsmmsi.toString());
-//				}
-//				System.out.println(bsmmsi);
-//				System.out.println(bsmmsi.toString());
-//				System.out.println(sourcenames.size());
-//				System.out.println(sourcenames.get(2190051+"").getName());
 				if (sourcenames.containsKey(bsmmsi.toString())) {
-//					System.out.println("fandt en = " + sourcenames.get(bsmmsi.toString()).getName());
 					name = sourcenames.get(bsmmsi.toString()).getName();
 					Source b = dataHandler.getSource(bsmmsi+"");
 
@@ -352,22 +330,16 @@ public abstract class AbstractCalculator implements Serializable {
 							EventBroadcaster.getInstance().broadcastEvent(new AisEvent(AisEvent.Event.BS_POSITION_FOUND, this, b));	
 					}
 				}
-//				else {
 					baseId = bsmmsi+"";
-//				}
 				receiverType = ReceiverType.BASESTATION;
 			}
 		}
 
 		//Checks if its neither a basestation nor a region
-		if (baseId == null){
-			baseId = defaultID;
-		}
+		if (baseId == null){	baseId = defaultID;	}
 		
 		// If time stamp is not present, we add one
-		if(timestamp == null){
-			timestamp = new Date();
-		}
+		if(timestamp == null){	timestamp = new Date();	}
 		
 		// It's a base station positiion message
 		if (aisMessage instanceof AisMessage4) {			
@@ -402,7 +374,6 @@ public abstract class AbstractCalculator implements Serializable {
 		
 		//calculate lat lon size based on first message
 //		if(firstMessage == null){
-//			System.out.println(aisMessage.getUserId());
 //			calculateLatLonSize(pos.getLatitude());
 //		}
 
@@ -416,10 +387,8 @@ public abstract class AbstractCalculator implements Serializable {
 		CustomMessage newMessage = new CustomMessage();
 		newMessage.setCog( (double) posMessage.getCog() / 10 );
 		newMessage.setSog( (double) posMessage.getSog() / 10 );
-		newMessage.setLatitude( posMessage.getPos().getGeoLocation()
-				.getLatitude() );
-		newMessage.setLongitude( posMessage.getPos().getGeoLocation()
-				.getLongitude() );
+		newMessage.setLatitude( posMessage.getPos().getGeoLocation().getLatitude() );
+		newMessage.setLongitude( posMessage.getPos().getGeoLocation().getLongitude() );
 		newMessage.setTimestamp( timestamp );
 		newMessage.setSourceMMSI(baseStation.getIdentifier());
 		newMessage.setShipMMSI( ship.getMmsi() );
@@ -441,7 +410,6 @@ public abstract class AbstractCalculator implements Serializable {
 
 //		return m.getCog()+""+m.getLatitude()+""+m.getLongitude()+""+m.getShipMMSI()+""+m.getSog()+""+m.getSourceMMSI();
 //		return m.getShipMMSI()+""+m.getTimestamp().getTime();
-
 //		return m.getShipMMSI()+""+m.getLatitude()+""+m.getLongitude();
 	}
 	
@@ -483,17 +451,12 @@ public abstract class AbstractCalculator implements Serializable {
 	public void setAllowedShipTypes(Map<ShipType, ShipType> allowedShipTypes) {
 		this.allowedShipTypes = allowedShipTypes;
 	}
-//	public AbstractCalculator(AisCoverageProject project){
-//		this.project = project;
-//	}
 	public AbstractCalculator(){
 //		this.project = project;
 	}
 	public AbstractCalculator(HashMap<String, Station> sourcenamemap){
 //		this.project = project;
 		sourcenames = sourcenamemap;
-		System.out.println("sourcenamemapsize="+sourcenames.size());
-		System.out.println(sourcenames.isEmpty());
 	}
 	public CustomMessage getFirstMessage() {
 		return firstMessage;

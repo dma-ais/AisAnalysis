@@ -48,7 +48,9 @@ public class SupersourceCoverageCalculator extends AbstractCalculator {
 	private int degreesPerMinute = 20;
 	private boolean ignoreRotation;
 	private List<IAisEventListener> listeners = new ArrayList<IAisEventListener>();
+	public boolean debug = false;
 	private LinkedHashMap<String, CustomMessage> doubletBuffer = new LinkedHashMap<String, CustomMessage>()
+			
 			  {
 	     @Override
 	     protected boolean removeEldestEntry(Map.Entry eldest)
@@ -66,26 +68,16 @@ public class SupersourceCoverageCalculator extends AbstractCalculator {
 		}
 	}
 
-//	public SupersourceCoverageCalculator(AisCoverageProject project, boolean ignoreRotation) {
-//		super(project);
-//		this.ignoreRotation = ignoreRotation;
-//		
-//		
-//	}
 	public SupersourceCoverageCalculator(boolean ignoreRotation, HashMap<String, Station> map) {
 		super(map);
 		this.ignoreRotation = ignoreRotation;
-		
-		
 	}
 
 	private boolean checkDoublets(CustomMessage m){
 		String key = m.getKey();
-//		System.out.println(key);
 
 		//if message exist in queue return true, otherwise false.
 		if(doubletBuffer.containsKey(key)){
-//			System.out.println(bufferInSeconds);
 			return true;
 		}
 		doubletBuffer.put(key, m);		
@@ -93,7 +85,6 @@ public class SupersourceCoverageCalculator extends AbstractCalculator {
 		
 	}
 	
-	public boolean debug = false;
 	/**
 	 * This is called whenever a message is received
 	 */
@@ -114,7 +105,6 @@ public class SupersourceCoverageCalculator extends AbstractCalculator {
 			for (CustomMessage m : list) {
 				this.broadcastEvent(new AisEvent(Event.AISMESSAGE_REJECTED,this,m));
 			}
-			
 			return;
 		}		
 
@@ -256,6 +246,7 @@ public class SupersourceCoverageCalculator extends AbstractCalculator {
 			timestamp = sourceTag.getTimestamp();
 //			srcCountry = sourceTag.getCountry();
 			String region = sourceTag.getRegion();
+			//TODO update code to fit supersourcecalculator
 			if(bsmmsi == null){
 				if(!region.equals("")){
 					baseId = region;
@@ -309,12 +300,10 @@ public class SupersourceCoverageCalculator extends AbstractCalculator {
 		
 		//calculate lat lon size based on first message
 //		if(firstMessage == null){
-//			System.out.println(aisMessage.getUserId());
 //			calculateLatLonSize(pos.getLatitude());
 //		}
 
 		// Extract Base station
-//		BaseStation baseStation = extractBaseStation(baseId, receiverType);
 		Source baseStation = extractBaseStation("supersource", ReceiverType.NOTDEFINED);
 
 		// Extract ship

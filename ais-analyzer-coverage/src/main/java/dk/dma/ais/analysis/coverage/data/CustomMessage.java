@@ -34,7 +34,6 @@ public class CustomMessage implements Serializable {
 	public void setKey(String key) {
 		this.key = key;
 	}
-	
 	public double getCog() {
 		return cog;
 	}
@@ -68,7 +67,6 @@ public class CustomMessage implements Serializable {
 	public String getSourceMMSI() {
 		return sourceMMSI;
 	}
-
 	public long getShipMMSI() {
 		return shipMMSI;
 	}

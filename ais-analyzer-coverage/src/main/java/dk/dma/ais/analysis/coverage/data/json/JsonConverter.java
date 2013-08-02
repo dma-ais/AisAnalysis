@@ -27,7 +27,6 @@ public class JsonConverter {
 			else {
 				s.name=baseStation.getName();
 			}
-			
 			s.type=baseStation.getReceiverType().name();
 			
 			if(baseStation.getLatitude() != null)

@@ -95,10 +95,12 @@ public class AisCoverage {
         aisBus.start();
         aisBus.startConsumers();
         aisBus.startProviders();
+        LOG.info("aisbus startet");
         // Start web server
         if (webServer != null) {
             try {
                 webServer.start();
+                LOG.info("webserver startet");
             } catch (Exception e) {
                 LOG.error("Failed to start web server: " + e.getMessage());
                 e.printStackTrace();
@@ -109,23 +111,17 @@ public class AisCoverage {
     public void stop() {
         // Stop AisBus
         aisBus.cancel();
+        LOG.info("aisbus stopped");
     }
     
-    public AisCoverageConfiguration getConf() {
-        return conf;
-    }
-    
-    public CoverageHandler getHandler() {
-        return handler;
-    }
+    public AisCoverageConfiguration getConf() {	return conf;	}
+    public CoverageHandler getHandler() {	return handler;	}
     
     public static synchronized AisCoverage create(AisCoverageConfiguration conf) {
         instance = new AisCoverage(conf);
         return instance;
     }
     
-    public static synchronized AisCoverage get() {
-        return instance;
-    }
+    public static synchronized AisCoverage get() {	return instance;	}
 
 }

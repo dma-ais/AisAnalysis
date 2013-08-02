@@ -11,6 +11,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import dk.dma.ais.analysis.coverage.AisCoverage;
 import dk.dma.ais.analysis.coverage.data.Cell;
 import dk.dma.ais.analysis.coverage.data.Source;
 import dk.dma.ais.analysis.coverage.data.CustomMessage;
@@ -21,9 +25,10 @@ import dk.dma.ais.packet.AisPacketTags.SourceType;
 
 public class SatCalculator extends AbstractCalculator {
 
+	private static final Logger LOG = LoggerFactory.getLogger(SatCalculator.class);
 	private int timeMargin = 600000; //in ms
 	private LinkedHashMap<String, Boolean> doubletBuffer = new LinkedHashMap<String, Boolean>()
-			  {
+	{
 	     @Override
 	     protected boolean removeEldestEntry(Map.Entry eldest)
 	     {
@@ -72,10 +77,8 @@ public class SatCalculator extends AbstractCalculator {
     			}
     		}
     		
-    		
-    		System.out.println(spans.get(i).getFirstMessage()+" "+spans.get(i).getLastMessage()+" "+spans.get(i).getMessageCounter()+ " "+spans.get(i).getDistinctShips().size());
+    		LOG.debug(spans.get(i).getFirstMessage()+" "+spans.get(i).getLastMessage()+" "+spans.get(i).getMessageCounter()+ " "+spans.get(i).getDistinctShips().size());
 		}
-    	System.out.println();
     	return merged;
 	}
 	public Collection<Cell> getCells(double latStart, double lonStart, double latEnd, double lonEnd){
@@ -105,14 +108,12 @@ public class SatCalculator extends AbstractCalculator {
 		
 		//If timespan does not exist, create it
 		if(timeSpan == null){
-//			System.out.println("CREATE");
 			timeSpan = new TimeSpan(m.getTimestamp());
 			c.getTimeSpans().add(timeSpan);
 		}
 		
 		//if timespan is outdated, create new
 		if(Math.abs(m.getTimestamp().getTime()-timeSpan.getLastMessage().getTime()) > timeMargin){
-//			System.out.println("CREATE");
 			timeSpan = new TimeSpan(m.getTimestamp());
 			c.getTimeSpans().add(timeSpan);
 		}
@@ -164,7 +165,6 @@ public class SatCalculator extends AbstractCalculator {
 	
 			//if message exist in queue return true, otherwise false.
 			if(doubletBuffer.containsKey(key)){
-	//			System.out.println(bufferInSeconds);
 				return true;
 			}
 			doubletBuffer.put(key, true);		

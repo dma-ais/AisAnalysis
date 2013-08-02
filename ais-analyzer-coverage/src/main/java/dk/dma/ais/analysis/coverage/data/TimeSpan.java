@@ -34,8 +34,6 @@ public class TimeSpan {
 	public void setMessageCounter(int messageCounter) {
 		this.messageCounter = messageCounter;
 	}
-	
-	
 	public TimeSpan copy(){
 		TimeSpan copy = new TimeSpan(this.firstMessage);
 		copy.setLastMessage(this.getLastMessage());

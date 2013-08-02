@@ -41,7 +41,11 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriInfo;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import dk.dma.ais.analysis.coverage.AisCoverage;
+import dk.dma.ais.analysis.coverage.AisCoverageGUI;
 import dk.dma.ais.analysis.coverage.CoverageHandler;
 import dk.dma.ais.analysis.coverage.data.Source;
 import dk.dma.ais.analysis.coverage.data.Cell;
@@ -61,6 +65,7 @@ import dk.dma.ais.data.AisVesselTarget;
 public class CoverageRestService {
 
     private final CoverageHandler handler;
+    private static final Logger LOG = LoggerFactory.getLogger(CoverageRestService.class);
     
 
     public CoverageRestService() {
@@ -74,7 +79,7 @@ public class CoverageRestService {
         Objects.requireNonNull(handler);
         Map<String, String> map = new HashMap<String, String>();
         map.put("q", q);
-        System.out.println(q);
+        LOG.debug(q);
         return map;
     }
 
@@ -100,7 +105,7 @@ public class CoverageRestService {
     @Produces(MediaType.APPLICATION_JSON)
     public Map<String, JsonSource> sources(@Context UriInfo uriInfo) {
         Objects.requireNonNull(handler);
-        System.out.println("get sources");
+        LOG.info("getting sources");
 		Collection<Source> sources = handler.getDistributeCalc().getDataHandler().getSources();
 		return JsonConverter.toJsonSources(sources);
     }
@@ -120,8 +125,6 @@ public class CoverageRestService {
 		
 		int multiplicationFactor = Integer.parseInt(request.getParameter("multiplicationFactor"));
 		
-//		System.out.println(multiplicationFactor);
-		
 		double latStart = Double.parseDouble(areaArray[0]);
 		double lonStart = Double.parseDouble(areaArray[1]);
 		double latEnd = Double.parseDouble(areaArray[2]);
@@ -132,7 +135,6 @@ public class CoverageRestService {
 			String[] sourcesArray = sources.split(",");	
 			for (String string : sourcesArray) {
 				sourcesMap.put(string, true);
-//				System.out.println(string);
 			}
 		}		
 		
@@ -143,8 +145,6 @@ public class CoverageRestService {
     @Path("export")
     @Produces(MediaType.APPLICATION_JSON)
     public Object export(@QueryParam("exportType") String exportType, @QueryParam("exportMultiFactor") String exportMultiFactor, @Context HttpServletResponse response) {
-    	System.out.println("we need to return the KML");
-
 
 		int multiplicity = Integer.parseInt(exportMultiFactor);
 		
@@ -159,22 +159,13 @@ public class CoverageRestService {
 		
 		Source superbs = handler.getSupersourceCalc().getDataHandler().getSource("supersource");	
 		
-		System.out.println("super source loaded " + superbs.getLatSize());
-		
-		System.out.println(sources.size());
-		
-		
 		for (Source bs : sources) {
 			Source summedbs = dh.createSource(bs.getIdentifier());
 			summedbs.setLatSize(bs.getLatSize()*multiplicity);
 			summedbs.setLonSize(bs.getLonSize()*multiplicity);
 			dh.setLatSize(bs.getLatSize()*multiplicity);
 			dh.setLonSize(bs.getLonSize()*multiplicity);
-//			System.out.println(summedbs.getLatSize());
 //			BaseStation tempSource = new BaseStation(basestation.getIdentifier(), gridHandler.getLatSize()*multiplicationFactor, gridHandler.getLonSize()*multiplicationFactor);
-			
-			
-//			System.out.println("source created: " + summedbs.getIdentifier());
 			
 			Collection<Cell> cells = bs.getGrid().values();
 			
@@ -188,23 +179,12 @@ public class CoverageRestService {
 				dhCell.addReceivedSignals(cell.getNOofReceivedSignals());
 				dhCell.addNOofMissingSignals((superbs.getGrid().get(cell.getId()).getTotalNumberOfMessages() - cell.getNOofReceivedSignals()));
 				
-				//debug printing
-//				System.out.println("cell for export created: " + summedbs.getCell(cell.getLatitude(), cell.getLongitude()).getNOofReceivedSignals() + "-" + summedbs.getCell(cell.getLatitude(), cell.getLongitude()).getNOofMissingSignals());
-				
+//				LOG.debug("cell for export created: " + summedbs.getCell(cell.getLatitude(), cell.getLongitude()).getNOofReceivedSignals() + "-" + summedbs.getCell(cell.getLatitude(), cell.getLongitude()).getNOofMissingSignals());
 			}
-			
-//			System.out.println(summedbs.getGrid().size());
 		}
-		
-		System.out.println(dh.getSources().size());
-
-		
-		//TODO print cells to kml with larger cellsize then the standart one (multiplication factor)
-	
 		KMLGenerator.generateKML(dh.getSources(), dh.getLatSize(), dh.getLonSize(), response);
 		return null;
     }
-    
     
     @GET
     @Path("satCoverage")
@@ -216,9 +196,8 @@ public class CoverageRestService {
     	double lonLeft = -55;
     	
     	return JsonConverter.toJsonTimeSpan(handler.getSatCalc().getTimeSpans(latTop, lonLeft, latBottom, lonRight));
-    	
-    	
     }
+    
     @GET
     @Path("satExport")
     @Produces(MediaType.APPLICATION_JSON)

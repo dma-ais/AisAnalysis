@@ -55,7 +55,7 @@ public class DistributeOnlyCalculator extends AbstractCalculator implements IAis
 					}
 					Date now = new Date();
 					int elapsed = (int) ((now.getTime()-start.getTime())/1000);
-//					System.out.println("messages/sec: "+ messagesProcessed/elapsed+ "... received messages "+receivedMessages.size());	
+//					LOG.debug("messages/sec: "+ messagesProcessed/elapsed+ "... received messages "+receivedMessages.size());
 				}
 			}
 		});
@@ -151,7 +151,6 @@ public class DistributeOnlyCalculator extends AbstractCalculator implements IAis
 			list = new HashMap<String, CustomMessage>();
 			receivedMessages.put(key, list);
 		}
-//		System.out.println(m.getLongitude());
 		
 		//we use a map, to filter doublets from a single source
 		//Apparently, a ship sometimes send the same (apparently) message multiple times

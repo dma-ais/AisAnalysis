@@ -32,21 +32,16 @@ public class Ship implements Serializable {
 	public enum ShipClass{
 		CLASS_A, CLASS_B
 	}
-	
-
 	public Cell getLastCell() {
 		return lastCell;
 	}
-
 	public void setLastCell(Cell lastCell) {
 		this.lastCell = lastCell;
 	}
-
 	public Ship(Long mmsi, ShipClass shipClass) {
 		this.mmsi = mmsi;
 		this.shipClass = shipClass;
 	}
-	
 	public void setLastMessage(CustomMessage message){
 		this.lastMessage = message;
 	}
@@ -64,11 +59,9 @@ public class Ship implements Serializable {
 		messageBuffer.clear();
 		messageBuffer.add(last); //We still want the last message in the buffer
 	}
-
 	public ShipClass getShipClass() {
 		return shipClass;
 	}
-
 	public void setShipClass(ShipClass shipClass) {
 		this.shipClass = shipClass;
 	}

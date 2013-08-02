@@ -20,6 +20,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import dk.dma.ais.analysis.coverage.calculator.DistributeOnlyCalculator;
 import dk.dma.ais.analysis.coverage.calculator.SatCalculator;
 import dk.dma.ais.analysis.coverage.calculator.SupersourceCoverageCalculator;
@@ -45,6 +48,7 @@ public class CoverageHandler {
     private DistributeOnlyCalculator distributeOnlyCalc;
     private SatCalculator satCalc;
     private int cellSize=2500;
+    private static final Logger LOG = LoggerFactory.getLogger(CoverageHandler.class);
    
     public CoverageHandler(AisCoverageConfiguration conf) {
         this.conf = conf;
@@ -65,9 +69,11 @@ public class CoverageHandler {
 			distributeOnlyCalc.setDataHandler(new OnlyMemoryData());
 			superCalc.setDataHandler(new OnlyMemoryData());
 			satCalc.setDataHandler(new OnlyMemoryData());	
+			LOG.info("coverage calculators set up with memory only data handling");
 		}else{
 			distributeOnlyCalc.setDataHandler(new MongoBasedData(conf.getDatabaseConfiguration()));
 			superCalc.setDataHandler(new MongoBasedData(conf.getDatabaseConfiguration()));
+			LOG.info("coverage calculators set up with mongodb data handling");
 		}
 		
 		
@@ -78,6 +84,7 @@ public class CoverageHandler {
 		superCalc.getDataHandler().setLonSize(conf.getLonSize());
 		satCalc.getDataHandler().setLatSize(conf.getLatSize());
 		satCalc.getDataHandler().setLonSize(conf.getLonSize());
+		LOG.info("grid granularity initiated with lat: "+conf.getLatSize() + " and lon: " + conf.getLonSize());
 		
     }
     int pr=0;
@@ -85,7 +92,7 @@ public class CoverageHandler {
 
     	superCalc.processMessage(packet, "supersource");
     	distributeOnlyCalc.processMessage(packet, "1");    
-          satCalc.processMessage(packet, "sat");
+        satCalc.processMessage(packet, "sat");
 
     }
     
@@ -97,7 +104,6 @@ public class CoverageHandler {
         }
         filtCount++;
 //        superCalc.processMessage(message, "supersource");
-//        System.out.println("filt: "+filtCount);
     }
     
     public JSonCoverageMap getJsonCoverage(double latStart, double lonStart, double latEnd, double lonEnd, Map<String, Boolean> sources, int multiplicationFactor) {
@@ -124,7 +130,7 @@ public class CoverageHandler {
 		for (Cell cell : celllist) {
 			Cell superCell = superMap.get(cell.getId());
 			if(superCell == null){
-//				System.out.println("prit");
+
 			}else{
 				JsonCell existing = JsonCells.get(cell.getId());
 				JsonCell theCell = JsonConverter.toJsonCell(cell, superCell);
@@ -141,15 +147,9 @@ public class CoverageHandler {
 	}
     
     
-    public DistributeOnlyCalculator getDistributeCalc(){
-    	return distributeOnlyCalc;
-    }
-    public SupersourceCoverageCalculator getSupersourceCalc(){
-    	return superCalc;
-    }
-	public SatCalculator getSatCalc(){
-		return satCalc;
-	}
+    public DistributeOnlyCalculator getDistributeCalc(){	return distributeOnlyCalc;	}
+    public SupersourceCoverageCalculator getSupersourceCalc(){	return superCalc;	}
+	public SatCalculator getSatCalc(){	return satCalc;	}
 
 
 }

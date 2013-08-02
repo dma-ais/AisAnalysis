@@ -19,12 +19,10 @@ public class OnlyMemoryData implements ICoverageData{
 	public Ship getShip(String sourceMmsi, long shipMmsi) {
 		return gridHandler.getGrid(sourceMmsi).getShip(shipMmsi);
 	}
-
 	@Override
 	public void updateShip(Ship ship) {
 
 	}
-
 	@Override
 	public Cell getCell(String sourceMmsi, double lat, double lon) {
 		return gridHandler.getGrid(sourceMmsi).getCell(lat, lon);
@@ -35,7 +33,6 @@ public class OnlyMemoryData implements ICoverageData{
 		// TODO Auto-generated method stub
 		
 	}
-
 	@Override
 	public List<Cell> getCells() {
 		List<Cell> cells = new ArrayList<Cell>();
@@ -145,18 +142,7 @@ public class OnlyMemoryData implements ICoverageData{
 					}
 					
 				}
-				
-//				// For each cell
-//				Collection<Cell> bscells = basestation.getGrid().values();
-//				for (Cell cell : bscells) {
-//					if(cell.getLatitude() <= latStart && cell.getLatitude() >= latEnd ){
-//						if(cell.getLongitude() >= lonStart && cell.getLongitude() <= lonEnd ){
-//							cells.add(cell);
-//						}
-//					}
-//				}
 			}
-
 		}
 		return cells;
 	}

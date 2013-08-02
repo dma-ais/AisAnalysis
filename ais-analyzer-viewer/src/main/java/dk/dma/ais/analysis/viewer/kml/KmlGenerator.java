@@ -327,6 +327,7 @@ public class KmlGenerator {
                         imo = classAStatic.getImoNo();
                     }
                     if (classAPosition != null) {
+                    	//TODO fixed changed method
                         NavigationalStatus navigationalStatus = NavigationalStatus.get(classAPosition.getNavStatus());
                         navstatus = navigationalStatus.prettyStatus();
                         if (classAPosition.getNavStatus() == 1 || classAPosition.getNavStatus() == 5) {

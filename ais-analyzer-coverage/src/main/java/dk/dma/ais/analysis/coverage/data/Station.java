@@ -15,8 +15,6 @@ public class Station {
 		latitude = lat;
 		longitude = lon;
 	}
-	
-	
 	public String getName() {
 		return name;
 	}
@@ -35,6 +33,4 @@ public class Station {
 	public void setLongitude(double longitude) {
 		this.longitude = longitude;
 	}
-	
-	
 }
