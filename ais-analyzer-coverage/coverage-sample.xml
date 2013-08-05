@@ -5,9 +5,24 @@ Reads AIS messages from FILE and saves coverage data to memory only.
 -->
 <aisCoverageConfiguration>
 	<aisbus>
+		<transformer xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="sourceTypeSatTransformerConfiguration">
+                <gh_region>802</gh_region>
+                <gh_region>804</gh_region>
+                <gh_region>810</gh_region>
+                <source>ORBCOMM999</source>
+        </transformer>   
 	
+<!-- 		<provider xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="tcpClientProviderConfiguration"> -->
+<!-- 			<hostPort>80.198.195.189:80</hostPort> -->
+<!-- 		</provider> -->
 		<provider xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="fileReaderProviderConfiguration">
-			<filename>d:\Søfart\aisdump_fullday.txt</filename>
+<!-- <<<<<<< HEAD -->
+			<filename>C:\Users\silentk\Desktop\aisdump.txt</filename>
+<!-- ======= -->
+<!-- 			<filename>d:\Søfart\AIS-SAT-data-04-2013\NORWAY_AIS_04-04-2013_8388.txt</filename> -->
+<!-- 			<filename>d:\Søfart\aisdump_fullday.txt</filename> -->
+<!-- 				<filename>d:\Søfart\putty.log</filename> -->
+<!-- >>>>>>> 1b874594577277ff3e16269508c2a2a0d152d33e -->
 		</provider>
 		
 		
@@ -19,6 +34,586 @@ Reads AIS messages from FILE and saves coverage data to memory only.
 	<!--Sets the grid granularity; the latitude and longitude minimum degree -->
 	<latSize>0.0225225225</latSize>
     <lonSize>0.0386812541</lonSize>
+    
+<!--     <supermanmap> -->
+<!--         <entry> -->
+<!--             <key>superman</key> -->
+<!--             <value>Aarsballe</value> -->
+<!--             <value>1</value> -->
+<!--             <value>5.19</value> -->
+<!--         </entry> -->
+<!--     </supermanmap> -->
+    
+    <sourceNameMap>
+        <entry>
+            <key>2190077</key>
+	            <value>
+	                <latitude>55.148611</latitude>
+	                <longitude>14.8805555559</longitude>
+	                <name>Aarsballe</name>
+	            </value>
+        </entry>
+        <entry>
+            <key>2190064</key>
+            	<value>
+            	    <latitude>56.717222222</latitude>
+                	<longitude>11.5202777776</longitude>
+                	<name>Anholt</name>
+                </value>
+        </entry>
+        <entry>
+            <key>2190065</key>
+            <value>
+            	    <latitude>55.5522222221</latitude>
+                	<longitude>8.13972222243</longitude>
+                	<name>Blaavand</name>
+                </value>
+        </entry>
+        <entry>
+            <key>2190047</key>
+            <value>
+            	    <latitude>55.7066666672</latitude>
+                	<longitude>12.6227777776</longitude>
+                	<name>Lynetten</name>
+                </value>
+        </entry>
+        <entry>
+            <key>2190049</key>
+            <value>
+            	    <latitude>55.7369444439</latitude>
+                	<longitude>10.9202777783</longitude>
+                	<name>Roesnaes</name>
+                </value>
+        </entry>
+        <entry>
+            <key>2190068</key>
+            <value>
+            	    <latitude>56.4475000002</latitude>
+                	<longitude>10.9466666674</longitude>
+                	<name>Fornaes</name>
+                </value>
+        </entry>
+         <entry>
+            <key>2190066</key>
+            <value>
+            	    <latitude>56.5299999998</latitude>
+                	<longitude>8.16833333337</longitude>
+                	<name>Bovbjerg</name>
+                </value>
+        </entry>
+        <entry>
+            <key>2190067</key>
+            <value>
+            	    <latitude>54.9652777782</latitude>
+                	<longitude>9.55416666678</longitude>
+                	<name>Felsted</name>
+                </value>
+        </entry>
+        <entry>
+            <key>2190069</key>
+            <value>
+            	    <latitude>57.0041666672</latitude>
+                	<longitude>9.82638888936</longitude>
+                	<name>Frejlev</name>
+                </value>
+        </entry>
+        <entry>
+            <key>2190071</key>
+            <value>
+            	    <latitude>57.1091666671</latitude>
+                	<longitude>8.65000000034</longitude>
+                	<name>Hanstholm</name>
+                </value>
+        </entry>
+        <entry>
+            <key>2190072</key>
+            <value>
+            	    <latitude>57.5241666668</latitude>
+                	<longitude>9.96472222156</longitude>
+                	<name>Hirtshals</name>
+                </value>
+        </entry>
+        <entry>
+            <key>2190052</key>
+            <value>
+            	    <latitude>54.8730555561</latitude>
+                	<longitude>11.1983333333</longitude>
+                	<name>Karleby</name>
+                </value>
+        </entry>
+         <entry>
+            <key>2190073</key>
+            <value>
+            	    <latitude>57.2694444438</latitude>
+                	<longitude>11.0538888889</longitude>
+                	<name>Laesoe</name>
+                </value>
+        </entry>
+        <entry>
+            <key>2190051</key>
+            <value>
+            	    <latitude>55.0527777779</latitude>
+                	<longitude>11.989444444</longitude>
+                	<name>Mern</name>
+                </value>
+        </entry>
+        <entry>
+            <key>2190074</key>
+            <value>
+            	    <latitude>57.7391666671</latitude>
+                	<longitude>10.5758333326</longitude>
+                	<name>Skagen</name>
+                </value>
+        </entry>
+        <entry>
+            <key>2190075</key>
+            <value>
+            	    <latitude>55.028611111</latitude>
+                	<longitude>10.6150000003</longitude>
+                	<name>Svendborg</name>
+                </value>
+        </entry>
+        <entry>
+            <key>2190048</key>
+            <value>
+            	    <latitude>56.0791666669</latitude>
+                	<longitude>12.1294444439</longitude>
+                	<name>Vejby</name>
+                </value>
+        </entry>
+        <entry>
+            <key>2190076</key>
+            <value>
+            	    <latitude>55.675833333</latitude>
+                	<longitude>9.50416666714</longitude>
+                	<name>Vejle</name>
+                </value>
+        </entry>
+        <entry>
+            <key>9</key>
+            <value>
+            	    <latitude>55.5178333333</latitude>
+                	<longitude>9.75416666667</longitude>
+                	<name>Fredericia</name>
+                </value>
+        </entry>
+        <entry>
+            <key>8</key>
+            <value>
+            	    <latitude>55.2971666667</latitude>
+                	<longitude>10.8128333333</longitude>
+                	<name>Nyborg havn</name>
+                </value>
+        </entry>
+        <entry>
+            <key>4</key>
+            <value>
+            	    <latitude>55.4642555556</latitude>
+                	<longitude>8.44803611111</longitude>
+                	<name>Esbjerg havn</name>
+                </value>
+        </entry>
+        <entry>
+            <key>6</key>
+            <value>
+            	    <latitude>57.0478</latitude>
+                	<longitude>10.0501833333</longitude>
+                	<name>Aalborg havn</name>
+                </value>
+        </entry>
+        <entry>
+            <key>5</key>
+            <value>
+            	    <latitude>55.14587</latitude>
+                	<longitude>10.95194</longitude>
+                	<name>Hirtshals havn</name>
+                </value>
+        </entry>
+        <entry>
+            <key>13</key>
+            <value>
+            	    <latitude>55.5389166667</latitude>
+                	<longitude>5.03316666667</longitude>
+                	<name>MOG - Maersk Olie Gas</name>
+                </value>
+        </entry>
+        <entry>
+            <key>7</key>
+            <value>
+            	    <latitude>55.6733</latitude>
+                	<longitude>11.0976</longitude>
+                	<name>Kalundborg havn</name>
+                </value>
+        </entry>
+        <entry>
+            <key>14</key>
+            <value>
+            	    <latitude>0</latitude>
+                	<longitude>0</longitude>
+                	<name>E.ON Roedsand 2</name>
+                </value>
+        </entry>
+        <entry>
+            <key>44</key>
+            <value>
+            	    <latitude>54.65498</latitude>
+                	<longitude>11.34902</longitude>
+                	<name>DONG Horns Rev 2</name>
+                </value>
+        </entry>
+        <entry>
+            <key>54</key>
+            <value>
+            	    <latitude>0</latitude>
+                	<longitude>0</longitude>
+                	<name>DONG Energy E, Olieledning</name>
+                </value>
+        </entry>
+        <entry>
+            <key>992190917</key>
+            <value>
+            	    <latitude>55.3206666667</latitude>
+                	<longitude>15.1871666667</longitude>
+                	<name>Christiansoe</name>
+                </value>
+        </entry>
+        <entry>
+            <key>40</key>
+            <value>
+            	    <latitude>0</latitude>
+                	<longitude>0</longitude>
+                	<name>Nuuk Havn</name>
+                </value>
+        </entry>
+        <entry>
+            <key>41</key>
+            <value>
+            	    <latitude>0</latitude>
+                	<longitude>0</longitude>
+                	<name>Qaqortoq Havn</name>
+                </value>
+        </entry>
+        <entry>
+            <key>992190918</key>
+            <value>
+            	    <latitude>56.9995</latitude>
+                	<longitude>9.29416666667</longitude>
+                	<name>Aggersundbroen</name>
+                </value>
+        </entry>
+        <entry>
+            <key>992190920</key>
+            <value>
+            	    <latitude>57.1382666667</latitude>
+                	<longitude>9.31043333333</longitude>
+                	<name>Svinklov Plantage</name>
+                </value>
+        </entry>
+        <entry>
+            <key>53</key>
+            <value>
+            	    <latitude>0</latitude>
+                	<longitude>0</longitude>
+                	<name>Skagen Fyr Vest</name>
+                </value>
+        </entry>
+        <entry>
+            <key>992190935</key>
+            <value>
+            	    <latitude>55.969167</latitude>
+                	<longitude>11.969167</longitude>
+                	<name>Kongsøre (isefjorden)</name>
+                </value>
+        </entry>
+        <entry>
+            <key>2</key>
+            <value>
+            	    <latitude>56.1533333333</latitude>
+                	<longitude>10.2022222222</longitude>
+                	<name>Aarhus Havn</name>
+                </value>
+        </entry>
+         <entry>
+            <key>992190910</key>
+            <value>
+            	    <latitude>55.6955555556</latitude>
+                	<longitude>12.0891666667</longitude>
+                	<name>Risø</name>
+                </value>
+        </entry>
+        <entry>
+            <key>992190916</key>
+            <value>
+            	    <latitude>55.0999222222</latitude>
+                	<longitude>14.6871861111</longitude>
+                	<name>Rønne Havn</name>
+                </value>
+        </entry>
+        <entry>
+            <key>992190913</key>
+            <value>
+            	    <latitude>54.851</latitude>
+                	<longitude>10.5105833333</longitude>
+                	<name>Marstal Navigations skole</name>
+                </value>
+        </entry>
+        <entry>
+            <key>43</key>
+            <value>
+            	    <latitude>0</latitude>
+                	<longitude>0</longitude>
+                	<name>Site test</name>
+                </value>
+        </entry>
+        <entry>
+            <key>3</key>
+            <value>
+            	    <latitude>0</latitude>
+                	<longitude>0</longitude>
+                	<name>Mssis data exhang</name>
+                </value>
+        </entry>
+        <entry>
+            <key>992190911</key>
+            <value>
+            	    <latitude>55.5365</latitude>
+                	<longitude>12.7115</longitude>
+                	<name>Drogden</name>
+                </value>
+        </entry>
+        <entry>
+            <key>992190921</key>
+            <value>
+            	    <latitude>57.4072833333</latitude>
+                	<longitude>10.5160666667</longitude>
+                	<name>Bangsbo - Frederikshavn</name>
+                </value>
+        </entry>
+        <entry>
+            <key>992190922</key>
+            <value>
+            	    <latitude>56.6999833333</latitude>
+                	<longitude>8.22175</longitude>
+                	<name>Thyboron</name>
+                </value>
+        </entry>
+        <entry>
+            <key>992190923</key>
+            <value>
+            	    <latitude>56.5186833333</latitude>
+                	<longitude>10.727</longitude>
+                	<name>Bonnerup Djursland N</name>
+                </value>
+        </entry>
+        <entry>
+            <key>992190924</key>
+            <value>
+            	    <latitude>57.17313</latitude>
+                	<longitude>11.02617</longitude>
+                	<name>Laeso</name>
+                </value>
+        </entry>
+        <entry>
+            <key>992190925</key>
+            <value>
+            	    <latitude>56.4299</latitude>
+                	<longitude>11.3114</longitude>
+                	<name>Anholt</name>
+                </value>
+        </entry>
+        <entry>
+            <key>992190927</key>
+            <value>
+            	    <latitude>55.6102777778</latitude>
+                	<longitude>7.62694444444</longitude>
+                	<name>Hon Langeland</name>
+                </value>
+        </entry>
+        <entry>
+            <key>992190927</key>
+            <value>
+            	    <latitude>56.00485</latitude>
+                	<longitude>11.16723</longitude>
+                	<name>Sj. Odde</name>
+                </value>
+        </entry>
+        <entry>
+            <key>992190928</key>
+            <value>
+            	    <latitude>54.5412</latitude>
+                	<longitude>10.4292</longitude>
+                	<name>Keldsnord Langeland</name>
+                </value>
+        </entry>
+        <entry>
+            <key>992190912</key>
+            <value>
+            	    <latitude>56.0003833333</latitude>
+                	<longitude>8.12913333333</longitude>
+                	<name>Hvide Sande</name>
+                </value>
+        </entry>
+        <entry>
+            <key>992190903</key>
+            <value>
+            	    <latitude>54.8528333333</latitude>
+                	<longitude>9.98733333333</longitude>
+                	<name>Kegnaes</name>
+                </value>
+        </entry>
+        <entry>
+            <key>992190907</key>
+            <value>
+            	    <latitude>55.0861111111</latitude>
+                	<longitude>8.56694444444</longitude>
+                	<name>Roemoe</name>
+                </value>
+        </entry>
+        <entry>
+            <key>993310001</key>
+            <value>
+            	    <latitude>0</latitude>
+                	<longitude>0</longitude>
+                	<name>Thule Airbase</name>
+                </value>
+        </entry>
+        <entry>
+            <key>992190929</key>
+            <value>
+            	    <latitude>56.0290666667</latitude>
+                	<longitude>12.6075166667</longitude>
+                	<name>Helsingor</name>
+                </value>
+        </entry>
+        <entry>
+            <key>992190930</key>
+            <value>
+            	    <latitude>54.5736</latitude>
+                	<longitude>12.3292</longitude>
+                	<name>Mons Klint</name>
+                </value>
+        </entry>
+        <entry>
+            <key>992190931</key>
+            <value>
+            	    <latitude>54.39304</latitude>
+                	<longitude>11.2094</longitude>
+                	<name>Rodby Havn</name>
+                </value>
+        </entry>
+        <entry>
+            <key>992190932</key>
+            <value>
+            	    <latitude>54.34207</latitude>
+                	<longitude>11.56555</longitude>
+                	<name>Gedser</name>
+                </value>
+        </entry>
+        <entry>
+            <key>42</key>
+            <value>
+            	    <latitude>0</latitude>
+                	<longitude>0</longitude>
+                	<name>Tasiilag Havn</name>
+                </value>
+        </entry>
+        <entry>
+            <key>100</key>
+            <value>
+            	    <latitude>0</latitude>
+                	<longitude>0</longitude>
+                	<name>Norge</name>
+                </value>
+        </entry>
+        <entry>
+            <key>46</key>
+            <value>
+            	    <latitude>0</latitude>
+                	<longitude>0</longitude>
+                	<name>DANSURVEY-Rødby havn</name>
+                </value>
+        </entry>
+        <entry>
+            <key>992190934</key>
+            <value>
+            	    <latitude>0</latitude>
+                	<longitude>0</longitude>
+                	<name>Akraberg fyr</name>
+                </value>
+        </entry>
+        <entry>
+            <key>992190902</key>
+            <value>
+            	    <latitude>55.276327</latitude>
+                	<longitude>12.118718</longitude>
+                	<name>Køge havn</name>
+                </value>
+        </entry>
+        <entry>
+            <key>992190906</key>
+            <value>
+            	    <latitude>54.95345</latitude>
+                	<longitude>12.4662</longitude>
+                	<name>Klintholm Rst</name>
+                </value>
+        </entry>
+        <entry>
+            <key>51</key>
+            <value>
+            	    <latitude>0</latitude>
+                	<longitude>0</longitude>
+                	<name>AISBOX Stream Test</name>
+                </value>
+        </entry>
+        <entry>
+            <key>52</key>
+            <value>
+            	    <latitude>0</latitude>
+                	<longitude>0</longitude>
+                	<name>Enstedværket DONG</name>
+                </value>
+        </entry>
+        <entry>
+            <key>802</key>
+            <value>
+            	    <latitude>0</latitude>
+                	<longitude>0</longitude>
+                	<name>ExactEarth AIS - Canada reg=802</name>
+                </value>
+        </entry>
+        <entry>
+            <key>56</key>
+            <value>
+            	    <latitude>0</latitude>
+                	<longitude>0</longitude>
+                	<name>DONG SIRI</name>
+                </value>
+        </entry>
+        <entry>
+            <key>55</key>
+            <value>
+            	    <latitude>0</latitude>
+                	<longitude>0</longitude>
+                	<name>Skive Bådebyggeri</name>
+                </value>
+        </entry>
+        <entry>
+            <key>992190936</key>
+            <value>
+            	    <latitude>55.011620</latitude>
+                	<longitude>9.263321</longitude>
+                	<name>992190936</name>
+                </value>
+        </entry>
+        <entry>
+            <key>992190937</key>
+            <value>
+            	    <latitude>57.4493</latitude>
+                	<longitude>10.3571</longitude>
+                	<name>992190937</name>
+                </value>
+        </entry>
+    </sourceNameMap>
 	
 	<!--Specifies where to store coverage data.
 	Currently supported types are: "MemoryOnly" or "MongoDB".
@@ -34,5 +629,7 @@ Reads AIS messages from FILE and saves coverage data to memory only.
 		<webappPath>web</webappPath>
 		<contextPath>/coverage</contextPath>
 	</serverConfiguration>
+	
+
 	
 </aisCoverageConfiguration>

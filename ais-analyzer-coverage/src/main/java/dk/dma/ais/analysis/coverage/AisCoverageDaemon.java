@@ -35,6 +35,7 @@ import dk.dma.commons.app.AbstractDaemon;
 public class AisCoverageDaemon extends AbstractDaemon {
 
     private static final Logger LOG = LoggerFactory.getLogger(AisCoverageDaemon.class);
+    
 
     @Parameter(names = "-file", description = "AisCoverage configuration file")
     String confFile = "coverage-sample.xml";
@@ -67,7 +68,7 @@ public class AisCoverageDaemon extends AbstractDaemon {
     }
 
     @Override
-    protected void shutdown() {
+    public void shutdown() {
         LOG.info("Shutting down");
         if (aisCoverage != null) {
             aisCoverage.stop();
@@ -76,13 +77,13 @@ public class AisCoverageDaemon extends AbstractDaemon {
     }
 
     public static void main(String[] args) throws Exception {
-        Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler() {            
-            @Override
-            public void uncaughtException(Thread t, Throwable e) {
-                LOG.error("Uncaught exception in thread " + t.getClass().getCanonicalName() + ": " + e.getMessage(), t);
-                System.exit(-1);
-            }
-        });
+//        Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler() {            
+//            @Override
+//            public void uncaughtException(Thread t, Throwable e) {
+//                LOG.error("Uncaught exception in thread " + t.getClass().getCanonicalName() + ": " + e.getMessage(), t);
+//                System.exit(-1);
+//            }
+//        });
         new AisCoverageDaemon().execute(args);
     }
 

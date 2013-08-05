@@ -15,11 +15,20 @@
  */
 package dk.dma.ais.analysis.coverage.rest;
 
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.GET;
@@ -32,16 +41,22 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriInfo;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import dk.dma.ais.analysis.coverage.AisCoverage;
+import dk.dma.ais.analysis.coverage.AisCoverageGUI;
 import dk.dma.ais.analysis.coverage.CoverageHandler;
-import dk.dma.ais.analysis.coverage.data.BaseStation;
+import dk.dma.ais.analysis.coverage.data.Source;
 import dk.dma.ais.analysis.coverage.data.Cell;
 import dk.dma.ais.analysis.coverage.data.ICoverageData;
 import dk.dma.ais.analysis.coverage.data.OnlyMemoryData;
+import dk.dma.ais.analysis.coverage.data.TimeSpan;
 import dk.dma.ais.analysis.coverage.data.json.JSonCoverageMap;
 import dk.dma.ais.analysis.coverage.data.json.JsonConverter;
 import dk.dma.ais.analysis.coverage.data.json.JsonSource;
 import dk.dma.ais.analysis.coverage.export.KMLGenerator;
+import dk.dma.ais.data.AisVesselTarget;
 
 /**
  * JAX-RS rest services
@@ -50,6 +65,7 @@ import dk.dma.ais.analysis.coverage.export.KMLGenerator;
 public class CoverageRestService {
 
     private final CoverageHandler handler;
+    private static final Logger LOG = LoggerFactory.getLogger(CoverageRestService.class);
     
 
     public CoverageRestService() {
@@ -63,7 +79,7 @@ public class CoverageRestService {
         Objects.requireNonNull(handler);
         Map<String, String> map = new HashMap<String, String>();
         map.put("q", q);
-        System.out.println(q);
+        LOG.debug(q);
         return map;
     }
 
@@ -89,8 +105,8 @@ public class CoverageRestService {
     @Produces(MediaType.APPLICATION_JSON)
     public Map<String, JsonSource> sources(@Context UriInfo uriInfo) {
         Objects.requireNonNull(handler);
-        System.out.println("get sources");
-		Collection<BaseStation> sources = handler.getDistributeCalc().getDataHandler().getSources();
+        LOG.info("getting sources");
+		Collection<Source> sources = handler.getDistributeCalc().getDataHandler().getSources();
 		return JsonConverter.toJsonSources(sources);
     }
     
@@ -109,8 +125,6 @@ public class CoverageRestService {
 		
 		int multiplicationFactor = Integer.parseInt(request.getParameter("multiplicationFactor"));
 		
-//		System.out.println(multiplicationFactor);
-		
 		double latStart = Double.parseDouble(areaArray[0]);
 		double lonStart = Double.parseDouble(areaArray[1]);
 		double latEnd = Double.parseDouble(areaArray[2]);
@@ -121,7 +135,6 @@ public class CoverageRestService {
 			String[] sourcesArray = sources.split(",");	
 			for (String string : sourcesArray) {
 				sourcesMap.put(string, true);
-//				System.out.println(string);
 			}
 		}		
 		
@@ -132,8 +145,6 @@ public class CoverageRestService {
     @Path("export")
     @Produces(MediaType.APPLICATION_JSON)
     public Object export(@QueryParam("exportType") String exportType, @QueryParam("exportMultiFactor") String exportMultiFactor, @Context HttpServletResponse response) {
-    	System.out.println("we need to return the KML");
-
 
 		int multiplicity = Integer.parseInt(exportMultiFactor);
 		
@@ -142,28 +153,19 @@ public class CoverageRestService {
 		ICoverageData dh = new OnlyMemoryData();
 		
 		
-		Collection<BaseStation> sources = handler.getDistributeCalc().getDataHandler().getSources();
+		Collection<Source> sources = handler.getDistributeCalc().getDataHandler().getSources();
 		
 //		Collection<BaseStation> superSource = covH.getSupersourceCalculator().getDataHandler().getSources();
 		
-		BaseStation superbs = handler.getSupersourceCalc().getDataHandler().getSource("supersource");	
+		Source superbs = handler.getSupersourceCalc().getDataHandler().getSource("supersource");	
 		
-		System.out.println("super source loaded " + superbs.getLatSize());
-		
-		System.out.println(sources.size());
-		
-		
-		for (BaseStation bs : sources) {
-			BaseStation summedbs = dh.createSource(bs.getIdentifier());
+		for (Source bs : sources) {
+			Source summedbs = dh.createSource(bs.getIdentifier());
 			summedbs.setLatSize(bs.getLatSize()*multiplicity);
 			summedbs.setLonSize(bs.getLonSize()*multiplicity);
 			dh.setLatSize(bs.getLatSize()*multiplicity);
 			dh.setLonSize(bs.getLonSize()*multiplicity);
-//			System.out.println(summedbs.getLatSize());
 //			BaseStation tempSource = new BaseStation(basestation.getIdentifier(), gridHandler.getLatSize()*multiplicationFactor, gridHandler.getLonSize()*multiplicationFactor);
-			
-			
-//			System.out.println("source created: " + summedbs.getIdentifier());
 			
 			Collection<Cell> cells = bs.getGrid().values();
 			
@@ -177,20 +179,70 @@ public class CoverageRestService {
 				dhCell.addReceivedSignals(cell.getNOofReceivedSignals());
 				dhCell.addNOofMissingSignals((superbs.getGrid().get(cell.getId()).getTotalNumberOfMessages() - cell.getNOofReceivedSignals()));
 				
-				//debug printing
-//				System.out.println("cell for export created: " + summedbs.getCell(cell.getLatitude(), cell.getLongitude()).getNOofReceivedSignals() + "-" + summedbs.getCell(cell.getLatitude(), cell.getLongitude()).getNOofMissingSignals());
-				
+//				LOG.debug("cell for export created: " + summedbs.getCell(cell.getLatitude(), cell.getLongitude()).getNOofReceivedSignals() + "-" + summedbs.getCell(cell.getLatitude(), cell.getLongitude()).getNOofMissingSignals());
 			}
-			
-//			System.out.println(summedbs.getGrid().size());
 		}
-		
-		System.out.println(dh.getSources().size());
-
-		
-		//TODO print cells to kml with larger cellsize then the standart one (multiplication factor)
-	
 		KMLGenerator.generateKML(dh.getSources(), dh.getLatSize(), dh.getLonSize(), response);
 		return null;
     }
+    
+    @GET
+    @Path("satCoverage")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Object satCoverage(@Context HttpServletRequest request) {
+    	double latTop = 62.47;
+    	double latBottom = 57.5;
+    	double lonRight = -35;
+    	double lonLeft = -55;
+    	
+    	return JsonConverter.toJsonTimeSpan(handler.getSatCalc().getTimeSpans(latTop, lonLeft, latBottom, lonRight));
+    }
+    
+    @GET
+    @Path("satExport")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Object satExport(@QueryParam("test") String test,  @Context HttpServletResponse response) throws IOException {
+    	double latTop = 62.47;
+    	double latBottom = 57.5;
+    	double lonRight = -35;
+    	double lonLeft = -55;
+    	
+
+    	SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy HH:mm");
+		response.setContentType("text/plain");
+		response.setHeader("Content-Disposition", "attachment; filename=" + "satexport.txt");
+		ServletOutputStream out = response.getOutputStream();
+		
+		
+		List<TimeSpan> timeSpans = handler.getSatCalc().getTimeSpans(latTop, lonLeft, latBottom, lonRight);
+		TimeSpan first = null;
+		TimeSpan previous = null;
+		for (TimeSpan timeSpan : timeSpans) {
+			if(first == null)
+				first = timeSpan;
+			
+			long timeSinceLastTimeSpan = 0;
+			if(previous != null)
+				timeSinceLastTimeSpan=Math.abs(timeSpan.getFirstMessage().getTime() - previous.getLastMessage().getTime())/1000/60;
+				
+			//last is determined by the order of receival, but it is not guaranteed that the tag is actually the last
+			//from time, to time, data time, time since last timespan, accumulated time, signals, distinct ships
+			String outstring = 	formatter.format(timeSpan.getFirstMessage())+","+	//from time
+								formatter.format(timeSpan.getLastMessage())+","+	//to time 
+								Math.abs(timeSpan.getLastMessage().getTime()-timeSpan.getFirstMessage().getTime())/1000/60+","+		//Timespan length
+								timeSinceLastTimeSpan+","+		// Time since last timestamp
+								Math.abs(timeSpan.getLastMessage().getTime()-first.getLastMessage().getTime())/1000/60+","+		//accumulated time
+								timeSpan.getMessageCounter()+ ","+	//signals
+								timeSpan.getDistinctShips().size()+	//distinct ships
+								"\n";
+			out.write(outstring.getBytes());
+			previous=timeSpan;
+
+		}
+		out.flush();
+
+		return null;
+    }
+    
+   
 }

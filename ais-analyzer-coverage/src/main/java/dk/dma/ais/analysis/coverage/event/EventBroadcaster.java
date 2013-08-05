@@ -3,9 +3,6 @@ package dk.dma.ais.analysis.coverage.event;
 import java.util.ArrayList;
 import java.util.List;
 
-
-
-
 /**
  * Useful for listening for AIS events, just register a IAisEventListener.
  * Other objects can broadcast events to listeners via broadcastEvent(AisEvent).
@@ -22,25 +19,20 @@ public class EventBroadcaster {
 			listener.aisEventReceived(event);
 		}
 	}
-
 	public void addProjectHandlerListener(IAisEventListener listener){
 		listeners.add(listener);
 	}
-	
 	//Singleton stuff
 	private static EventBroadcaster singletonObject;
-
 	private EventBroadcaster() {
 
 	}
-		
 	public static synchronized EventBroadcaster getInstance() {
 		if (singletonObject == null) {
 			singletonObject = new EventBroadcaster();
 		}
 		return singletonObject;
 	}
-		
 	public Object clone() throws CloneNotSupportedException {
 		throw new CloneNotSupportedException();
 	}

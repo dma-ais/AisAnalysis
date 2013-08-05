@@ -1,0 +1,79 @@
+
+<!DOCTYPE html>
+
+<html>
+<head>
+	
+	<title>Bar Charts</title>
+	<script type="text/javascript" src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+    <script src="js/jqBarGraph.1.1.js" defer="defer" type="text/javascript"></script>
+    <script src="js/AisJsonClient.js" defer="defer" type="text/javascript"></script>
+    <link rel="stylesheet" type="text/css" href="css/bargenerator.css">
+    
+    
+   
+</head>
+<body>
+<div id="outer" style="width:500px;">
+ <div id="test" style="margin: 100px;"></div>
+ </div>
+ 
+  <script type="text/javascript">
+  
+  function getParameterByName(name) {
+	    name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
+	    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+	        results = regex.exec(location.search);
+	    return results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+	}
+  
+  var lat1 = getParameterByName('lat1');
+  var lon1 = getParameterByName('lon1');
+  var lat2 = getParameterByName('lat2');
+  var lon2 = getParameterByName('lon2');
+  
+//   var aisJsonClient = new AisJsonClient();
+  
+  var arrayOfData = []; 
+  
+//   alert(arrayOfData);
+  $(document).ready(function(){
+	  var aisJsonClient = new AisJsonClient();
+	  if(lat1 == "" || lat2 == "" || lon1 == "" || lon2 == ""){
+		  $('#test').html("empty");
+	  }else{
+		  //get graph data
+		  aisJsonClient.getSatCoverage(new Array(lat1, lon1, lat2, lon2), function(sources){
+			  
+			  var first = true;
+			$.each(sources, function(key, source) {
+// 				alert(key+" "+source.fromTime);
+				if(!first){
+					arrayOfData.push(['',source.timeSinceLastSpan+' min','#cccccc', source.timeSinceLastSpan*2]);
+				}else{
+					first=false;
+				}
+				arrayOfData.push([source.signals,source.spanLength+ " min",'#cccccc', source.spanLength*2]);
+				
+				
+
+	    	});
+				
+			//print graph
+			  $('#test').jqbargraph({
+				  	 data: arrayOfData
+			});
+		});
+		  
+		  
+		  
+	  }
+	  
+    });
+  </script>
+    
+
+</body>
+
+
+</html>

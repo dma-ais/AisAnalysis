@@ -39,7 +39,7 @@ public class AbnormalStatisticsDaemon extends AbstractDaemon {
     }
 
     @Override
-    protected void shutdown() {
+    public void shutdown() {
         LOG.info("Shutting down");
         super.shutdown();
     }

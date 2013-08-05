@@ -9,11 +9,17 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import dk.dma.ais.analysis.coverage.AisCoverageGUI;
+
 
 
 public class SimpleDiskBasedData extends OnlyMemoryData {
 	private int intervalMinutes = 15;
 	private String filename = "coverageData.db";
+	private static final Logger LOG = LoggerFactory.getLogger(SimpleDiskBasedData.class);
 	
 	public SimpleDiskBasedData(){
 		load();
@@ -27,6 +33,7 @@ public class SimpleDiskBasedData extends OnlyMemoryData {
 						e.printStackTrace();
 					}
 		    		save();
+//		    		LOG.info("data saved to disk");
 		    	}
 		        
 		    }
@@ -37,12 +44,12 @@ public class SimpleDiskBasedData extends OnlyMemoryData {
 		long starttime = System.currentTimeMillis();
 		try {
 			ObjectInputStream in = new ObjectInputStream(new BufferedInputStream(new FileInputStream(filename)));
-			BaseStationHandler handler = (BaseStationHandler) in.readObject();
+			SourceHandler handler = (SourceHandler) in.readObject();
 			this.gridHandler = handler;
-			System.out.println("DB loaded in " + (System.currentTimeMillis()-starttime));
+			LOG.info("DB loaded in " + (System.currentTimeMillis()-starttime));
 		} catch (Exception e) {
-			System.out.println("Using new DB");
-			System.out.println(e.getMessage());
+			LOG.info("DB not found, using new DB");
+			LOG.error(e.getMessage());
 		} 
 		
 	}
@@ -52,10 +59,9 @@ public class SimpleDiskBasedData extends OnlyMemoryData {
 			ObjectOutputStream out = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(filename)));
 			out.writeObject(this.gridHandler);
 			out.close();
-			
-			System.out.println("Project saved in " + (System.currentTimeMillis()-starttime) );
-			
+			LOG.info("project saved in " + (System.currentTimeMillis()-starttime));
 		} catch (IOException e) {
+			LOG.error(e.getMessage());
 			e.printStackTrace();
 		}
 	}
@@ -65,7 +71,6 @@ public class SimpleDiskBasedData extends OnlyMemoryData {
 	 */
 	public static void main(String[] args) {
 		new SimpleDiskBasedData();
-
 	}
 	public String getFilename() {
 		return filename;

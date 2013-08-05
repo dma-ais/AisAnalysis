@@ -32,5 +32,11 @@ function AisJsonClient (serverurl) {
     		callback(data);
     	}); 
     }
+    
+    this.getSatCoverage = function(rectangle, callback){
+    	$.get('/coverage/rest/satCoverage', { area: rectangle}, function(data) {
+    		callback(data);
+    	}); 
+    }
  
 }

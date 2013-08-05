@@ -1,0 +1,70 @@
+@CHARSET "ISO-8859-1";
+
+body{
+	font-family:Arial,Helvetica,sans-serif;
+	font-size:small;
+}
+.rotate {
+	bottom:-5px;
+	position:absolute;
+	white-space:nowrap;
+
+	width:100px;
+  -webkit-transform: rotate(90deg);
+  -moz-transform: rotate(90deg);
+  -ms-transform: rotate(90deg);
+  -o-transform: rotate(90deg);
+  transform: rotate(90deg);
+
+	text-align:right;
+
+  /* Should be unset in IE9+ I think. */
+  filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=3);
+}
+.betweenSpanLabel{
+	font-size:x-small;
+	color: #B3B2B0;
+}
+.timeSpanLabel{
+/* 	font-weight:bold; */
+	font-size:x-small;
+}
+.bar{
+	position: absolute;
+}
+.value{
+	position: absolute;
+	width:100px;
+	text-align:center;
+}
+#outer{
+	border-bottom:1px solid black;
+	border-left:1px solid black;
+	margin:0px auto;
+	margin-top:100px;
+}
+.line{
+	position:absolute;
+	width:1px;
+	height:100%;
+	border-left:1px solid #cccccc;
+}
+.labelDate{
+	font-family:Arial,Helvetica,sans-serif;
+	font-size:small;
+	top:-40px;
+	position:absolute;
+	white-space:nowrap;
+
+	width:100px;
+  -webkit-transform: rotate(90deg);
+  -moz-transform: rotate(90deg);
+  -ms-transform: rotate(90deg);
+  -o-transform: rotate(90deg);
+  transform: rotate(90deg);
+
+	text-left;
+
+  /* Should be unset in IE9+ I think. */
+  filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=3);
+}

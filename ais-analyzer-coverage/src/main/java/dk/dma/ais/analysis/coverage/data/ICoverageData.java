@@ -22,11 +22,10 @@ public interface ICoverageData {
 	List<Cell> getCells(Map<String, Boolean> sources);
 	List<Cell> getCells(double latStart, double lonStart, double latEnd, double lonEnd, Map<String, Boolean> sources, int multiplicationFactor);
 	
-	BaseStation getSource(String sourceId);
-	BaseStation createSource(String sourceId);
+	Source getSource(String sourceId);
+	Source createSource(String sourceId);
 	String[] getSourceNames();
-	Collection<BaseStation> getSources();
-	
+	Collection<Source> getSources();
 	
 	void setLatSize(double latsize);
 	void setLonSize(double lonsize);

@@ -14,12 +14,13 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 
-import dk.dma.ais.analysis.coverage.data.BaseStation;
-import dk.dma.ais.analysis.coverage.data.BaseStation.ReceiverType;
+import dk.dma.ais.analysis.coverage.data.Source;
+import dk.dma.ais.analysis.coverage.data.Source.ReceiverType;
 import dk.dma.ais.analysis.coverage.data.Cell;
 import dk.dma.ais.analysis.coverage.data.CustomMessage;
 import dk.dma.ais.analysis.coverage.data.Ship;
 import dk.dma.ais.analysis.coverage.data.Ship.ShipClass;
+import dk.dma.ais.analysis.coverage.data.Station;
 import dk.dma.ais.analysis.coverage.event.AisEvent;
 import dk.dma.ais.analysis.coverage.event.AisEvent.Event;
 import dk.dma.ais.analysis.coverage.event.IAisEventListener;
@@ -47,7 +48,9 @@ public class SupersourceCoverageCalculator extends AbstractCalculator {
 	private int degreesPerMinute = 20;
 	private boolean ignoreRotation;
 	private List<IAisEventListener> listeners = new ArrayList<IAisEventListener>();
+	public boolean debug = false;
 	private LinkedHashMap<String, CustomMessage> doubletBuffer = new LinkedHashMap<String, CustomMessage>()
+			
 			  {
 	     @Override
 	     protected boolean removeEldestEntry(Map.Entry eldest)
@@ -65,26 +68,16 @@ public class SupersourceCoverageCalculator extends AbstractCalculator {
 		}
 	}
 
-//	public SupersourceCoverageCalculator(AisCoverageProject project, boolean ignoreRotation) {
-//		super(project);
-//		this.ignoreRotation = ignoreRotation;
-//		
-//		
-//	}
-	public SupersourceCoverageCalculator(boolean ignoreRotation) {
-		super();
+	public SupersourceCoverageCalculator(boolean ignoreRotation, HashMap<String, Station> map) {
+		super(map);
 		this.ignoreRotation = ignoreRotation;
-		
-		
 	}
 
 	private boolean checkDoublets(CustomMessage m){
 		String key = m.getKey();
-//		System.out.println(key);
 
 		//if message exist in queue return true, otherwise false.
 		if(doubletBuffer.containsKey(key)){
-//			System.out.println(bufferInSeconds);
 			return true;
 		}
 		doubletBuffer.put(key, m);		
@@ -112,10 +105,8 @@ public class SupersourceCoverageCalculator extends AbstractCalculator {
 			for (CustomMessage m : list) {
 				this.broadcastEvent(new AisEvent(Event.AISMESSAGE_REJECTED,this,m));
 			}
-			
 			return;
-		}
-		
+		}		
 
 		// Time difference between first and last message in buffer
 		CustomMessage firstMessage = ship.getFirstMessageInBuffer();
@@ -163,7 +154,7 @@ public class SupersourceCoverageCalculator extends AbstractCalculator {
 	private void calculateMissingPoints(CustomMessage m1, CustomMessage m2,
 			boolean rotating) {
 		
-		BaseStation source = dataHandler.getSource(m1.getSourceMMSI());
+		Source source = dataHandler.getSource(m1.getSourceMMSI());
 		Ship ship = dataHandler.getShip(m1.getSourceMMSI(), m1.getShipMMSI());
 		
 		// Get cell from first message and increment message count
@@ -171,7 +162,6 @@ public class SupersourceCoverageCalculator extends AbstractCalculator {
 		if (cell == null) {
 			cell = dataHandler.createCell(source.getIdentifier(), m1.getLatitude(), m1.getLongitude());
 		}
-		
 		dataHandler.getSource(source.getIdentifier()).incrementMessageCount();
 		cell.incrementNOofReceivedSignals();
 		dataHandler.updateCell(cell);
@@ -193,7 +183,6 @@ public class SupersourceCoverageCalculator extends AbstractCalculator {
 		int sog = (int) m2.getSog();
 		double expectedTransmittingFrequency = getExpectedTransmittingFrequency(
 				sog, rotating, ship.getShipClass());
-
 		/*
 		 * Calculate missing messages and increment missing signal to
 		 * corresponding cell. Lat-lon points are calculated to metric x-y
@@ -211,7 +200,6 @@ public class SupersourceCoverageCalculator extends AbstractCalculator {
 			// Finds lat/lon of each missing point and adds "missing signal" to
 			// corresponding cell
 			for (int i = 1; i <= missingMessages; i++) {
-
 				double xMissing = getX((i * expectedTransmittingFrequency),
 						p1Time, p2Time, p1X, p2X);
 				double yMissing = getY(i * expectedTransmittingFrequency,
@@ -258,6 +246,7 @@ public class SupersourceCoverageCalculator extends AbstractCalculator {
 			timestamp = sourceTag.getTimestamp();
 //			srcCountry = sourceTag.getCountry();
 			String region = sourceTag.getRegion();
+			//TODO update code to fit supersourcecalculator
 			if(bsmmsi == null){
 				if(!region.equals("")){
 					baseId = region;
@@ -311,13 +300,11 @@ public class SupersourceCoverageCalculator extends AbstractCalculator {
 		
 		//calculate lat lon size based on first message
 //		if(firstMessage == null){
-//			System.out.println(aisMessage.getUserId());
 //			calculateLatLonSize(pos.getLatitude());
 //		}
 
 		// Extract Base station
-//		BaseStation baseStation = extractBaseStation(baseId, receiverType);
-		BaseStation baseStation = extractBaseStation("supersource", ReceiverType.NOTDEFINED);
+		Source baseStation = extractBaseStation("supersource", ReceiverType.NOTDEFINED);
 
 		// Extract ship
 		Ship ship = extractShip(aisMessage.getUserId(), shipClass, baseStation);
