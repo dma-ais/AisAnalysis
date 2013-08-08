@@ -21,8 +21,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-
-
 public class Cell {
 	
 	
@@ -30,8 +28,6 @@ public class Cell {
 	private Map<Long, Ship> ships = new ConcurrentHashMap<Long, Ship>();
 	private Long NOofReceivedSignals=0L; 
 	private Long NOofMissingSignals=0L;
-//	private int NOofReceivedSignals =0;
-//	private int NOofMissingSignals =0;
 	private double latitude;
 	private double longitude;
 	private String id;
@@ -57,11 +53,14 @@ public class Cell {
 		this.longitude = lon;
 		this.id = id;
 	}
-
-	
-//	public Cell(Source baseStation, double lat, double lon, String id) {
-//	    this(lat, lon, id);
-//        }
+//<<<<<<< HEAD
+//
+//	
+////	public Cell(Source baseStation, double lat, double lon, String id) {
+////	    this(lat, lon, id);
+////        }
+//=======
+//>>>>>>> 20665eed57a1ca92b14b5ee3cb767ea37b7bb973
 	
     public void incrementNOofReceivedSignals(){
 		NOofReceivedSignals++;
@@ -77,71 +76,50 @@ public class Cell {
 		return NOofReceivedSignals+NOofMissingSignals;
 	}
 	public double getCoverage(){
-//		System.out.println(NOofReceivedSignals);
-//		System.out.println(getTotalNumberOfMessages());
 		return (double)NOofReceivedSignals/ (double)getTotalNumberOfMessages();
 	}
 	public Map<Long, Ship> getShips() {
 		return ships;
 	}
-
 	public double getLatitude() {
 		return latitude;
 	}
-
 	public void setLatitude(double latitude) {
 		this.latitude = latitude;
 	}
-
 	public double getLongitude() {
 		return longitude;
 	}
-
 	public void setLongitude(double longitude) {
 		this.longitude = longitude;
 	}
-
 	public String getId() {
 		return id;
 	}
-
 	public void setId(String id) {
 		this.id = id;
 	}
-
 	public Source getGrid() {
 		return grid;
 	}
-
 	public void setGrid(Source grid) {
 		this.grid = grid;
 	}
-
 	public int getShipCount() {
 		return shipCount;
 	}
 	public Long getNOofReceivedSignals() {
 		return NOofReceivedSignals;
 	}
-
 	public Long getNOofMissingSignals() {
 		return NOofMissingSignals;
 	}
-	
-//	public int getNOofReceivedSignals() {
-//		return NOofReceivedSignals;
-//	}
-//
-//	public int getNOofMissingSignals() {
-//		return NOofMissingSignals;
-//	}
 	public void addReceivedSignals(long amount){
 		this.NOofReceivedSignals += amount;
 	}
 	public void addNOofMissingSignals(long amount) {
 		this.NOofMissingSignals+=amount;
 	}
-	
 	public void setNoofMissingSignals(long amount){
 		this.NOofMissingSignals=amount;
 	}

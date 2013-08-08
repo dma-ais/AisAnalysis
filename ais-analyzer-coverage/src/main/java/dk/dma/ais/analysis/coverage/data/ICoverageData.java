@@ -27,7 +27,6 @@ public interface ICoverageData {
 	String[] getSourceNames();
 	Collection<Source> getSources();
 	
-	
 	void setLatSize(double latsize);
 	void setLonSize(double lonsize);
 	double getLatSize();

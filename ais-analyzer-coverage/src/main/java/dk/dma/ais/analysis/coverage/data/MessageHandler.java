@@ -17,20 +17,22 @@
 //
 //import java.util.List;
 //
+//import dk.dma.ais.message.AisMessage;
+//
 //
 ///**
 // * Class for handling incoming AIS messages
 // */
 //public class MessageHandler implements IAisHandler {
 //	
-//	private AisCoverageProject project = null;
+////	private AisCoverageProject project = null;
 //	private String defaultID;
 //	
 //
-//	public MessageHandler(AisCoverageProject project, String defaultID){
-//		this.project = project;
-//		this.defaultID = defaultID;
-//	}
+////	public MessageHandler(AisCoverageProject project, String defaultID){
+//////		this.project = project;
+////		this.defaultID = defaultID;
+////	}
 //
 //
 //	/**
@@ -40,7 +42,7 @@
 //	public void receive(AisMessage aisMessage) {	
 //		
 //		// Increment count
-//		project.incrementMessageCount();
+////		project.incrementMessageCount();
 //		
 //		// Notify each calculator
 //		List<AbstractCalculator> calculators = project.getCalculators();	

@@ -13,6 +13,7 @@ import dk.dma.ais.analysis.coverage.AisCoverage;
 import dk.dma.ais.analysis.coverage.data.Source;
 import dk.dma.ais.analysis.coverage.data.Cell;
 import dk.dma.ais.analysis.coverage.data.CustomMessage;
+import dk.dma.ais.analysis.coverage.data.Station;
 import dk.dma.ais.analysis.coverage.event.AisEvent;
 import dk.dma.ais.analysis.coverage.event.AisEvent.Event;
 import dk.dma.ais.analysis.coverage.event.IAisEventListener;
@@ -40,8 +41,8 @@ public class DistributeOnlyCalculator extends AbstractCalculator implements IAis
 	     }
 	  };
 	
-	public DistributeOnlyCalculator(boolean ignoreRotation) {
-		super();
+	public DistributeOnlyCalculator(boolean ignoreRotation, HashMap<String, Station> map) {
+		super(map);
 		Thread t1 = new Thread(new Runnable(){
 			@Override
 			public void run() {
@@ -54,7 +55,7 @@ public class DistributeOnlyCalculator extends AbstractCalculator implements IAis
 					}
 					Date now = new Date();
 					int elapsed = (int) ((now.getTime()-start.getTime())/1000);
-//					System.out.println("messages/sec: "+ messagesProcessed/elapsed+ "... received messages "+receivedMessages.size());	
+//					LOG.debug("messages/sec: "+ messagesProcessed/elapsed+ "... received messages "+receivedMessages.size());
 				}
 			}
 		});
@@ -150,7 +151,6 @@ public class DistributeOnlyCalculator extends AbstractCalculator implements IAis
 			list = new HashMap<String, CustomMessage>();
 			receivedMessages.put(key, list);
 		}
-//		System.out.println(m.getLongitude());
 		
 		//we use a map, to filter doublets from a single source
 		//Apparently, a ship sometimes send the same (apparently) message multiple times

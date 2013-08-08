@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.util.HashMap;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -29,6 +30,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import dk.dma.ais.analysis.common.web.WebServerConfiguration;
 import dk.dma.ais.analysis.coverage.data.OnlyMemoryData;
+import dk.dma.ais.analysis.coverage.data.Station;
 import dk.dma.ais.configuration.bus.AisBusConfiguration;
 
 /**
@@ -42,9 +44,19 @@ public class AisCoverageConfiguration {
     private double latSize=0.0225225225;
     private double lonSize=0.0386812541;
     private DatabaseConfiguration dbConf = new DatabaseConfiguration();
+    private HashMap<String, Station> sourcenames = new HashMap<String, Station>();
 
  
 
+    public HashMap<String, Station> getSourceNameMap()
+    {
+    	return sourcenames;
+    }
+    public void setSourceNameMap(HashMap<String, Station> map)
+    {
+    	sourcenames = map;
+    }
+    
 	public DatabaseConfiguration getDatabaseConfiguration() {
 		return dbConf;
 	}

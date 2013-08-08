@@ -2,8 +2,14 @@ package dk.dma.ais.analysis.coverage.data;
 
 import java.awt.Color;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import dk.dma.ais.analysis.coverage.AisCoverage;
+
 public class ColorGenerator {
 
+	private static final Logger LOG = LoggerFactory.getLogger(ColorGenerator.class);
 	
 	private static Color[] colors = {
 		Color.RED,interpolate(Color.RED, Color.YELLOW, 0.33f),
@@ -44,7 +50,7 @@ public class ColorGenerator {
 
 			return color;
 		}catch(Exception e){
-			System.out.println("exception");
+			LOG.error(e.getMessage());
 			return Color.WHITE;
 		}
 		

@@ -69,8 +69,6 @@ function CoverageUI () {
     	});
     	
     	
-    	
-    	
     	//setup the threshold slider
     	$( "#slider-range" ).slider({
     		range: true,
@@ -282,7 +280,7 @@ function CoverageUI () {
     }
     
     this.refreshSourceList = function(){	
-    	var sourceContainer = $("#sourcesPanel  > .panelContainer");
+    	var sourceContainer = $("#sourcesPanel > .panelContainer");
     	sourceContainer.html("");
     	var sourceshtml = "";
     	$.each(self.sources, function(key, source) {
@@ -290,7 +288,7 @@ function CoverageUI () {
     		if(source.enabled){
     			checked = 'checked="checked"';
     		}
-    		sourceshtml += '<div class="legendsText" style="clear: left;height:15px;"><div class="rowElement"><input type="checkbox" class="sourceCheckbox" id="'+source.mmsi+'" '+checked+' style="margin-top:0px;" name="" value=""/></div><div class="rowElement" style="width:75px">'+source.mmsi+'</div><div  class="smallText rowElement">'+source.type+'</div></div>';
+    		sourceshtml += '<div class="legendsText" style="clear: left;height:15px;"><div class="rowElement"><input type="checkbox" class="sourceCheckbox" id="'+source.mmsi+'" '+checked+' style="margin-top:0px;" name="" value=""/></div><div class="rowElement" style="width:75px">'+source.name+'</div><div  class="smallText rowElement">'+source.type+'</div></div>';
     	});
     	sourceContainer.html(sourceshtml);
     	self.drawSources();
@@ -306,8 +304,11 @@ function CoverageUI () {
         	checked='checked="checked"';
         }
 
+
         $("#featureDetailsPanel > .panelContainer").html('<div class="smallText">Id</div>'+
                 '<div class="information">'+feature.mmsi+'</div>'+
+                '<div class="smallText">Name</div>'+
+                '<div class="information">'+feature.name+'</div>'+
                 '<div class="smallText">Type</div>'+
                 '<div class="information">'+feature.type+'</div>'+
                 '<div class="smallText">Lat</div>'+
@@ -333,6 +334,7 @@ function CoverageUI () {
     	}else{
     		image = 'img/marker2.png'
     	}
+
     	var feature = new OpenLayers.Feature.Vector(
     			new OpenLayers.Geometry.Point( val.lon , val.lat ).transform(
     					new OpenLayers.Projection("EPSG:4326"), // transform from WGS 1984
@@ -341,6 +343,7 @@ function CoverageUI () {
     			 {hmm:'100'});
 //    			 {externalGraphic: image, graphicHeight: 21, graphicWidth: 16, cursor: "crosshair", fillColor: "#ffcc66", pointRadius: "10"});
     	feature.mmsi = val.mmsi;
+    	feature.name = val.name;
     	feature.type = val.type;
     	feature.lat = val.lat;
     	feature.lon = val.lon;
@@ -459,7 +462,7 @@ function CoverageUI () {
     	});
 //    	alert(topleft);
     }
-    
+
     this.drawCoverage = function(){
     	
     	//get the multiplication factor for corresponding zoom level
@@ -513,7 +516,7 @@ function CoverageUI () {
 	  			  }else{
 	  				  color ='red';
 	  			  }
-	  			  
+
 	  			  self.drawPolygon({
 	  				  lat: val.lat,
 	  				  lon: val.lon,

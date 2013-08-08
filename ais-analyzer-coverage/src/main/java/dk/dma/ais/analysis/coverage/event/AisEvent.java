@@ -13,7 +13,6 @@ public class AisEvent {
 	
 	public AisEvent(){
 	}
-	
 	public AisEvent(Event event, Object source, Object eventObject){
 		this.event = event;
 		this.source = source;
@@ -37,5 +36,4 @@ public class AisEvent {
 	public void setEventObject(Object eventObject) {
 		this.eventObject = eventObject;
 	}
-
 }

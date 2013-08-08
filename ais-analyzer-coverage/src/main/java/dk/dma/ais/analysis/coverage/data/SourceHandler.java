@@ -28,11 +28,18 @@ public class SourceHandler implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	private ConcurrentHashMap<String, Source> baseStations = new ConcurrentHashMap<String, Source>();
-//	private double latSize = -1;
-//	private double lonSize = -1;
 	private double latSize = 0.022522522522522525;
 	private double lonSize = 0.03868125413876516;
 	private AbstractCalculator calculator;
+	
+	
+	public SourceHandler(AbstractCalculator calculator){
+		this.calculator = calculator;
+	}
+	public SourceHandler()
+	{
+		
+	}
 	
 	/*
 	 * Create grid associated to a specific transponder
@@ -50,7 +57,6 @@ public class SourceHandler implements Serializable {
 		return grid;
 	}
 	
-	
 	public void setAllVisible(boolean b){
 		Collection<Source> basestations = baseStations.values();
 		for (Source baseStation : basestations) {	
@@ -62,70 +68,25 @@ public class SourceHandler implements Serializable {
 		if(baseStation != null){
 			baseStation.setVisible(b);
 			
-//			ProjectHandler.getInstance().broadcastEvent(new AisEvent(AisEvent.Event.BS_VISIBILITY_CHANGED, calculator, baseStation));
-			
+//			ProjectHandler.getInstance().broadcastEvent(new AisEvent(AisEvent.Event.BS_VISIBILITY_CHANGED, calculator, baseStation));	
 		}
-	}
-	
-	/**
-	 * latitude is rounded down
-	 * longitude is rounded up.
-	 * The id is lat-lon-coords representing top-left point in cell
-	 */
-//	public String getCellId(double latitude, double longitude){
-//
-//		double lat;
-//		double lon;
-//		if(latitude < 0){
-//			latitude +=latSize;
-//			lat = (double)((int)(10000*((latitude)- (latitude % latSize))))/10000;
-//			
-//		}else{
-//			lat = (double)((int)(10000*((latitude)- (latitude % latSize))))/10000;
-//		}
-//		
-//		if(longitude < 0){
-//			lon = (double)((int)(10000*(longitude - (longitude % lonSize))))/10000;
-//			
-//		}else{
-//			longitude -=lonSize;
-//			lon = (double)((int)(10000*(longitude - (longitude % lonSize))))/10000;
-//		}
-//		
-//		String cellId =  lat+"_"+lon;	
-//		return cellId;
-//	}
-	
-	
+	}	
 	public Source getGrid(String bsMmsi){
 		return baseStations.get(bsMmsi);
 	}
 	public Map<String, Source> getBaseStations() {
 		return baseStations;
 	}
-	public SourceHandler(AbstractCalculator calculator){
-		this.calculator = calculator;
-	}
-	
-	public SourceHandler()
-	{
-		
-	}
-	
 	public double getLatSize() {
 		return latSize;
 	}
-
 	public void setLatSize(double latSize) {
 		this.latSize = latSize;
 	}
-
 	public double getLonSize() {
 		return lonSize;
 	}
-
 	public void setLonSize(double lonSize) {
 		this.lonSize = lonSize;
 	}
-	
 }
