@@ -70,6 +70,14 @@ function transformPosition(lon, lat){
 			map.getProjectionObject() // to Spherical Mercator Projection
 		);
 }
+function toLonLat(x, y){
+	var pixel = new OpenLayers.Pixel(x, y);
+	console.log("weh:"+y);
+	return map.getLonLatFromPixel(pixel).transform(
+			map.getProjectionObject(), // from Spherical Mercator Projection
+			new OpenLayers.Projection("EPSG:4326") // to WGS 1984
+		);
+}
 
 
 /**

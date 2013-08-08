@@ -20,6 +20,8 @@
 		<script src="js/expandable-jquery-plugin.js" defer="defer" type="text/javascript"></script>
 		<link rel="stylesheet" type="text/css" href="css/expandable.css">
 		
+		<link rel="stylesheet" type="text/css" href="css/bargenerator.css">
+		
 	</head>
 
   
@@ -31,7 +33,7 @@
 			<div id="leftSide" class="shadowsIE">
 			
 			<!-- Expandable elements are initialized in CoverageUI -->
-				<div id="sourcesPanel" class="expandable whiteOpacity"></div>
+				<div id="sourcesPanel" class="expandable whiteOpacity">hmm</div>
 				
 				<div id="featureDetailsPanel" class="expandable whiteOpacity"></div>
 
@@ -83,6 +85,12 @@
 				</div>
 			</div>
 			
+			<div id="bottomPanel" class="expandable whiteOpacity">
+				<div style="height:400px;margin:20px;">
+					<div id="outer" style="position: relative;height: 300px;"></div>
+				</div>
+			</div>
+			
 			<div id="statusPanel" class="panel whiteOpacity shadowsIE">
 				<div class="smallText">Coordinates</div>
 				<div id="location" class="information">0.0000, 0.0000</div>
@@ -107,17 +115,4 @@
 <!-- 		<div id="teest" style="position:absolute;left:300;top:300; width: 1200px; height:400px;">dfg</div> -->
 	</body>
 	
-<!-- 	<script> -->
-		
-// 	function something(){
-// 		html2canvas($("#container"), {
-// 			  onrendered: function(canvas) {
-// 			    $("#teest").append(canvas);
-// 			  },
-// 			  width: 300,
-// 			  height: 1200
-// 		});
-
-// 	}
-<!-- 		</script> -->
 </html>

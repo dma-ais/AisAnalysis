@@ -209,11 +209,19 @@ public class CoverageRestService {
     @GET
     @Path("satCoverage")
     @Produces(MediaType.APPLICATION_JSON)
-    public Object satCoverage(@Context HttpServletRequest request) {
-    	double latTop = 62.47;
-    	double latBottom = 57.5;
-    	double lonRight = -35;
-    	double lonLeft = -55;
+    public Object satCoverage(@Context HttpServletRequest request, @QueryParam("area") String area) {
+    	String[] points = area.split(",");
+    	if(points.length != 4){
+    		return null;
+    	}
+    	
+//    	System.out.println("the area "+area);
+    	double lonLeft = Double.parseDouble(points[0]);
+    	double latTop = Double.parseDouble(points[1]);
+    	double lonRight = Double.parseDouble(points[2]);
+    	double latBottom = Double.parseDouble(points[3]);
+    	
+    	
     	
     	return JsonConverter.toJsonTimeSpan(handler.getSatCalc().getTimeSpans(latTop, lonLeft, latBottom, lonRight));
     	
