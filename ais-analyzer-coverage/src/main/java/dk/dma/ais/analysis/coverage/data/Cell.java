@@ -53,14 +53,6 @@ public class Cell {
 		this.longitude = lon;
 		this.id = id;
 	}
-//<<<<<<< HEAD
-//
-//	
-////	public Cell(Source baseStation, double lat, double lon, String id) {
-////	    this(lat, lon, id);
-////        }
-//=======
-//>>>>>>> 20665eed57a1ca92b14b5ee3cb767ea37b7bb973
 	
     public void incrementNOofReceivedSignals(){
 		NOofReceivedSignals++;

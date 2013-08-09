@@ -16,13 +16,11 @@ Reads AIS messages from FILE and saves coverage data to memory only.
 <!-- 			<hostPort>80.198.195.189:80</hostPort> -->
 <!-- 		</provider> -->
 		<provider xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="fileReaderProviderConfiguration">
-<!-- <<<<<<< HEAD -->
-<!-- 			<filename>C:\Users\silentk\Desktop\aisdump.txt</filename> -->
-<!-- ======= -->
+
 <!-- 			<filename>d:\Søfart\AIS-SAT-data-04-2013\NORWAY_AIS_04-04-2013_8388.txt</filename> -->
 <!-- 			<filename>d:\Søfart\aisdump_fullday.txt</filename> -->
 				<filename>d:\Søfart\putty.log</filename>
-<!-- >>>>>>> 1b874594577277ff3e16269508c2a2a0d152d33e -->
+
 		</provider>
 		
 		

@@ -400,6 +400,7 @@ function CoverageUI () {
 	    	lastDate = new Date(array[array.length-1].toTime);
 	    	
 	    	timeDifference = Math.ceil((array[array.length-1].toTime - array[0].fromTime)/1000/60/60);
+	    	
 	    	floorDate = new Date(array[0].fromTime);
 	    	floorDate.setMinutes(0);
 	    	offset = new Date(array[0].fromTime).getMinutes();
@@ -409,6 +410,9 @@ function CoverageUI () {
 	
 	    	//set width of diagram
 	    	//outer.width(timeDifference*60);
+	    	if(timeDifference*60 < outer.width()){
+	    		timeDifference = outer.width()/60;
+	    	}
 	    	
 	    	//draw vertical lines
 	    	for (var i=0;i<=timeDifference;i++)
@@ -449,6 +453,8 @@ function CoverageUI () {
 	    	
 	    	//draw bars
 	    	$.each(array, function(key, bar) {
+	    		var leftPos =  (bar.fromTime - floorDate.getTime())/1000/60/60;
+	    		console.log(bar.fromTime+" "+bar.toTime);
 	    		if(key != 0){result+="<div class='rotate betweenSpanLabel' style='left: "+(accumulatedTime-50+(bar.timeSinceLastSpan/2))+"px'>"+bar.timeSinceLastSpan+" min</div>";}
 	    		accumulatedTime += bar.timeSinceLastSpan;
 	    		result+="<div class='bar' style='width: "+bar.spanLength+"px; height:"+bar.signals*scale+"px; background: #6E6E6E; left: "+accumulatedTime+"px;bottom:0px;'></div><div class='rotate timeSpanLabel' style='left: "+(accumulatedTime-50+(bar.spanLength/2))+"px'>"+bar.spanLength+" min</div><div class='value' style=' left: "+(accumulatedTime-50+(bar.spanLength/2))+"px;bottom:"+(bar.signals*scale)+"px;'>"+bar.signals+"</div>";
