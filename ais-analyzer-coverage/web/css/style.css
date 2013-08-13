@@ -37,6 +37,20 @@ body{
     -o-user-select: none;
 }
 
+#bottomPanel{
+	width: 800px;
+/* 	height: 250px; */
+	padding: 4px;
+	vertical-align:middle;
+	position: absolute;
+	bottom: 8px;
+	right: 8px;
+	-moz-user-select: none; 
+    -khtml-user-select: none; 
+    -webkit-user-select: none; 
+    -o-user-select: none;
+}
+
 #loadingPanel
 {
 	width: 150px;

@@ -45,11 +45,6 @@ function CoverageUI () {
     	$('#exportPanel').expandable({
     		header: "Export"
     	});
-    	$('#bottomPanel').expandable({
-    		header: "Satellite Statistics",
-    		maxHeight: "800px"
-    	});
-    	
     	//add check box listeners
     	$(document).on('change', ".sourceCheckbox", function(e) {
     		self.sources[this.id].enabled=$(this).is(':checked');
@@ -226,61 +221,10 @@ function CoverageUI () {
     	selectControl.handlers.feature.stopDown = false; 
     	map.addControl(selectControl);
     	selectControl.activate();
-    	
-    	var boxLayer = new OpenLayers.Layer.Vector("Box layer");
-    	map.addLayers([boxLayer]);
-    	var currentBox = null;
-    	var draw = new OpenLayers.Control.DrawFeature(
-    			boxLayer,
-    		    OpenLayers.Handler.RegularPolygon,
-    		    {
-    				featureAdded : function(feature) {
-    					if(currentBox != null){
-    						boxLayer.removeFeatures([boxLayer.features[0]]);
-//    						console.log("remove");
-    					}
-    					currentBox = feature;
-    					var g=boxLayer.features[0].clone().geometry; //get geometry of a featyre in your vector layer
-    					var vertices = g.getVertices();
-    					
-    					var topleftPoint = vertices[1].transform( map.getProjectionObject(),
-    			                   new OpenLayers.Projection("EPSG:4326"));
-    					var bottomRightPoint = vertices[3].transform( map.getProjectionObject(),
- 			                   new OpenLayers.Projection("EPSG:4326"));
-
-    					self.loadSatStats(topleftPoint, bottomRightPoint);
-//    				    console.log("A point has been added");
-    				},
-                    handlerOptions: {
-                        sides: 4,
-                        irregular: true
-                    }
-                },function(){alert('added')}
-    		);
-    	map.addControl(draw);
-    	
-    	var isDown = false;
-    	var box;
-    	$(document).keydown(function (e) {
-    		if(e.which == 17){
-    			if(isDown != true){
-    				isDown = true;
-    				draw.activate();
-    			}
-    			isDown = true;
-    			
-    		}
-    	});
-    	$(document).keyup(function (e) {
-    		if(e.which == 17){
-    			isDown = false; 
-    			draw.deactivate();
-    		}
-    	});
     }
     
     this.refreshSourceList = function(){	
-    	var sourceContainer = $("#sourcesPanel > .panelContainer");
+    	var sourceContainer = $("#sourcesPanel");
     	sourceContainer.html("");
     	var sourceshtml = "";
     	$.each(self.sources, function(key, source) {
@@ -288,7 +232,7 @@ function CoverageUI () {
     		if(source.enabled){
     			checked = 'checked="checked"';
     		}
-    		sourceshtml += '<div class="legendsText" style="clear: left;height:15px;"><div class="rowElement"><input type="checkbox" class="sourceCheckbox" id="'+source.mmsi+'" '+checked+' style="margin-top:0px;" name="" value=""/></div><div class="rowElement" style="width:75px">'+source.name+'</div><div  class="smallText rowElement">'+source.type+'</div></div>';
+    		sourceshtml += '<div class="legendsText" style="clear: left;height:15px;"><div class="rowElement"><input type="checkbox" class="sourceCheckbox" id="'+source.mmsi+'" '+checked+' style="margin-top:0px;" name="" value=""/></div><div class="rowElement" style="width:75px">'+source.mmsi+'</div><div  class="smallText rowElement">'+source.type+'</div></div>';
     	});
     	sourceContainer.html(sourceshtml);
     	self.drawSources();
@@ -304,11 +248,8 @@ function CoverageUI () {
         	checked='checked="checked"';
         }
 
-
-        $("#featureDetailsPanel > .panelContainer").html('<div class="smallText">Id</div>'+
+        $("#featureDetailsPanel").html('<div class="smallText">Id</div>'+
                 '<div class="information">'+feature.mmsi+'</div>'+
-                '<div class="smallText">Name</div>'+
-                '<div class="information">'+feature.name+'</div>'+
                 '<div class="smallText">Type</div>'+
                 '<div class="information">'+feature.type+'</div>'+
                 '<div class="smallText">Lat</div>'+
@@ -334,7 +275,6 @@ function CoverageUI () {
     	}else{
     		image = 'img/marker2.png'
     	}
-
     	var feature = new OpenLayers.Feature.Vector(
     			new OpenLayers.Geometry.Point( val.lon , val.lat ).transform(
     					new OpenLayers.Projection("EPSG:4326"), // transform from WGS 1984
@@ -343,7 +283,6 @@ function CoverageUI () {
     			 {hmm:'100'});
 //    			 {externalGraphic: image, graphicHeight: 21, graphicWidth: 16, cursor: "crosshair", fillColor: "#ffcc66", pointRadius: "10"});
     	feature.mmsi = val.mmsi;
-    	feature.name = val.name;
     	feature.type = val.type;
     	feature.lat = val.lat;
     	feature.lon = val.lon;
@@ -378,97 +317,7 @@ function CoverageUI () {
     	sourceLayer.addFeatures(feature);
     }
     
-    this.loadSatStats = function(topleft, bottomright){
-    	
-//    	var array = [{"fromTime":1374220785115,"toTime":1374220774501,"spanLength":1,"timeSinceLastSpan":0,"accumulatedTime":0,"signals":3,"distinctShips":1},{"fromTime":1374226711355,"toTime":1374227266676,"spanLength":9,"timeSinceLastSpan":98,"accumulatedTime":108,"signals":163,"distinctShips":7},{"fromTime":1374228081000,"toTime":1374228352000,"spanLength":4,"timeSinceLastSpan":13,"accumulatedTime":126,"signals":38,"distinctShips":6},{"fromTime":1374232884293,"toTime":1374233250297,"spanLength":6,"timeSinceLastSpan":75,"accumulatedTime":207,"signals":71,"distinctShips":6},{"fromTime":1374233909000,"toTime":1374234299000,"spanLength":6,"timeSinceLastSpan":10,"accumulatedTime":225,"signals":33,"distinctShips":7},{"fromTime":1374238552052,"toTime":1374239226409,"spanLength":11,"timeSinceLastSpan":70,"accumulatedTime":307,"signals":46,"distinctShips":6},{"fromTime":1374239872000,"toTime":1374239943000,"spanLength":1,"timeSinceLastSpan":10,"accumulatedTime":319,"signals":8,"distinctShips":5},{"fromTime":1374243070626,"toTime":1374243403490,"spanLength":5,"timeSinceLastSpan":52,"accumulatedTime":377,"signals":42,"distinctShips":6},{"fromTime":1374244812816,"toTime":1374245655000,"spanLength":14,"timeSinceLastSpan":23,"accumulatedTime":414,"signals":105,"distinctShips":6},{"fromTime":1374248972125,"toTime":1374249122001,"spanLength":2,"timeSinceLastSpan":55,"accumulatedTime":472,"signals":58,"distinctShips":7},{"fromTime":1374250432644,"toTime":1374251214883,"spanLength":13,"timeSinceLastSpan":21,"accumulatedTime":507,"signals":120,"distinctShips":7},{"fromTime":1374251846000,"toTime":1374251977000,"spanLength":2,"timeSinceLastSpan":10,"accumulatedTime":520,"signals":5,"distinctShips":4},{"fromTime":1374254798441,"toTime":1374255211329,"spanLength":6,"timeSinceLastSpan":47,"accumulatedTime":573,"signals":33,"distinctShips":6},{"fromTime":1374257362000,"toTime":1374257820000,"spanLength":7,"timeSinceLastSpan":35,"accumulatedTime":617,"signals":16,"distinctShips":7},{"fromTime":1374261058127,"toTime":1374261077807,"spanLength":1,"timeSinceLastSpan":53,"accumulatedTime":671,"signals":2,"distinctShips":1},{"fromTime":1374263221000,"toTime":1374263407000,"spanLength":3,"timeSinceLastSpan":35,"accumulatedTime":710,"signals":16,"distinctShips":5},{"fromTime":1374269013000,"toTime":1374269185000,"spanLength":2,"timeSinceLastSpan":93,"accumulatedTime":806,"signals":6,"distinctShips":2},{"fromTime":1374274821000,"toTime":1374274933000,"spanLength":1,"timeSinceLastSpan":93,"accumulatedTime":902,"signals":4,"distinctShips":4},{"fromTime":1374278293629,"toTime":1374278393470,"spanLength":1,"timeSinceLastSpan":56,"accumulatedTime":960,"signals":4,"distinctShips":3},{"fromTime":1374220785115,"toTime":1374220774501,"spanLength":1,"timeSinceLastSpan":33,"accumulatedTime":0,"signals":3,"distinctShips":1},{"fromTime":1374226711355,"toTime":1374227266676,"spanLength":9,"timeSinceLastSpan":98,"accumulatedTime":108,"signals":163,"distinctShips":7},{"fromTime":1374228081000,"toTime":1374228352000,"spanLength":4,"timeSinceLastSpan":13,"accumulatedTime":126,"signals":38,"distinctShips":6},{"fromTime":1374232884293,"toTime":1374233250297,"spanLength":6,"timeSinceLastSpan":75,"accumulatedTime":207,"signals":71,"distinctShips":6},{"fromTime":1374233909000,"toTime":1374234299000,"spanLength":6,"timeSinceLastSpan":10,"accumulatedTime":225,"signals":33,"distinctShips":7},{"fromTime":1374238552052,"toTime":1374239226409,"spanLength":11,"timeSinceLastSpan":70,"accumulatedTime":307,"signals":46,"distinctShips":6},{"fromTime":1374239872000,"toTime":1374239943000,"spanLength":1,"timeSinceLastSpan":10,"accumulatedTime":319,"signals":8,"distinctShips":5},{"fromTime":1374243070626,"toTime":1374243403490,"spanLength":5,"timeSinceLastSpan":52,"accumulatedTime":377,"signals":42,"distinctShips":6},{"fromTime":1374244812816,"toTime":1374245655000,"spanLength":14,"timeSinceLastSpan":23,"accumulatedTime":414,"signals":105,"distinctShips":6},{"fromTime":1374248972125,"toTime":1374249122001,"spanLength":2,"timeSinceLastSpan":55,"accumulatedTime":472,"signals":58,"distinctShips":7},{"fromTime":1374250432644,"toTime":1374251214883,"spanLength":13,"timeSinceLastSpan":21,"accumulatedTime":507,"signals":120,"distinctShips":7},{"fromTime":1374251846000,"toTime":1374251977000,"spanLength":2,"timeSinceLastSpan":10,"accumulatedTime":520,"signals":5,"distinctShips":4},{"fromTime":1374254798441,"toTime":1374255211329,"spanLength":6,"timeSinceLastSpan":47,"accumulatedTime":573,"signals":33,"distinctShips":6},{"fromTime":1374257362000,"toTime":1374257820000,"spanLength":7,"timeSinceLastSpan":35,"accumulatedTime":617,"signals":16,"distinctShips":7},{"fromTime":1374261058127,"toTime":1374261077807,"spanLength":1,"timeSinceLastSpan":53,"accumulatedTime":671,"signals":2,"distinctShips":1},{"fromTime":1374263221000,"toTime":1374263407000,"spanLength":3,"timeSinceLastSpan":35,"accumulatedTime":710,"signals":16,"distinctShips":5},{"fromTime":1374269013000,"toTime":1374269185000,"spanLength":2,"timeSinceLastSpan":93,"accumulatedTime":806,"signals":6,"distinctShips":2},{"fromTime":1374274821000,"toTime":1374274933000,"spanLength":1,"timeSinceLastSpan":93,"accumulatedTime":902,"signals":4,"distinctShips":4},{"fromTime":1374278293629,"toTime":1374379393470,"spanLength":1,"timeSinceLastSpan":56,"accumulatedTime":960,"signals":4,"distinctShips":3}];
-    	aisJsonClient.getSatCoverage(topleft.x+","+ topleft.y+","+ bottomright.x+","+ bottomright.y, function(array){
-    	
-	    	var output = "";
-	    	var outer = $("#outer");
-	//    	$("#bottomPanel").hide();
-	    	outer.html("");
-	    	result = "";
-	    	if(array.length == 0){
-	    		outer.html(" No data available");
-	    		console.log("NO DATA");
-	    		$("#bottomPanel").slideDown();
-    			return;
-    		}
-	//    	console.log($("#statusPanel").html());
-	    	var accumulatedTime = 0;
-	//     	alert(array[array.length-1].toTime);
-	    	lastDate = new Date(array[array.length-1].toTime);
-	    	
-	    	timeDifference = Math.ceil((array[array.length-1].toTime - array[0].fromTime)/1000/60/60);
-	    	
-	    	floorDate = new Date(array[0].fromTime);
-	    	floorDate.setMinutes(0);
-	    	offset = new Date(array[0].fromTime).getMinutes();
-	    	var accumulatedTime = offset;
-	    	var maxHeight = 0;
-	//     	alert(floorDate.getDate()+"-"+floorDate.getMonth());
-	
-	    	//set width of diagram
-	    	//outer.width(timeDifference*60);
-	    	if(timeDifference*60 < outer.width()){
-	    		timeDifference = outer.width()/60;
-	    	}
-	    	
-	    	//draw vertical lines
-	    	for (var i=0;i<=timeDifference;i++)
-	    	{ 
-	    		
-	    		if(i%3==0 || i==0){
-	    			currentDate = new Date(floorDate.getTime()+(1000*60*60*i));
-	//     			currentDate.setHours(currentDate.getHours()+i+1);
-	    			dateLabel = ('0' + currentDate.getDate()).slice(-2)+"-"+('0' + currentDate.getMonth()).slice(-2)+" "+(('0' + currentDate.getHours()).slice(-2)+":00");
-	//    			console.log(outer.html());
-	    			result+='<div class="labelDate" style="left:'+((i)*60-50)+'px">'+dateLabel+'</div>';
-	    		}
-	    		if(i == 0){
-	    			result+='<div class="leftVerticalLine" style="left:'+(i)*60+'px;"></div>';
-	    		}else{
-	    			result+='<div class="line" style="left:'+(i)*60+'px;"></div>';
-	    		}
-	    		
-	    	}
-	    	
-	    	//Draw the horizontal lower border
-	    	var lowerBorderwidth = 60*timeDifference;
-	    	if(lowerBorderwidth < outer.width()){
-	    		lowerBorderwidth=outer.width();
-	    	}
-	    	result+='<div class="horizontalLine" style="bottom:0px;left:0px;width:'+lowerBorderwidth+'px;"></div>';
-	    	//draw bottom horizontal line
-	    	
-	    	//Find max height and calculate scale factor
-	    	$.each(array, function(key, bar) {
-	    		if(bar.signals > maxHeight){maxHeight=bar.signals;}	  
-	    	});
-	    	if(maxHeight > outer.height()){
-	    	scale = outer.height()/maxHeight;
-	    	}else{
-	    		scale=1;
-	    	}
-	    	
-	    	//draw bars
-	    	$.each(array, function(key, bar) {
-	    		var leftPos =  (bar.fromTime - floorDate.getTime())/1000/60/60;
-	    		console.log(bar.fromTime+" "+bar.toTime);
-	    		if(key != 0){result+="<div class='rotate betweenSpanLabel' style='left: "+(accumulatedTime-50+(bar.timeSinceLastSpan/2))+"px'>"+bar.timeSinceLastSpan+" min</div>";}
-	    		accumulatedTime += bar.timeSinceLastSpan;
-	    		result+="<div class='bar' style='width: "+bar.spanLength+"px; height:"+bar.signals*scale+"px; background: #6E6E6E; left: "+accumulatedTime+"px;bottom:0px;'></div><div class='rotate timeSpanLabel' style='left: "+(accumulatedTime-50+(bar.spanLength/2))+"px'>"+bar.spanLength+" min</div><div class='value' style=' left: "+(accumulatedTime-50+(bar.spanLength/2))+"px;bottom:"+(bar.signals*scale)+"px;'>"+bar.signals+"</div>";
-	    		accumulatedTime += bar.spanLength;
-	    		  
-	    	});
-	    	
-	    	
-	    	outer.html(result);
-	    	$("#bottomPanel").slideDown();
-    	});
-//    	alert(topleft);
-    }
-
+    
     this.drawCoverage = function(){
     	
     	//get the multiplication factor for corresponding zoom level
@@ -522,7 +371,7 @@ function CoverageUI () {
 	  			  }else{
 	  				  color ='red';
 	  			  }
-
+	  			  
 	  			  self.drawPolygon({
 	  				  lat: val.lat,
 	  				  lon: val.lon,
@@ -613,7 +462,7 @@ function CoverageUI () {
         	
         	//Setting up cell details panel
         	$("#featureDetailsPanel > .panelHeader").html("Cell Details");
-        	$("#featureDetailsPanel > .panelContainer").html('<div class="smallText">Source</div>'+
+        	$("#featureDetailsPanel").html('<div class="smallText">Source</div>'+
                     '<div class="information">'+feature.mmsi+'</div>'+
                     '<div class="smallText">Cell Latitude</div>'+
                     '<div class="information">'+feature.lat.toFixed(4)+'</div>'+

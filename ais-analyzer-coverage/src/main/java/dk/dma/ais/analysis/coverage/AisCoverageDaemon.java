@@ -35,6 +35,7 @@ import dk.dma.commons.app.AbstractDaemon;
 public class AisCoverageDaemon extends AbstractDaemon {
 
     private static final Logger LOG = LoggerFactory.getLogger(AisCoverageDaemon.class);
+    
 
     @Parameter(names = "-file", description = "AisCoverage configuration file")
     String confFile = "coverage-sample.xml";

@@ -21,6 +21,12 @@ public class JsonConverter {
 			JsonSource s = new JsonSource();
 			s.mmsi=baseStation.getIdentifier();
 			
+			if (baseStation.getName().equals("")) {
+				s.name=baseStation.getIdentifier();
+			}
+			else {
+				s.name=baseStation.getName();
+			}
 			s.type=baseStation.getReceiverType().name();
 			
 			if(baseStation.getLatitude() != null)

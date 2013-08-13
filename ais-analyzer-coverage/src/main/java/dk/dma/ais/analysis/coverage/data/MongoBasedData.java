@@ -7,6 +7,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import sun.util.LocaleServiceProviderPool.LocalizedObjectGetter;
+
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
@@ -15,9 +20,10 @@ import com.mongodb.DBObject;
 import com.mongodb.Mongo;
 import com.mongodb.MongoException;
 
+import dk.dma.ais.analysis.coverage.AisCoverage;
 import dk.dma.ais.analysis.coverage.configuration.DatabaseConfiguration;
 import dk.dma.ais.analysis.coverage.data.Ship.ShipClass;
-
+//TODO fix mongodb back up
 
 public class MongoBasedData implements ICoverageData{
 	public SourceHandler gridHandler = new SourceHandler(null);
@@ -25,6 +31,7 @@ public class MongoBasedData implements ICoverageData{
 	public DB db;
 	private String dbname = "cells";
 	DBCollection latLonCollection;
+	private static final Logger LOG = LoggerFactory.getLogger(MongoBasedData.class);
 
 	public MongoBasedData(DatabaseConfiguration dbConf)
 	{
@@ -37,8 +44,12 @@ public class MongoBasedData implements ICoverageData{
 			db = mongo.getDB(dbConf.getDbName());
 			latLonCollection = db.getCollection("latLon");
 			
-			System.out.println("db created");
-		} catch (UnknownHostException e) {		e.printStackTrace();		}
+			LOG.info("db created");
+		} catch (UnknownHostException e) 
+		{		
+			LOG.error(e.getMessage());
+			e.printStackTrace();		
+		}
 	}
 		
 	
@@ -103,7 +114,6 @@ public class MongoBasedData implements ICoverageData{
 				
 				 
 				double latsize = (double) dbo.get("latSize");
-				System.out.println("latsize =" + latsize);
 				gridHandler.setLatSize(latsize);
 				return latsize;
 			}
@@ -123,7 +133,6 @@ public class MongoBasedData implements ICoverageData{
 			else
 			{
 				double lonsize = (double) dbo.get("lonSize");
-				System.out.println("lonsize = "+ lonsize);
 				gridHandler.setLonSize(lonsize);
 				return lonsize;
 			}
@@ -154,7 +163,7 @@ public class MongoBasedData implements ICoverageData{
 			
 			if(dbo == null)
 			{
-				System.out.println("dbo var null + cellsize = " + gridHandler.getLatSize() + "-" + gridHandler.getLonSize());
+				LOG.warn("dbo var null + cellsize = " + gridHandler.getLatSize() + "-" + gridHandler.getLonSize());
 				return null;
 				
 			}
@@ -172,13 +181,10 @@ public class MongoBasedData implements ICoverageData{
 		public List<Cell> getCells(double latStart, double lonStart, double latEnd,
 				double lonEnd, Map<String, Boolean> sources, int multiplicationFactor) {
 			
-//			System.out.println("ceeeels");
-//			System.out.println(latStart + " " +lonStart);
 			List<Cell> cells = new ArrayList<Cell>();
 			Collection<Source> basestations = gridHandler.getBaseStations().values();
 			for (Source basestation : basestations) {
 				if ( sources.containsKey(basestation.getIdentifier()) ) {	
-//					System.out.println(basestation.getIdentifier());
 					
 					//find collection
 					DBCollection collection = db.getCollection(basestation.getIdentifier());	
@@ -186,7 +192,7 @@ public class MongoBasedData implements ICoverageData{
 					Source tempSource = new Source(basestation.getIdentifier(), gridHandler.getLatSize()*multiplicationFactor, gridHandler.getLonSize()*multiplicationFactor);
 					// For each cell
 					Long starttime = System.currentTimeMillis();
-					System.out.println("started get ranged cells " + starttime);
+					LOG.info("startet loading cells within range at: " + starttime);
 					Collection<Cell> bscells = new ArrayList<Cell>();
 					DBCursor cursor = collection.find();				
 				 
@@ -198,7 +204,6 @@ public class MongoBasedData implements ICoverageData{
 						String value = dbo.get("NOofReceivedSignals").toString();
 						Long NOofReceivedSignals = Long.parseLong(value);
 						String value2 = dbo.get("NOofMissingSignals").toString();
-//						System.out.println("received: " + value + "missing: " +value2);
 						Long NOofMissingSignals = Long.parseLong(value2);
 //						cell.addReceivedSignals(Long.valueOf(dbo.get("NOofReceivedSignals").toString()));
 						cell.addNOofMissingSignals(NOofMissingSignals);
@@ -208,7 +213,7 @@ public class MongoBasedData implements ICoverageData{
 						bscells.add(cell);
 					}
 					Long time = (System.currentTimeMillis() - starttime);
-					System.out.println("finished loading ranged cells: " +time);
+					LOG.info("finished loading cells within range: " + time);
 					
 					for (Cell cell : bscells) {
 						Cell tempCell = tempSource.getCell(cell.getLatitude(), cell.getLongitude());
@@ -230,7 +235,6 @@ public class MongoBasedData implements ICoverageData{
 					}
 				}
 			}
-			System.out.println("mm: " + cells.size());
 			return cells;
 		}
 		

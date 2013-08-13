@@ -26,11 +26,12 @@ public class Source implements Serializable {
 	private static final long serialVersionUID = 1L;
 	private ConcurrentHashMap<String, Cell> grid = new ConcurrentHashMap<String, Cell>();
 	private ConcurrentHashMap<Long, Ship> ships = new ConcurrentHashMap<Long, Ship>();
+	private String name = "";
 	private String identifier;
 	private double latSize;
 	private double lonSize;
-	private Double latitude;
-	private Double longitude;
+	private double latitude;
+	private double longitude;
 	private long messageCount = 0;
 	private boolean isVisible = true;
 	private ReceiverType receiverType = ReceiverType.NOTDEFINED;
@@ -55,7 +56,7 @@ public class Source implements Serializable {
 	 * The id is lat-lon-coords representing top-left point in cell
 	 */
 	public String getCellId(double latitude, double longitude){
-
+		//TODO move CellId convertion somewhere better
 		double lat;
 		double lon;
 		if(latitude < 0){
@@ -81,27 +82,21 @@ public class Source implements Serializable {
 	public void incrementMessageCount(){
 		messageCount++;
 	}
-
-
 	public ReceiverType getReceiverType() {
 		return receiverType;
 	}
-
 	public void setReceiverType(ReceiverType receiverType) {
 		this.receiverType = receiverType;
 	}
-
 	public boolean isVisible() {
 		return isVisible;
 	}
-
 	public void setVisible(boolean isVisible) {
 		this.isVisible = isVisible;
 	}
 	public Cell getCell(double latitude, double longitude){
 		return grid.get(getCellId(latitude, longitude));
 	}
-
 	public Cell createCell(double latitude, double longitude){
 		String id = getCellId(latitude, longitude);
 		double lat = (double)((int)(10000*(latitude - (latitude % latSize))))/10000;
@@ -110,7 +105,6 @@ public class Source implements Serializable {
 		grid.put(cell.getId(), cell);		
 		
 		return cell;
-		
 	}
 	
 	/*
@@ -121,67 +115,57 @@ public class Source implements Serializable {
 		ships.put(mmsi, ship);
 		return ship;
 	}
-	
 	public Ship getShip(Long mmsi){
 		return ships.get(mmsi);
 	}
-	
 	public ConcurrentHashMap<String, Cell> getGrid() {
 		return grid;
 	}
-
 	public void setGrid(ConcurrentHashMap<String, Cell> grid) {
 		this.grid = grid;
 	}
-
 	public ConcurrentHashMap<Long, Ship> getShips() {
 		return ships;
 	}
-
 	public void setShips(ConcurrentHashMap<Long, Ship> ships) {
 		this.ships = ships;
 	}
-
 	public String getIdentifier() {
 		return identifier;
 	}
-
 	public void setIdentifier(String identifier) {
 		this.identifier = identifier;
 	}
-
+	public String getName() {
+		return name;
+	}
+	public void setName(String name) {
+		this.name = name;
+	}
 	public double getLatSize() {
 		return latSize;
 	}
-
 	public void setLatSize(double latSize) {
 		this.latSize = latSize;
 	}
-
 	public double getLonSize() {
 		return lonSize;
 	}
-
 	public void setLonSize(double lonSize) {
 		this.lonSize = lonSize;
 	}
-
 	public Double getLatitude() {
 		return latitude;
 	}
-
 	public void setLatitude(Double latitude) {
 		this.latitude = latitude;
 	}
-
 	public Double getLongitude() {
 		return longitude;
 	}
-
 	public void setLongitude(Double longitude) {
 		this.longitude = longitude;
 	}
-
 	public long getMessageCount() {
 		return messageCount;
 	}

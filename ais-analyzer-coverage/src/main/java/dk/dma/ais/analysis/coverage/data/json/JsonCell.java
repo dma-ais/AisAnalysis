@@ -12,5 +12,4 @@ public class JsonCell implements Serializable{
 	public double getCoverage(){
 		return (double) nrOfRecMes/ (double) (nrOfMisMes+nrOfRecMes);
 	}
-
 }
