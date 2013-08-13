@@ -110,6 +110,8 @@ function CoverageUI () {
     			exportMultiplicationDivHidden.val(ui.value);
     		}
     	});
+
+    	
     	
     	
     	//setting the loop function
@@ -133,8 +135,7 @@ function CoverageUI () {
     		exportMultiplicationDivHidden.val(self.exportMultiplicationFactor);
         	exportMultiplicationDiv.html(self.exportMultiplicationFactor);
     		$( "#multiplicationSlider" ).slider({value:self.getMultiplicationFactor()});
-        	
-        	
+    		
         	//draw coverage
     		coverageUI.drawCoverage();
     		
@@ -453,6 +454,7 @@ function CoverageUI () {
 //    	alert(multifactor)
     	return multifactor;
     }
+    
     
     this.onFeatureSelect = function(evt) {	
     	

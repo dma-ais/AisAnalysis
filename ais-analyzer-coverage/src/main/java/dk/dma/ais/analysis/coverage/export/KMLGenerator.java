@@ -26,7 +26,7 @@ public class KMLGenerator {
 	private static final Logger LOG = LoggerFactory.getLogger(KMLGenerator.class);
 
 //	public static void generateKML(CoverageCalculator calc, String path) {
-	public static void generateKML(Collection<Source> grids, double latSize, double lonSize, HttpServletResponse response) {
+	public static void generateKML(Collection<Source> grids, double latSize, double lonSize, int multiplicity, HttpServletResponse response) {
 
 		LOG.info("startet kml generation");
 		
@@ -35,7 +35,7 @@ public class KMLGenerator {
 		DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 		Date date = new Date();
 		
-		String fileName = ("aiscoverage-" + dateFormat.format(date)+ "_latSize "+latSize+"_lonSize "+lonSize+".kml");
+		String fileName = ("aiscoverage-" + dateFormat.format(date)+ "_latSize "+latSize+"_lonSize "+lonSize+"multiplicationfactor"+multiplicity+".kml");
 		out.setContentType("application/vnd.google-earth.kml+xml");
 		out.setHeader("Content-Disposition", "attachment; filename=" + fileName);
 

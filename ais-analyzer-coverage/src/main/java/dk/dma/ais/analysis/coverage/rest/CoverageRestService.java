@@ -55,7 +55,9 @@ import dk.dma.ais.analysis.coverage.data.TimeSpan;
 import dk.dma.ais.analysis.coverage.data.json.JSonCoverageMap;
 import dk.dma.ais.analysis.coverage.data.json.JsonConverter;
 import dk.dma.ais.analysis.coverage.data.json.JsonSource;
+import dk.dma.ais.analysis.coverage.export.CSVGenerator;
 import dk.dma.ais.analysis.coverage.export.KMLGenerator;
+import dk.dma.ais.analysis.coverage.export.XMLGenerator;
 import dk.dma.ais.data.AisVesselTarget;
 
 /**
@@ -148,7 +150,6 @@ public class CoverageRestService {
 
 		int multiplicity = Integer.parseInt(exportMultiFactor);
 		
-		
 //		BaseStationHandler gh = new BaseStationHandler();
 		ICoverageData dh = new OnlyMemoryData();
 		
@@ -182,9 +183,25 @@ public class CoverageRestService {
 //				LOG.debug("cell for export created: " + summedbs.getCell(cell.getLatitude(), cell.getLongitude()).getNOofReceivedSignals() + "-" + summedbs.getCell(cell.getLatitude(), cell.getLongitude()).getNOofMissingSignals());
 			}
 		}
-		KMLGenerator.generateKML(dh.getSources(), dh.getLatSize(), dh.getLonSize(), response);
+		if (exportType.equals("KML")) {
+//			System.out.println(expotype);
+			KMLGenerator.generateKML(dh.getSources(), dh.getLatSize(), dh.getLonSize(), multiplicity, response);
+		}
+		else if (exportType.equals("CSV")) {
+//			System.out.println(expotype);
+			CSVGenerator.generateCSV(dh.getSources(), dh.getLatSize(), dh.getLonSize(), multiplicity, response);
+		}
+		else if (exportType.equals("XML")) {
+//			System.out.println(expotype);
+			XMLGenerator.generateXML(dh.getSources(), dh.getLatSize(), dh.getLonSize(), multiplicity, response);
+		}
+		else
+		{
+			System.out.println("wrong exporttype");
+		}
 		return null;
     }
+    
     
     @GET
     @Path("satCoverage")
