@@ -15,53 +15,54 @@
  */
 package dk.dma.ais.analysis.viewer.rest.json;
 
+import static java.util.Objects.requireNonNull;
 import dk.dma.ais.data.AisVesselTarget;
 import dk.dma.enav.model.geometry.Position;
 
 /**
- * A cluster of vessels described as an area with a number
- * of known vessel positions.
- * A cluster knows its density in vessels per kilometer.
+ * A cluster of vessels described as an area with a number of known vessel positions. A cluster knows its density in
+ * vessels per kilometer.
  */
 public class VesselCluster {
 
-    private ThinGeoLocation from;
-    private ThinGeoLocation to;
+    private Position from;
+    private Position to;
     private int count;
     private double density;
     private BaseVesselList vessels;
-    
+
     /**
      * Constructor of Vessel Cluster.
+     * 
      * @param from
-     *         Top left corner of area.
+     *            Top left corner of area.
      * @param to
-     *         Bottom right corner of area.
+     *            Bottom right corner of area.
      * @param count
-     *         The number of vessels in the area.
+     *            The number of vessels in the area.
      * @param locations
-     *         The knoe locations in the area.
+     *            The knoe locations in the area.
      */
     public VesselCluster(Position from, Position to, int count, BaseVesselList vessels) {
-        this.from = new ThinGeoLocation(from.getLatitude(), from.getLongitude()); 
-        this.to = new ThinGeoLocation(to.getLatitude(), to.getLongitude()); 
+        this.from = requireNonNull(from);
+        this.to = requireNonNull(to);
         this.count = count;
         this.vessels = vessels;
     }
 
-    public ThinGeoLocation getFrom() {
+    public Position getFrom() {
         return from;
     }
 
-    public void setFrom(ThinGeoLocation from) {
+    public void setFrom(Position from) {
         this.from = from;
     }
 
-    public ThinGeoLocation getTo() {
+    public Position getTo() {
         return to;
     }
 
-    public void setTo(ThinGeoLocation to) {
+    public void setTo(Position to) {
         this.to = to;
     }
 
@@ -102,5 +103,5 @@ public class VesselCluster {
     public void setDensity(double density) {
         this.density = density;
     }
-    
+
 }

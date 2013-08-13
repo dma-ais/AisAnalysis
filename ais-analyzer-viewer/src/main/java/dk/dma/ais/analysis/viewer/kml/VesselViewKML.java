@@ -10,7 +10,6 @@ import de.micromata.opengis.kml.v_2_2_0.Icon;
 import de.micromata.opengis.kml.v_2_2_0.Kml;
 import de.micromata.opengis.kml.v_2_2_0.LineString;
 import de.micromata.opengis.kml.v_2_2_0.Placemark;
-
 import de.micromata.opengis.kml.v_2_2_0.Style;
 import dk.dma.ais.data.PastTrackPoint;
 
@@ -34,8 +33,9 @@ public class VesselViewKML {
     }
 
     public void addVessel(String stylename, String name, String description, List<PastTrackPoint> pastTrackPoints) {
-        if (pastTrackPoints.isEmpty())
+        if (pastTrackPoints.isEmpty()) {
             return;
+        }
 
         Folder folder = document.createAndAddFolder().withName(name);
 
@@ -65,6 +65,6 @@ public class VesselViewKML {
         vesselview.addStyle("red", "/yees.png", "ff0000ff", 10.8, "<![CDATA[$[name]$[description]]]>");
         // vesselview.addVessel("red", "934584", null);
         // vesselview.addVessel("red", "heysa", "stort skiw");
-        vesselview.marshall();
+        System.out.println(vesselview.marshall());
     }
 }

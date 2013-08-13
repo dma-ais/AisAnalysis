@@ -206,11 +206,39 @@ public class CoverageRestService {
     @GET
     @Path("satCoverage")
     @Produces(MediaType.APPLICATION_JSON)
-    public Object satCoverage(@Context HttpServletRequest request) {
-    	double latTop = 62.47;
-    	double latBottom = 57.5;
-    	double lonRight = -35;
-    	double lonLeft = -55;
+    public Object satCoverage(@Context HttpServletRequest request, @QueryParam("area") String area) {
+    	String[] points = area.split(",");
+    	if(points.length != 4){
+    		LOG.warn("SatCoverage requires 2 latlon coordinates.");
+    		return null;
+    	}
+    	LOG.info("Finding sat coverage for area: "+area);
+    	double latPoint1 = Double.parseDouble(points[1]);
+    	double latPoint2 = Double.parseDouble(points[3]);
+    	double lonPoint1 = Double.parseDouble(points[0]);
+    	double lonPoint2 = Double.parseDouble(points[2]);
+    	
+    	//Determine which points are which
+    	double lonLeft;
+    	double lonRight;
+    	if(lonPoint1 < lonPoint2){
+    		lonLeft = lonPoint1;
+    		lonRight = lonPoint2;
+    	}else{
+    		lonLeft = lonPoint2;
+    		lonRight = lonPoint1;
+    	}
+    	double latTop;
+    	double latBottom;
+    	if(latPoint1 < latPoint2){
+    		latTop = latPoint2;
+    		latBottom = latPoint1;
+    	}else{
+    		latTop = latPoint1;
+    		latBottom = latPoint2;
+    	}
+    	
+    	
     	
     	return JsonConverter.toJsonTimeSpan(handler.getSatCalc().getTimeSpans(latTop, lonLeft, latBottom, lonRight));
     }
@@ -242,8 +270,8 @@ public class CoverageRestService {
 			if(previous != null)
 				timeSinceLastTimeSpan=Math.abs(timeSpan.getFirstMessage().getTime() - previous.getLastMessage().getTime())/1000/60;
 				
-			//last is determined by the order of receival, but it is not guaranteed that the tag is actually the last
-			//from time, to time, data time, time since last timespan, accumulated time, signals, distinct ships
+			//last is determined by the order of reception, but it is not guaranteed that the tag is actually the last
+			//from time, to time, data time, time since last time span, accumulated time, signals, distinct ships
 			String outstring = 	formatter.format(timeSpan.getFirstMessage())+","+	//from time
 								formatter.format(timeSpan.getLastMessage())+","+	//to time 
 								Math.abs(timeSpan.getLastMessage().getTime()-timeSpan.getFirstMessage().getTime())/1000/60+","+		//Timespan length

@@ -297,42 +297,46 @@ public abstract class AbstractCalculator implements Serializable {
 
 		// Get source tag properties
 		IProprietarySourceTag sourceTag = aisMessage.getSourceTag();
-		if (sourceTag != null && defaultID != "sat") {
+		
+		if (sourceTag != null) {
 			Integer bsmmsi = sourceTag.getBaseMmsi();
 			timestamp = sourceTag.getTimestamp();
 //			srcCountry = sourceTag.getCountry();
 			String region = sourceTag.getRegion();
 			
-			if(bsmmsi == null){
-				if(!region.equals("")){
-					if (sourcenames.containsKey(region)) {
-						name = sourcenames.get(region).getName(); 
-						Source b = dataHandler.getSource(region);
+			if(defaultID != "sat"){
+				if(bsmmsi == null){
+					if(!region.equals("")){
+						if (sourcenames.containsKey(region)) {
+							name = sourcenames.get(region).getName(); 
+							Source b = dataHandler.getSource(region);
+
+							if (b != null) {
+									b.setLatitude( sourcenames.get(region).getLatitude() );
+									b.setLongitude( sourcenames.get(region).getLongitude() );
+									EventBroadcaster.getInstance().broadcastEvent(new AisEvent(AisEvent.Event.BS_POSITION_FOUND, this, b));	
+							}
+						}
+							baseId = region;
+						receiverType = ReceiverType.REGION;
+					}
+				}
+				else{
+					if (sourcenames.containsKey(bsmmsi.toString())) {
+						name = sourcenames.get(bsmmsi.toString()).getName();
+						Source b = dataHandler.getSource(bsmmsi+"");
 
 						if (b != null) {
-								b.setLatitude( sourcenames.get(region).getLatitude() );
-								b.setLongitude( sourcenames.get(region).getLongitude() );
+								b.setLatitude( sourcenames.get(bsmmsi.toString()).getLatitude() );
+								b.setLongitude( sourcenames.get(bsmmsi.toString()).getLongitude() );
 								EventBroadcaster.getInstance().broadcastEvent(new AisEvent(AisEvent.Event.BS_POSITION_FOUND, this, b));	
 						}
 					}
-						baseId = region;
-					receiverType = ReceiverType.REGION;
+						baseId = bsmmsi+"";
+					receiverType = ReceiverType.BASESTATION;
 				}
 			}
-			else{
-				if (sourcenames.containsKey(bsmmsi.toString())) {
-					name = sourcenames.get(bsmmsi.toString()).getName();
-					Source b = dataHandler.getSource(bsmmsi+"");
-
-					if (b != null) {
-							b.setLatitude( sourcenames.get(bsmmsi.toString()).getLatitude() );
-							b.setLongitude( sourcenames.get(bsmmsi.toString()).getLongitude() );
-							EventBroadcaster.getInstance().broadcastEvent(new AisEvent(AisEvent.Event.BS_POSITION_FOUND, this, b));	
-					}
-				}
-					baseId = bsmmsi+"";
-				receiverType = ReceiverType.BASESTATION;
-			}
+			
 		}
 
 		//Checks if its neither a basestation nor a region

@@ -1,19 +1,29 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <aisViewConfiguration>
 	<aisbus>
-        <busPullMaxElements>1000</busPullMaxElements>
-        <busQueueSize>10000</busQueueSize>
-        <provider xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="tcpClientProviderConfiguration">
-            <clientConf>
-                <bufferSize>8192</bufferSize>
-                <gzipBufferSize>2048</gzipBufferSize>
-                <gzipCompress>false</gzipCompress>
-            </clientConf>
-            <hostPort>linux06.fomfrv.dk:9001</hostPort>
-            <reconnectInterval>10</reconnectInterval>
-            <timeout>10</timeout>
-        </provider>
-    </aisbus>
+		<busPullMaxElements>1000</busPullMaxElements>
+		<busQueueSize>10000</busQueueSize>
+		<provider xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="tcpClientProviderConfiguration">
+			<clientConf>
+				<bufferSize>8192</bufferSize>
+				<gzipBufferSize>2048</gzipBufferSize>
+				<gzipCompress>false</gzipCompress>
+			</clientConf>
+			<hostPort>linux06.fomfrv.dk:9001</hostPort>
+			<reconnectInterval>10</reconnectInterval>
+			<timeout>10</timeout>
+		</provider>
+		<filter xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="locationFilterConfiguration">
+			<geometry xsi:type="circleGeometryConfiguration">
+				<lat>70</lat>
+				<lon>-46</lon>
+				<radius>1800000</radius>
+			</geometry>
+		</filter>
+		<filter xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="expressionFilterConfiguration">
+			<expression><![CDATA[country!=ISL&id!=MSSIS]]></expression>
+		</filter>
+	</aisbus>
 	<serverConfiguration>
 		<port>8081</port>
 		<webappPath>web</webappPath>
