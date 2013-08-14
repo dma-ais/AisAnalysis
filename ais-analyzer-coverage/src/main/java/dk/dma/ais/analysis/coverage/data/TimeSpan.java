@@ -13,6 +13,9 @@ public class TimeSpan {
 		this.firstMessage=firstMessage;
 		this.lastMessage=firstMessage;
 	}
+	public TimeSpan(){
+		
+	}
 	public Map<String, Boolean> getDistinctShips() {
 		return distinctShips;
 	}

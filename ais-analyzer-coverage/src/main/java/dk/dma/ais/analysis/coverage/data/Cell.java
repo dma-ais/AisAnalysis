@@ -53,6 +53,10 @@ public class Cell {
 		this.longitude = lon;
 		this.id = id;
 	}
+	public Cell()
+	{
+		
+	}
 	
     public void incrementNOofReceivedSignals(){
 		NOofReceivedSignals++;

@@ -2,9 +2,11 @@ package dk.dma.ais.analysis.coverage.data;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.mongodb.DBObject;
 
@@ -15,6 +17,10 @@ public class OnlyMemoryData implements ICoverageData{
 	
 	protected SourceHandler gridHandler = new SourceHandler(null);
 	
+	public SourceHandler getgridHandler()
+	{
+		return gridHandler;
+	}
 	@Override
 	public Ship getShip(String sourceMmsi, long shipMmsi) {
 		return gridHandler.getGrid(sourceMmsi).getShip(shipMmsi);
@@ -98,6 +104,10 @@ public class OnlyMemoryData implements ICoverageData{
 	@Override
 	public Collection<Source> getSources() {
 		return gridHandler.getBaseStations().values();
+	}
+	
+	public Map<String, Source> getSourcesData() {
+		return gridHandler.getBaseStations();
 	}
 
 	@Override

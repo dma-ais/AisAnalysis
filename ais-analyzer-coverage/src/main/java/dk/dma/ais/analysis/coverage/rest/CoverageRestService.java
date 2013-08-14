@@ -15,6 +15,7 @@
  */
 package dk.dma.ais.analysis.coverage.rest;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -40,6 +41,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriInfo;
+import javax.xml.bind.JAXBException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,6 +49,8 @@ import org.slf4j.LoggerFactory;
 import dk.dma.ais.analysis.coverage.AisCoverage;
 import dk.dma.ais.analysis.coverage.AisCoverageGUI;
 import dk.dma.ais.analysis.coverage.CoverageHandler;
+import dk.dma.ais.analysis.coverage.data.MarshallCell;
+import dk.dma.ais.analysis.coverage.data.MarshallSource;
 import dk.dma.ais.analysis.coverage.data.Source;
 import dk.dma.ais.analysis.coverage.data.Cell;
 import dk.dma.ais.analysis.coverage.data.ICoverageData;
@@ -58,6 +62,7 @@ import dk.dma.ais.analysis.coverage.data.json.JsonSource;
 import dk.dma.ais.analysis.coverage.export.CSVGenerator;
 import dk.dma.ais.analysis.coverage.export.KMLGenerator;
 import dk.dma.ais.analysis.coverage.export.XMLGenerator;
+import dk.dma.ais.analysis.coverage.timewindow.XMLExporter;
 import dk.dma.ais.data.AisVesselTarget;
 
 /**
@@ -151,10 +156,59 @@ public class CoverageRestService {
 		int multiplicity = Integer.parseInt(exportMultiFactor);
 		
 //		BaseStationHandler gh = new BaseStationHandler();
-		ICoverageData dh = new OnlyMemoryData();
+//		ICoverageData dh = new OnlyMemoryData();
+		OnlyMemoryData dh = new OnlyMemoryData();
+		
+		
 		
 		
 		Collection<Source> sources = handler.getDistributeCalc().getDataHandler().getSources();
+		
+		Date start = new Date();
+		LOG.info("starting marshalling");
+		XMLExporter xmlex = new XMLExporter();
+		xmlex.setLatSize(dh.getLatSize());
+		xmlex.setLonSize(dh.getLonSize());
+		
+		Collection<MarshallSource> sovses = new ArrayList<MarshallSource>();
+		
+		for (Source source : sources) {
+			MarshallSource ms = new MarshallSource(); 
+//			ms.setName(source.getName());
+			ms.setIdentifier(source.getIdentifier());
+//			ms.setLatitude(source.getLatitude());
+//			ms.setLongitude(source.getLongitude());
+			HashMap<String, MarshallCell> celllls = new HashMap<String, MarshallCell>();
+			for (Cell cell : source.getGrid().values()) {
+				MarshallCell mc = new MarshallCell();
+//				mc.setId(cell.getId());
+				mc.setLatitude(cell.getLatitude());
+				mc.setLongitude(cell.getLongitude());
+				mc.setNOofMissingSignals(cell.getNOofMissingSignals());
+				mc.setNOofReceivedSignals(cell.getNOofReceivedSignals());
+//				mc.setSourceID(cell.getGrid().getIdentifier());
+				celllls.put(cell.getId(), mc);
+			}
+			
+			ms.setGrid(celllls);
+			sovses.add(ms);
+		}
+		xmlex.setBaseStations(sovses);
+
+		Date timepsanstart = new Date();
+		Date timepsanend = new Date();
+//		xmlex.setBaseStations(sources);
+		try {
+			XMLExporter.save("D:\\silentk\\Desktop\\"+timepsanstart.getDate()+"-"+timepsanend.getDate()+".xml", xmlex);
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (JAXBException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		Date end = new Date();
+		LOG.info("Marshalling ended - took:"+(end.getTime()-start.getTime())+" ms");
 		
 //		Collection<BaseStation> superSource = covH.getSupersourceCalculator().getDataHandler().getSources();
 		

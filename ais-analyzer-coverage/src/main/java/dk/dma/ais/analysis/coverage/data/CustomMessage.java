@@ -3,12 +3,14 @@ package dk.dma.ais.analysis.coverage.data;
 import java.io.Serializable;
 import java.util.Date;
 
+import javax.xml.bind.annotation.XmlTransient;
+
 import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.packet.AisPacketTags.SourceType;
 
 
 public class CustomMessage implements Serializable {
-	private AisMessage originalMessage;
+	
 	
 	private static final long serialVersionUID = 1L;
 	private double cog;
@@ -21,6 +23,9 @@ public class CustomMessage implements Serializable {
 	private long timeSinceLastMsg;
 	private String key;
 	private SourceType sourceType;
+	
+	@XmlTransient
+	private AisMessage originalMessage;
 	
 	public SourceType getSourceType() {
 		return sourceType;
@@ -82,9 +87,11 @@ public class CustomMessage implements Serializable {
 	public void setTimeSinceLastMsg(long timeSinceLastMsg) {
 		this.timeSinceLastMsg = timeSinceLastMsg;
 	}
+	@XmlTransient
 	public AisMessage getOriginalMessage() {
 		return originalMessage;
 	}
+	
 	public void setOriginalMessage(AisMessage originalMessage) {
 		this.originalMessage = originalMessage;
 	}

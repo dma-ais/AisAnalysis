@@ -18,6 +18,8 @@ package dk.dma.ais.analysis.coverage.data;
 import java.io.Serializable;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.xml.bind.annotation.XmlTransient;
+
 import dk.dma.ais.analysis.coverage.data.Ship.ShipClass;
 
 
@@ -25,6 +27,7 @@ public class Source implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	private ConcurrentHashMap<String, Cell> grid = new ConcurrentHashMap<String, Cell>();
+	@XmlTransient
 	private ConcurrentHashMap<Long, Ship> ships = new ConcurrentHashMap<Long, Ship>();
 	private String name = "";
 	private String identifier;

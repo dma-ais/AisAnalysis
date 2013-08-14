@@ -28,7 +28,7 @@ import dk.dma.ais.analysis.coverage.calculator.SatCalculator;
 import dk.dma.ais.analysis.coverage.calculator.SupersourceCoverageCalculator;
 import dk.dma.ais.analysis.coverage.configuration.AisCoverageConfiguration;
 import dk.dma.ais.analysis.coverage.data.Cell;
-import dk.dma.ais.analysis.coverage.data.MongoBasedData;
+//import dk.dma.ais.analysis.coverage.data.MongoBasedData;
 import dk.dma.ais.analysis.coverage.data.OnlyMemoryData;
 import dk.dma.ais.analysis.coverage.data.json.JSonCoverageMap;
 import dk.dma.ais.analysis.coverage.data.json.JsonCell;
@@ -71,8 +71,8 @@ public class CoverageHandler {
 			satCalc.setDataHandler(new OnlyMemoryData());	
 			LOG.info("coverage calculators set up with memory only data handling");
 		}else{
-			distributeOnlyCalc.setDataHandler(new MongoBasedData(conf.getDatabaseConfiguration()));
-			superCalc.setDataHandler(new MongoBasedData(conf.getDatabaseConfiguration()));
+//			distributeOnlyCalc.setDataHandler(new MongoBasedData(conf.getDatabaseConfiguration()));
+//			superCalc.setDataHandler(new MongoBasedData(conf.getDatabaseConfiguration()));
 			LOG.info("coverage calculators set up with mongodb data handling");
 		}
 		
@@ -150,6 +150,6 @@ public class CoverageHandler {
     public DistributeOnlyCalculator getDistributeCalc(){	return distributeOnlyCalc;	}
     public SupersourceCoverageCalculator getSupersourceCalc(){	return superCalc;	}
 	public SatCalculator getSatCalc(){	return satCalc;	}
-
+//
 
 }

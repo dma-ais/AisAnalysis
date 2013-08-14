@@ -17,6 +17,7 @@ package dk.dma.ais.analysis.coverage.data;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 

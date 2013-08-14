@@ -10,15 +10,22 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import sun.util.LocaleServiceProviderPool.LocalizedObjectGetter;
-
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.Mongo;
-import com.mongodb.MongoException;
+
+import sun.util.LocaleServiceProviderPool.LocalizedObjectGetter;
+
+//import com.mongodb.BasicDBObject;
+//import com.mongodb.DB;
+//import com.mongodb.DBCollection;
+//import com.mongodb.DBCursor;
+//import com.mongodb.DBObject;
+//import com.mongodb.Mongo;
+//import com.mongodb.MongoException;
 
 import dk.dma.ais.analysis.coverage.AisCoverage;
 import dk.dma.ais.analysis.coverage.configuration.DatabaseConfiguration;
@@ -26,6 +33,8 @@ import dk.dma.ais.analysis.coverage.data.Ship.ShipClass;
 //TODO fix mongodb back up
 
 public class MongoBasedData implements ICoverageData{
+
+	
 	public SourceHandler gridHandler = new SourceHandler(null);
 	public Mongo mongo;
 	public DB db;

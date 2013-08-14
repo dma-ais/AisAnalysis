@@ -42,6 +42,9 @@ public class Ship implements Serializable {
 		this.mmsi = mmsi;
 		this.shipClass = shipClass;
 	}
+	public Ship() {
+		
+	}
 	public void setLastMessage(CustomMessage message){
 		this.lastMessage = message;
 	}
