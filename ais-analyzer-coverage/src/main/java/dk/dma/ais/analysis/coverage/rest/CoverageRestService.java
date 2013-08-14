@@ -17,6 +17,7 @@ package dk.dma.ais.analysis.coverage.rest;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -164,6 +165,9 @@ public class CoverageRestService {
 		
 		Collection<Source> sources = handler.getDistributeCalc().getDataHandler().getSources();
 		
+		DateFormat dateFormat = new SimpleDateFormat("dd-MM-YYYY-HH-mm");
+		Date testStartDate = new Date();
+		
 		Date start = new Date();
 		LOG.info("starting marshalling");
 		XMLExporter xmlex = new XMLExporter();
@@ -199,7 +203,9 @@ public class CoverageRestService {
 		Date timepsanend = new Date();
 //		xmlex.setBaseStations(sources);
 		try {
-			XMLExporter.save("D:\\silentk\\Desktop\\"+timepsanstart.getDate()+"-"+timepsanend.getDate()+".xml", xmlex);
+			XMLExporter.save("testdata"+dateFormat.format(testStartDate), dateFormat.format(timepsanstart)+"-"+dateFormat.format(timepsanend)+".xml", xmlex);
+//			XMLExporter.save("gurligris", "gurligis", xmlex);
+//			XMLExporter.save("c:\\gurligris.xml", xmlex);
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
