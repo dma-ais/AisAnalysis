@@ -21,10 +21,28 @@
 		<script src="js/expandable-jquery-plugin.js" defer="defer" type="text/javascript"></script>
 		<link rel="stylesheet" type="text/css" href="css/expandable.css">
 		
+
+		<script>
+		function selectExportType()
+		{
+		var x=document.getElementById("expotype").selectedIndex;
+		var y=document.getElementById("expotype").options;
+		exportType.value = y[x].text;
+		}
+		</script>
+
 		<link rel="stylesheet" type="text/css" href="css/bargenerator.css">
+
 		
 	</head>
 
+
+
+
+
+
+
+  
   
 	<body onload="setupMap()">
 		<div id="container">
@@ -66,18 +84,23 @@
 				<div id="exportPanel" class="expandable whiteOpacity">
 					<div class="smallText">Export format</div>
 					<div style="margin-top:10px; margin-left:auto;margin-right:auto;width:100px;">
-						<select style="width:auto">
-						  <option value="KML">KML</option>
-						  <option value="saab">Something</option>
+						<select name="expotype" id="expotype" onblur="selectExportType()" style="width:auto">
+						  <option value="KML" selected>KML</option>
+						  <option value="CSV">CSV</option>
+						  <option value="XML">XML</option>
+<!-- 						  <option value="saab">Something</option> -->
 						</select>
 					</div>
+					
+					
+					
 					
 					<div class="smallText" style="margin-top:20px;">Cell zoom factor</div>
 					<div id="exportMultiplicationFactor" style="text-align:center;margin-top:10px"></div>
 					<div id="multiplicationSlider" class="slider"></div>
 					<div style="float:right;margin-top:10px;margin-right:10px;">
 						<form action="/coverage/rest/export/" method="GET" target="_blank">
-							<input type="hidden" name="exportType" value="kml"><br>
+							<input id="exportType" type="hidden" name="exportType" value="KML"><br>
 							<input id="exportMultiHidden" type="hidden" name="exportMultiFactor" value=""><br>
 							<input type="submit" value="Export">
 						</form>
