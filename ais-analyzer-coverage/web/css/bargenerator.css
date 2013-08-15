@@ -10,13 +10,25 @@ body{
 	white-space:nowrap;
 
 	width:100px;
+/*   -webkit-transform: rotate(90deg); */
+/*   -moz-transform: rotate(90deg); */
+/*   -ms-transform: rotate(90deg); */
+/*   -o-transform: rotate(90deg); */
+/*   transform: rotate(90deg); */
+  
   -webkit-transform: rotate(90deg);
-  -moz-transform: rotate(90deg);
-  -ms-transform: rotate(90deg);
-  -o-transform: rotate(90deg);
-  transform: rotate(90deg);
+    -webkit-transform-origin: top left;   
+    -moz-transform: rotate(90deg);
+    -moz-transform-origin: top left; 
+    -o-transform: rotate(90deg);
+    -o-transform-origin: top left; 
+    -ms-transform: rotate(90deg);
+    -ms-transform-origin: top left; 
+    transform: rotate(90deg);
+    transform-origin: top left;  
+    
 
-	text-align:right;
+	text-align:left;
 
   /* Should be unset in IE9+ I think. */
   filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=3);

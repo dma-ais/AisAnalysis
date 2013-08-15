@@ -221,7 +221,28 @@ hr {
 /* 	right:8px; */
 	bottom:8px;
 	width: 800px;
+	height:70px;
+	
+	
+}
+.noScroll::-webkit-scrollbar { 
+    display: none; 
+    overflow:hidden;
 }
 .slidingWindowLabel{
-	top: -175px;
+	top: -210px;
+	height:65px !important;
+	padding:0px;
+	padding-left:30px;
+	padding-top:27px;
+	width:218px !important;
+	
+}
+.bluePointer{
+	background-image:url('../img/pointer.png');
+	background-repeat:no-repeat;
+}
+.grayPointer{
+	background-image:url('../img/graypointer.png');
+	background-repeat:no-repeat;
 }

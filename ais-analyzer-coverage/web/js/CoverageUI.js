@@ -51,10 +51,10 @@ function CoverageUI () {
     		header: "Satellite Statistics",
     		maxHeight: "800px"
     	});
-    	$('#slidingWindowPanel').expandable({
-    		header: "Sliding Window",
-    		maxHeight: "800px"
-    	});
+//    	$('#slidingWindowPanel').expandable({
+//    		header: "Sliding Window",
+//    		maxHeight: "800px"
+//    	});
     	
     	//add check box listeners
     	$(document).on('change', ".sourceCheckbox", function(e) {
@@ -179,6 +179,7 @@ function CoverageUI () {
         });
     }
     this.setupSlidingWindow = function(startDate, endDate){
+    	$('.slidingWindowLabel').hide();
     	$( "#globalStarTime" ).html(self.formatDate(startDate));
     	$( "#globalEndTime" ).html(self.formatDate(endDate));
     	
@@ -187,7 +188,7 @@ function CoverageUI () {
     	var endTimeLabel = $( "#endTime" );
     	var intervalLabel = $( "#interval" );
 //    	var slidingWindowSlider = $( "#slidingWindowOuter" ).width();
-    	var leftOffset = -155;
+    	var leftOffset = 37;
     	var pixelInterval = $( "#slidingWindowOuter" ).width()/timeDif;
     	$( "#globalStarTime" ).css("left", leftOffset);
     	$( "#globalEndTime" ).css("left", leftOffset+(pixelInterval*timeDif));
@@ -228,6 +229,25 @@ function CoverageUI () {
 	    		
 	    		self.changed = true;
 	    	}
+    	});
+    	
+    	showLabels = false;
+    	$('#slidingWindowPanel').mouseover(function() {
+    		if(showLabels==false){
+    			$('.slidingWindowLabel').fadeIn(100);	
+    		}
+    		showLabels=true;
+    		
+    	});
+    	$('#slidingWindowPanel').mouseout(function() {
+    		showLabels = false;
+    		
+    		//wait a bit and hide if showlabels is still true.
+    		setTimeout(function(){
+    			if(showLabels==false){
+        			$('.slidingWindowLabel').fadeOut(100);
+        		}
+    		},1000);
     	});
     }
 
