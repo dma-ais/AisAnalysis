@@ -8,6 +8,8 @@ function CoverageUI () {
     this.maxThreshold = 80;
     this.minExpectedMessages = 100;
     this.exportMultiplicationFactor = 4;
+    this.startDate; //is the time when the analysis started (used for sliding window)
+    this.endDate;	//Is the end time of the analysis or the point where the analysis is now (used for sliding window)
 
 
     
@@ -49,6 +51,10 @@ function CoverageUI () {
     		header: "Satellite Statistics",
     		maxHeight: "800px"
     	});
+    	$('#slidingWindowPanel').expandable({
+    		header: "Sliding Window",
+    		maxHeight: "800px"
+    	});
     	
     	//add check box listeners
     	$(document).on('change', ".sourceCheckbox", function(e) {
@@ -69,19 +75,23 @@ function CoverageUI () {
     	});
     	
     	
+    	 
     	//setup the threshold slider
-    	$( "#slider-range" ).slider({
+    	$( "#slider-range" ).dragslider({
     		range: true,
     	    min: 0,
     	    max: 100,
+    	    rangeDrag: true,
     	    values: [ self.minThreshold, self.maxThreshold ],
     	    slide: function( event, ui ) {
     	    	self.minThreshold = ui.values[ 0 ];
     	    	self.maxThreshold = ui.values[ 1 ];
     	    	$( "#min-range" ).html( " < " + self.minThreshold + "% <= " );
     	    	$( "#max-range" ).html( " < " + self.maxThreshold + "% <= " );
-    	    	self.changed = true;
-    	    }
+    	    },
+	    	change: function(event, ui){
+	    		self.changed = true;
+	    	}
     	});
     	$( "#min-range" ).html( " < " + self.minThreshold + "% <= " );
     	$( "#max-range" ).html( " < " + self.maxThreshold + "% <= " );
@@ -96,9 +106,32 @@ function CoverageUI () {
     		slide: function(event, ui){
     			self.minExpectedMessages=ui.value;
     			minExpected.html(ui.value);
-    			self.changed = true;
-    		}
+    		},
+	    	change: function(event, ui){
+	    		self.changed = true;
+	    	}
     	});
+    	
+    	
+    	//setup sliding window
+    	aisJsonClient.getStatus(function(data){
+    		var startDate = new Date(data.firstMessage);
+    		startDate.setMinutes(0);
+    		startDate.setSeconds(0);
+    		startDate.setMilliseconds(0);
+    		var endDate = new Date(data.lastMessage+(1000*60*60));
+    		endDate.setMinutes(0);
+    		endDate.setSeconds(0);
+    		endDate.setMilliseconds(0);
+    		self.setupSlidingWindow(startDate, endDate);
+//    		alert(startDate);
+//    		alert(endDate);
+//    		alert(data.firstMessage);
+    	});
+//    	startDate = new Date();
+//    	endDate = new Date(startDate.getTime()+(1000*60*60*24));
+//    	self.setupSlidingWindow(startDate, endDate);
+    	
     	
     	//setup
     	var exportMultiplicationDivHidden = $("#exportMultiHidden");
@@ -145,7 +178,62 @@ function CoverageUI () {
     		
         });
     }
+    this.setupSlidingWindow = function(startDate, endDate){
+    	$( "#globalStarTime" ).html(self.formatDate(startDate));
+    	$( "#globalEndTime" ).html(self.formatDate(endDate));
+    	
+    	var timeDif = (endDate.getTime()-startDate.getTime())/1000/60/60;
+    	var startTimeLabel = $( "#starTime" );
+    	var endTimeLabel = $( "#endTime" );
+    	var intervalLabel = $( "#interval" );
+//    	var slidingWindowSlider = $( "#slidingWindowOuter" ).width();
+    	var leftOffset = -155;
+    	var pixelInterval = $( "#slidingWindowOuter" ).width()/timeDif;
+    	$( "#globalStarTime" ).css("left", leftOffset);
+    	$( "#globalEndTime" ).css("left", leftOffset+(pixelInterval*timeDif));
+    	
+    	var updateLabels = function(firstValue, lastValue){
+    		startTimeLabel.html(self.formatDate(new Date(startDate.getTime()+firstValue*1000*60*60)));
+	    	startTimeLabel.css("left", (firstValue*pixelInterval)+leftOffset);
+	    	endTimeLabel.html(self.formatDate(new Date(startDate.getTime()+lastValue*1000*60*60)));
+	    	endTimeLabel.css("left", (lastValue*pixelInterval)+leftOffset);
+	    	
+	    	var intervalSize =  lastValue-firstValue;
+	    	if(intervalSize > 1){
+	    		intervalLabel.html(intervalSize +" hours");
+	    	}else{
+	    		intervalLabel.html(intervalSize +" hour");
+	    	}
+	    	intervalLabel.css("left", ((firstValue+(intervalSize/2))*pixelInterval)-25);
+    	}
+    	var defaultFirstValue = timeDif-6;
+    	var defaultSecondValue = timeDif;	
+    	if(timeDif < 6){ defaultFirstValue = 0; }
+    	updateLabels(defaultFirstValue,defaultSecondValue);
+    	
+    	$( "#slidingWindow" ).dragslider({
+    		range: true,
+    	    min: 0,
+    	    max: timeDif,
+    	    rangeDrag: true,
+    	    values: [ defaultFirstValue, defaultSecondValue ],
+    	    slide: function(event, ui){
+    	    	if(ui.values[1] - ui.values[0] < 1){
+                    // do not allow change
+                    return false;
+                }
+    	    	updateLabels(ui.values[ 0 ],ui.values[ 1 ]);
+        	},
+	    	change: function(event, ui){
+	    		
+	    		self.changed = true;
+	    	}
+    	});
+    }
 
+    this.formatDate = function(date){
+    	return ('0' + date.getDate()).slice(-2)+"-"+('0' + date.getMonth()).slice(-2)+" "+(('0' + date.getHours()).slice(-2)+":00");
+    }
 
     
     /**
@@ -266,6 +354,7 @@ function CoverageUI () {
     			if(isDown != true){
     				isDown = true;
     				draw.activate();
+//    				$('.expandable').fadeOut();
     			}
     			isDown = true;
     			
@@ -275,6 +364,7 @@ function CoverageUI () {
     		if(e.which == 17){
     			isDown = false; 
     			draw.deactivate();
+//    			$('.expandable').fadeIn();
     		}
     	});
     }

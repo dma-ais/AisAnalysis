@@ -55,6 +55,7 @@ import dk.dma.ais.analysis.coverage.data.TimeSpan;
 import dk.dma.ais.analysis.coverage.data.json.JSonCoverageMap;
 import dk.dma.ais.analysis.coverage.data.json.JsonConverter;
 import dk.dma.ais.analysis.coverage.data.json.JsonSource;
+import dk.dma.ais.analysis.coverage.data.json.Status;
 import dk.dma.ais.analysis.coverage.export.KMLGenerator;
 import dk.dma.ais.data.AisVesselTarget;
 
@@ -272,5 +273,21 @@ public class CoverageRestService {
 		return null;
     }
     
+    @GET
+    @Path("status")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Object status() throws IOException {
+    	LOG.info("getting status");
+    	Date first = handler.getSupersourceCalc().getFirstMessage().getTimestamp();
+    	Date last = handler.getSupersourceCalc().getCurrentMessage().getTimestamp();
+    	
+    	
+    	Status s = new Status();
+    	s.firstMessage=first.getTime();
+    	s.lastMessage=last.getTime();
+    	s.analysisStatus="Running";
+    	return s;
+    	
+    }
    
 }

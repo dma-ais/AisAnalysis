@@ -12,6 +12,7 @@
 		<script src="js/CoverageUI.js" defer="defer" type="text/javascript"></script>
 		<script src="js/settings.js" defer="defer" type="text/javascript"></script>
 		<script src="js/html2canvas.js" defer="defer" type="text/javascript"></script>
+		<script src="js/dragslider.js" defer="defer" type="text/javascript"></script>
 		<link rel="stylesheet" type="text/css" href="css/style.css">
 		
 		<link rel="stylesheet" href="http://code.jquery.com/ui/1.10.0/themes/base/jquery-ui.css" />
@@ -89,6 +90,19 @@
 				<div style="height:400px;margin:20px;">
 					<div id="outer" style="position: relative;height: 300px;"></div>
 				</div>
+			</div>
+			<div id="slidingWindowPanel" class="expandable whiteOpacity">
+				<div id="slidingWindowOuter" style="position:relative;width:600px;height:50px;margin-left:auto;margin-right:auto;margin-top:110px;">
+					<div id="globalStarTime" class="rotate slidingWindowLabel" >11-07-2013 14:00</div>
+					<div id="globalEndTime" class="rotate slidingWindowLabel" >12-07-2013 14:00</div>
+					
+					<div id="starTime" class="rotate slidingWindowLabel" >11-07-2013 14:00</div>
+					<div id="endTime" class="rotate slidingWindowLabel" >12-07-2013 14:00</div>
+					<div id="interval" style="position:absolute;left:0px;top:20px;">6 hours</div>
+					<div id="slidingWindow" style="width:100%;top:0px;" class="slider"></div>
+				</div>
+			
+
 			</div>
 			
 			<div id="statusPanel" class="panel whiteOpacity shadowsIE">

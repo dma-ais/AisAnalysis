@@ -38,5 +38,10 @@ function AisJsonClient (serverurl) {
     		callback(data);
     	}); 
     }
+    this.getStatus = function(callback){
+    	$.get('/coverage/rest/status', function(data) {
+    		callback(data);
+    	}); 
+    }
  
 }

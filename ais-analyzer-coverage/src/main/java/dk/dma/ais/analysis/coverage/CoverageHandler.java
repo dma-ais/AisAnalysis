@@ -16,6 +16,7 @@
 package dk.dma.ais.analysis.coverage;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -49,8 +50,9 @@ public class CoverageHandler {
     private SatCalculator satCalc;
     private int cellSize=2500;
     private static final Logger LOG = LoggerFactory.getLogger(CoverageHandler.class);
-   
-    public CoverageHandler(AisCoverageConfiguration conf) {
+    
+
+	public CoverageHandler(AisCoverageConfiguration conf) {
         this.conf = conf;
         
         superCalc = new SupersourceCoverageCalculator( false, conf.getSourceNameMap());
@@ -89,7 +91,6 @@ public class CoverageHandler {
     }
     int pr=0;
     public void receiveUnfiltered(AisPacket packet) {
-
     	superCalc.processMessage(packet, "supersource");
     	distributeOnlyCalc.processMessage(packet, "1");    
         satCalc.processMessage(packet, "sat");

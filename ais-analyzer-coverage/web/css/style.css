@@ -203,14 +203,25 @@ hr {
 #greenbox{background-color:green;}
 .slider {
 	width:180px;
-	background: gray;
+/* 	background: gray; */
 	margin-top:10px;
 	margin-left:auto;
 	margin-right:auto;
 }
-.slider .ui-widget-header { background: inherit; }
+/* .ui-slider-range { background: blue; } */
 
 
 /* #slider-range {width:200px} */
-/* #slider-range { background: gray;} */
+/* #slider-range { background: blue;} */
 /* #slider-range .ui-widget-header { background: gray; } */
+
+#slidingWindowPanel{
+	position: absolute;
+	left:8px;
+/* 	right:8px; */
+	bottom:8px;
+	width: 800px;
+}
+.slidingWindowLabel{
+	top: -175px;
+}
