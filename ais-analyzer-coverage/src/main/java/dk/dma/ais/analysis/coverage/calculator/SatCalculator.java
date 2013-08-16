@@ -47,7 +47,7 @@ public class SatCalculator extends AbstractCalculator {
 	 * @param lonEnd
 	 * @return
 	 */
-	public List<TimeSpan> getTimeSpans(double latStart, double lonStart, double latEnd, double lonEnd){
+	public List<TimeSpan> getTimeSpans(Date startTime, Date endTime, double latStart, double lonStart, double latEnd, double lonEnd){
 			
 		//Retrieve cells within the specified rectangle
     	Collection<Cell> cells = dataHandler.getCells();
@@ -62,12 +62,24 @@ public class SatCalculator extends AbstractCalculator {
 		
 		//Store every time span of the filtered cells
 		List<TimeSpan> spans = new ArrayList<TimeSpan>();
-    	for (Cell cell : areaFiltered) {
-			List<TimeSpan> individualSpan = cell.getTimeSpans();
-			for (TimeSpan timeSpan : individualSpan) {
-				spans.add(timeSpan);
-			}
-		}	
+		if(startTime != null && endTime != null){
+			for (Cell cell : areaFiltered) {
+				List<TimeSpan> individualSpan = cell.getTimeSpans();
+				for (TimeSpan timeSpan : individualSpan) {
+					if(timeSpan.getFirstMessage().getTime() > startTime.getTime() &&
+							timeSpan.getLastMessage().getTime() < endTime.getTime()){
+						spans.add(timeSpan);
+					}
+				}
+			}	
+		}else{
+	    	for (Cell cell : areaFiltered) {
+				List<TimeSpan> individualSpan = cell.getTimeSpans();
+				for (TimeSpan timeSpan : individualSpan) {
+					spans.add(timeSpan);
+				}
+			}	
+		}
     	
     	//sort time spans based on date
     	Collections.sort(spans, new SortByDate());

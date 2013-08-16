@@ -39,12 +39,22 @@ body{
 
 #bottomPanel{
 	width: 800px;
-/* 	height: 250px; */
+	height: 500px;
 	padding: 4px;
+	left: 50%;
+	margin-left: -400px;
+	top:50%;
+	margin-top:-250px;
+	
+
 	vertical-align:middle;
 	position: absolute;
-	bottom: 8px;
-	right: 8px;
+	
+/* 	background-image:url('../img/cross.png'); */
+/* 	background-repeat:no-repeat; */
+/* 	background-position: 785px 8px; */
+
+
 	-moz-user-select: none; 
     -khtml-user-select: none; 
     -webkit-user-select: none; 
@@ -217,9 +227,9 @@ hr {
 
 #slidingWindowPanel{
 	position: absolute;
-	left:8px;
-/* 	right:8px; */
+	left:50%;
 	bottom:8px;
+	margin-left:-400px;
 	width: 800px;
 	height:70px;
 	

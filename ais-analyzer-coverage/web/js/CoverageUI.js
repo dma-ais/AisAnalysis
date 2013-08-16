@@ -10,6 +10,10 @@ function CoverageUI () {
     this.exportMultiplicationFactor = 4;
     this.startDate; //is the time when the analysis started (used for sliding window)
     this.endDate;	//Is the end time of the analysis or the point where the analysis is now (used for sliding window)
+    this.selectedStartDate;
+    this.selectedEndDate;
+    var topleftPoint;//points which define sat box
+    var bottomRightPoint
 
 
     
@@ -47,10 +51,10 @@ function CoverageUI () {
     	$('#exportPanel').expandable({
     		header: "Export"
     	});
-    	$('#bottomPanel').expandable({
-    		header: "Satellite Statistics",
-    		maxHeight: "800px"
-    	});
+//    	$('#bottomPanel').expandable({
+//    		header: "Satellite Statistics",
+//    		maxHeight: "800px"
+//    	});
 //    	$('#slidingWindowPanel').expandable({
 //    		header: "Sliding Window",
 //    		maxHeight: "800px"
@@ -72,6 +76,16 @@ function CoverageUI () {
     		self.refreshSourceList();
     		self.refreshSourceDetails();
     		self.changed=true;
+    	});
+    	
+    	//Close window listeners
+    	$('.close').parent().hide();
+    	$('.close').click(function(){
+    		$(this).parent().fadeOut(100);
+    		//remove sat rectangle
+//    		boxLayer.removeFeatures([boxLayer.features[0]]);
+    		boxLayer.removeAllFeatures();
+    		
     	});
     	
     	
@@ -114,23 +128,7 @@ function CoverageUI () {
     	
     	
     	//setup sliding window
-    	aisJsonClient.getStatus(function(data){
-    		var startDate = new Date(data.firstMessage);
-    		startDate.setMinutes(0);
-    		startDate.setSeconds(0);
-    		startDate.setMilliseconds(0);
-    		var endDate = new Date(data.lastMessage+(1000*60*60));
-    		endDate.setMinutes(0);
-    		endDate.setSeconds(0);
-    		endDate.setMilliseconds(0);
-    		self.setupSlidingWindow(startDate, endDate);
-//    		alert(startDate);
-//    		alert(endDate);
-//    		alert(data.firstMessage);
-    	});
-//    	startDate = new Date();
-//    	endDate = new Date(startDate.getTime()+(1000*60*60*24));
-//    	self.setupSlidingWindow(startDate, endDate);
+    	self.updateSlidingWindow();
     	
     	
     	//setup
@@ -155,6 +153,7 @@ function CoverageUI () {
     	function loopFunction () {;
 	    	if(self.changed){
 	    		self.drawCoverage();
+//	    		self.updateSlidingWindow();
 	    		self.changed = false;
 	    	}
     		myTimeout = setTimeout(loopFunction, 2000);
@@ -178,6 +177,22 @@ function CoverageUI () {
     		
         });
     }
+    this.updateSlidingWindow = function(){
+    	aisJsonClient.getStatus(function(data){
+    		var startDate = new Date(data.firstMessage);
+    		startDate.setMinutes(0);
+    		startDate.setSeconds(0);
+    		startDate.setMilliseconds(0);
+    		var endDate = new Date(data.lastMessage+(1000*60*60));
+    		endDate.setMinutes(0);
+    		endDate.setSeconds(0);
+    		endDate.setMilliseconds(0);
+    		self.setupSlidingWindow(startDate, endDate);
+//    		alert(startDate);
+//    		alert(endDate);
+//    		alert(data.firstMessage);
+    	});
+    }
     this.setupSlidingWindow = function(startDate, endDate){
     	$('.slidingWindowLabel').hide();
     	$( "#globalStarTime" ).html(self.formatDate(startDate));
@@ -194,9 +209,11 @@ function CoverageUI () {
     	$( "#globalEndTime" ).css("left", leftOffset+(pixelInterval*timeDif));
     	
     	var updateLabels = function(firstValue, lastValue){
-    		startTimeLabel.html(self.formatDate(new Date(startDate.getTime()+firstValue*1000*60*60)));
+    		selectedStartDate = new Date(startDate.getTime()+firstValue*1000*60*60);
+    		selectedEndDate = new Date(startDate.getTime()+lastValue*1000*60*60);
+    		startTimeLabel.html(self.formatDate(selectedStartDate));
 	    	startTimeLabel.css("left", (firstValue*pixelInterval)+leftOffset);
-	    	endTimeLabel.html(self.formatDate(new Date(startDate.getTime()+lastValue*1000*60*60)));
+	    	endTimeLabel.html(self.formatDate(selectedEndDate));
 	    	endTimeLabel.css("left", (lastValue*pixelInterval)+leftOffset);
 	    	
 	    	var intervalSize =  lastValue-firstValue;
@@ -206,6 +223,8 @@ function CoverageUI () {
 	    		intervalLabel.html(intervalSize +" hour");
 	    	}
 	    	intervalLabel.css("left", ((firstValue+(intervalSize/2))*pixelInterval)-25);
+	    	
+	    	
     	}
     	var defaultFirstValue = timeDif-6;
     	var defaultSecondValue = timeDif;	
@@ -226,7 +245,10 @@ function CoverageUI () {
     	    	updateLabels(ui.values[ 0 ],ui.values[ 1 ]);
         	},
 	    	change: function(event, ui){
-	    		
+	    		//Update sat bar chart if it is visible
+		    	if ($('#bottomPanel').css('display') != 'none') {
+		    		self.updateBarChart();
+		    	}
 	    		self.changed = true;
 	    	}
     	});
@@ -335,28 +357,29 @@ function CoverageUI () {
     	map.addControl(selectControl);
     	selectControl.activate();
     	
-    	var boxLayer = new OpenLayers.Layer.Vector("Box layer");
+    	boxLayer = new OpenLayers.Layer.Vector("Box layer");
     	map.addLayers([boxLayer]);
-    	var currentBox = null;
+//    	var currentBox = null;
     	var draw = new OpenLayers.Control.DrawFeature(
     			boxLayer,
     		    OpenLayers.Handler.RegularPolygon,
     		    {
     				featureAdded : function(feature) {
-    					if(currentBox != null){
+    					if(boxLayer.features.length > 1){
     						boxLayer.removeFeatures([boxLayer.features[0]]);
-//    						console.log("remove");
+////    						console.log("remove");
     					}
-    					currentBox = feature;
+//    					currentBox = feature;
     					var g=boxLayer.features[0].clone().geometry; //get geometry of a featyre in your vector layer
     					var vertices = g.getVertices();
     					
-    					var topleftPoint = vertices[1].transform( map.getProjectionObject(),
+    					topleftPoint = vertices[1].transform( map.getProjectionObject(),
     			                   new OpenLayers.Projection("EPSG:4326"));
-    					var bottomRightPoint = vertices[3].transform( map.getProjectionObject(),
+    					bottomRightPoint = vertices[3].transform( map.getProjectionObject(),
  			                   new OpenLayers.Projection("EPSG:4326"));
 
-    					self.loadSatStats(topleftPoint, bottomRightPoint);
+    					self.updateBarChart();
+    					$('#barchart').parent().fadeIn(100);
 //    				    console.log("A point has been added");
     				},
                     handlerOptions: {
@@ -388,7 +411,9 @@ function CoverageUI () {
     		}
     	});
     }
-    
+    this.updateBarChart = function(){
+    	$('#barchart').attr('src', 'rest/satExportPNG?random='+Math.random()+'&startTime='+selectedStartDate.getTime()+'&endTime='+selectedEndDate.getTime()+'&lat1='+topleftPoint.y+'&lon1='+topleftPoint.x+'&lat2='+bottomRightPoint.y+'&lon2='+bottomRightPoint.x);
+    }
     this.refreshSourceList = function(){	
     	var sourceContainer = $("#sourcesPanel > .panelContainer");
     	sourceContainer.html("");
@@ -488,96 +513,96 @@ function CoverageUI () {
     	sourceLayer.addFeatures(feature);
     }
     
-    this.loadSatStats = function(topleft, bottomright){
-    	
-//    	var array = [{"fromTime":1374220785115,"toTime":1374220774501,"spanLength":1,"timeSinceLastSpan":0,"accumulatedTime":0,"signals":3,"distinctShips":1},{"fromTime":1374226711355,"toTime":1374227266676,"spanLength":9,"timeSinceLastSpan":98,"accumulatedTime":108,"signals":163,"distinctShips":7},{"fromTime":1374228081000,"toTime":1374228352000,"spanLength":4,"timeSinceLastSpan":13,"accumulatedTime":126,"signals":38,"distinctShips":6},{"fromTime":1374232884293,"toTime":1374233250297,"spanLength":6,"timeSinceLastSpan":75,"accumulatedTime":207,"signals":71,"distinctShips":6},{"fromTime":1374233909000,"toTime":1374234299000,"spanLength":6,"timeSinceLastSpan":10,"accumulatedTime":225,"signals":33,"distinctShips":7},{"fromTime":1374238552052,"toTime":1374239226409,"spanLength":11,"timeSinceLastSpan":70,"accumulatedTime":307,"signals":46,"distinctShips":6},{"fromTime":1374239872000,"toTime":1374239943000,"spanLength":1,"timeSinceLastSpan":10,"accumulatedTime":319,"signals":8,"distinctShips":5},{"fromTime":1374243070626,"toTime":1374243403490,"spanLength":5,"timeSinceLastSpan":52,"accumulatedTime":377,"signals":42,"distinctShips":6},{"fromTime":1374244812816,"toTime":1374245655000,"spanLength":14,"timeSinceLastSpan":23,"accumulatedTime":414,"signals":105,"distinctShips":6},{"fromTime":1374248972125,"toTime":1374249122001,"spanLength":2,"timeSinceLastSpan":55,"accumulatedTime":472,"signals":58,"distinctShips":7},{"fromTime":1374250432644,"toTime":1374251214883,"spanLength":13,"timeSinceLastSpan":21,"accumulatedTime":507,"signals":120,"distinctShips":7},{"fromTime":1374251846000,"toTime":1374251977000,"spanLength":2,"timeSinceLastSpan":10,"accumulatedTime":520,"signals":5,"distinctShips":4},{"fromTime":1374254798441,"toTime":1374255211329,"spanLength":6,"timeSinceLastSpan":47,"accumulatedTime":573,"signals":33,"distinctShips":6},{"fromTime":1374257362000,"toTime":1374257820000,"spanLength":7,"timeSinceLastSpan":35,"accumulatedTime":617,"signals":16,"distinctShips":7},{"fromTime":1374261058127,"toTime":1374261077807,"spanLength":1,"timeSinceLastSpan":53,"accumulatedTime":671,"signals":2,"distinctShips":1},{"fromTime":1374263221000,"toTime":1374263407000,"spanLength":3,"timeSinceLastSpan":35,"accumulatedTime":710,"signals":16,"distinctShips":5},{"fromTime":1374269013000,"toTime":1374269185000,"spanLength":2,"timeSinceLastSpan":93,"accumulatedTime":806,"signals":6,"distinctShips":2},{"fromTime":1374274821000,"toTime":1374274933000,"spanLength":1,"timeSinceLastSpan":93,"accumulatedTime":902,"signals":4,"distinctShips":4},{"fromTime":1374278293629,"toTime":1374278393470,"spanLength":1,"timeSinceLastSpan":56,"accumulatedTime":960,"signals":4,"distinctShips":3},{"fromTime":1374220785115,"toTime":1374220774501,"spanLength":1,"timeSinceLastSpan":33,"accumulatedTime":0,"signals":3,"distinctShips":1},{"fromTime":1374226711355,"toTime":1374227266676,"spanLength":9,"timeSinceLastSpan":98,"accumulatedTime":108,"signals":163,"distinctShips":7},{"fromTime":1374228081000,"toTime":1374228352000,"spanLength":4,"timeSinceLastSpan":13,"accumulatedTime":126,"signals":38,"distinctShips":6},{"fromTime":1374232884293,"toTime":1374233250297,"spanLength":6,"timeSinceLastSpan":75,"accumulatedTime":207,"signals":71,"distinctShips":6},{"fromTime":1374233909000,"toTime":1374234299000,"spanLength":6,"timeSinceLastSpan":10,"accumulatedTime":225,"signals":33,"distinctShips":7},{"fromTime":1374238552052,"toTime":1374239226409,"spanLength":11,"timeSinceLastSpan":70,"accumulatedTime":307,"signals":46,"distinctShips":6},{"fromTime":1374239872000,"toTime":1374239943000,"spanLength":1,"timeSinceLastSpan":10,"accumulatedTime":319,"signals":8,"distinctShips":5},{"fromTime":1374243070626,"toTime":1374243403490,"spanLength":5,"timeSinceLastSpan":52,"accumulatedTime":377,"signals":42,"distinctShips":6},{"fromTime":1374244812816,"toTime":1374245655000,"spanLength":14,"timeSinceLastSpan":23,"accumulatedTime":414,"signals":105,"distinctShips":6},{"fromTime":1374248972125,"toTime":1374249122001,"spanLength":2,"timeSinceLastSpan":55,"accumulatedTime":472,"signals":58,"distinctShips":7},{"fromTime":1374250432644,"toTime":1374251214883,"spanLength":13,"timeSinceLastSpan":21,"accumulatedTime":507,"signals":120,"distinctShips":7},{"fromTime":1374251846000,"toTime":1374251977000,"spanLength":2,"timeSinceLastSpan":10,"accumulatedTime":520,"signals":5,"distinctShips":4},{"fromTime":1374254798441,"toTime":1374255211329,"spanLength":6,"timeSinceLastSpan":47,"accumulatedTime":573,"signals":33,"distinctShips":6},{"fromTime":1374257362000,"toTime":1374257820000,"spanLength":7,"timeSinceLastSpan":35,"accumulatedTime":617,"signals":16,"distinctShips":7},{"fromTime":1374261058127,"toTime":1374261077807,"spanLength":1,"timeSinceLastSpan":53,"accumulatedTime":671,"signals":2,"distinctShips":1},{"fromTime":1374263221000,"toTime":1374263407000,"spanLength":3,"timeSinceLastSpan":35,"accumulatedTime":710,"signals":16,"distinctShips":5},{"fromTime":1374269013000,"toTime":1374269185000,"spanLength":2,"timeSinceLastSpan":93,"accumulatedTime":806,"signals":6,"distinctShips":2},{"fromTime":1374274821000,"toTime":1374274933000,"spanLength":1,"timeSinceLastSpan":93,"accumulatedTime":902,"signals":4,"distinctShips":4},{"fromTime":1374278293629,"toTime":1374379393470,"spanLength":1,"timeSinceLastSpan":56,"accumulatedTime":960,"signals":4,"distinctShips":3}];
-    	aisJsonClient.getSatCoverage(topleft.x+","+ topleft.y+","+ bottomright.x+","+ bottomright.y, function(array){
-    	
-	    	var output = "";
-	    	var outer = $("#outer");
-	//    	$("#bottomPanel").hide();
-	    	outer.html("");
-	    	result = "";
-	    	if(array.length == 0){
-	    		outer.html(" No data available");
-	    		console.log("NO DATA");
-	    		$("#bottomPanel").slideDown();
-    			return;
-    		}
-	//    	console.log($("#statusPanel").html());
-	    	var accumulatedTime = 0;
-	//     	alert(array[array.length-1].toTime);
-	    	lastDate = new Date(array[array.length-1].toTime);
-	    	
-	    	timeDifference = Math.ceil((array[array.length-1].toTime - array[0].fromTime)/1000/60/60);
-	    	
-	    	floorDate = new Date(array[0].fromTime);
-	    	floorDate.setMinutes(0);
-	    	offset = new Date(array[0].fromTime).getMinutes();
-	    	var accumulatedTime = offset;
-	    	var maxHeight = 0;
-	//     	alert(floorDate.getDate()+"-"+floorDate.getMonth());
-	
-	    	//set width of diagram
-	    	//outer.width(timeDifference*60);
-	    	if(timeDifference*60 < outer.width()){
-	    		timeDifference = outer.width()/60;
-	    	}
-	    	
-	    	//draw vertical lines
-	    	for (var i=0;i<=timeDifference;i++)
-	    	{ 
-	    		
-	    		if(i%3==0 || i==0){
-	    			currentDate = new Date(floorDate.getTime()+(1000*60*60*i));
-	//     			currentDate.setHours(currentDate.getHours()+i+1);
-	    			dateLabel = ('0' + currentDate.getDate()).slice(-2)+"-"+('0' + currentDate.getMonth()).slice(-2)+" "+(('0' + currentDate.getHours()).slice(-2)+":00");
-	//    			console.log(outer.html());
-	    			result+='<div class="labelDate" style="left:'+((i)*60-50)+'px">'+dateLabel+'</div>';
-	    		}
-	    		if(i == 0){
-	    			result+='<div class="leftVerticalLine" style="left:'+(i)*60+'px;"></div>';
-	    		}else{
-	    			result+='<div class="line" style="left:'+(i)*60+'px;"></div>';
-	    		}
-	    		
-	    	}
-	    	
-	    	//Draw the horizontal lower border
-	    	var lowerBorderwidth = 60*timeDifference;
-	    	if(lowerBorderwidth < outer.width()){
-	    		lowerBorderwidth=outer.width();
-	    	}
-	    	result+='<div class="horizontalLine" style="bottom:0px;left:0px;width:'+lowerBorderwidth+'px;"></div>';
-	    	//draw bottom horizontal line
-	    	
-	    	//Find max height and calculate scale factor
-	    	$.each(array, function(key, bar) {
-	    		if(bar.signals > maxHeight){maxHeight=bar.signals;}	  
-	    	});
-	    	if(maxHeight > outer.height()){
-	    	scale = outer.height()/maxHeight;
-	    	}else{
-	    		scale=1;
-	    	}
-	    	
-	    	//draw bars
-	    	$.each(array, function(key, bar) {
-	    		var leftPos =  (bar.fromTime - floorDate.getTime())/1000/60/60;
-	    		console.log(bar.fromTime+" "+bar.toTime);
-	    		if(key != 0){result+="<div class='rotate betweenSpanLabel' style='left: "+(accumulatedTime-50+(bar.timeSinceLastSpan/2))+"px'>"+bar.timeSinceLastSpan+" min</div>";}
-	    		accumulatedTime += bar.timeSinceLastSpan;
-	    		result+="<div class='bar' style='width: "+bar.spanLength+"px; height:"+bar.signals*scale+"px; background: #6E6E6E; left: "+accumulatedTime+"px;bottom:0px;'></div><div class='rotate timeSpanLabel' style='left: "+(accumulatedTime-50+(bar.spanLength/2))+"px'>"+bar.spanLength+" min</div><div class='value' style=' left: "+(accumulatedTime-50+(bar.spanLength/2))+"px;bottom:"+(bar.signals*scale)+"px;'>"+bar.signals+"</div>";
-	    		accumulatedTime += bar.spanLength;
-	    		  
-	    	});
-	    	
-	    	
-	    	outer.html(result);
-	    	$("#bottomPanel").slideDown();
-    	});
-//    	alert(topleft);
-    }
+//    this.loadSatStats = function(topleft, bottomright){
+//    	
+////    	var array = [{"fromTime":1374220785115,"toTime":1374220774501,"spanLength":1,"timeSinceLastSpan":0,"accumulatedTime":0,"signals":3,"distinctShips":1},{"fromTime":1374226711355,"toTime":1374227266676,"spanLength":9,"timeSinceLastSpan":98,"accumulatedTime":108,"signals":163,"distinctShips":7},{"fromTime":1374228081000,"toTime":1374228352000,"spanLength":4,"timeSinceLastSpan":13,"accumulatedTime":126,"signals":38,"distinctShips":6},{"fromTime":1374232884293,"toTime":1374233250297,"spanLength":6,"timeSinceLastSpan":75,"accumulatedTime":207,"signals":71,"distinctShips":6},{"fromTime":1374233909000,"toTime":1374234299000,"spanLength":6,"timeSinceLastSpan":10,"accumulatedTime":225,"signals":33,"distinctShips":7},{"fromTime":1374238552052,"toTime":1374239226409,"spanLength":11,"timeSinceLastSpan":70,"accumulatedTime":307,"signals":46,"distinctShips":6},{"fromTime":1374239872000,"toTime":1374239943000,"spanLength":1,"timeSinceLastSpan":10,"accumulatedTime":319,"signals":8,"distinctShips":5},{"fromTime":1374243070626,"toTime":1374243403490,"spanLength":5,"timeSinceLastSpan":52,"accumulatedTime":377,"signals":42,"distinctShips":6},{"fromTime":1374244812816,"toTime":1374245655000,"spanLength":14,"timeSinceLastSpan":23,"accumulatedTime":414,"signals":105,"distinctShips":6},{"fromTime":1374248972125,"toTime":1374249122001,"spanLength":2,"timeSinceLastSpan":55,"accumulatedTime":472,"signals":58,"distinctShips":7},{"fromTime":1374250432644,"toTime":1374251214883,"spanLength":13,"timeSinceLastSpan":21,"accumulatedTime":507,"signals":120,"distinctShips":7},{"fromTime":1374251846000,"toTime":1374251977000,"spanLength":2,"timeSinceLastSpan":10,"accumulatedTime":520,"signals":5,"distinctShips":4},{"fromTime":1374254798441,"toTime":1374255211329,"spanLength":6,"timeSinceLastSpan":47,"accumulatedTime":573,"signals":33,"distinctShips":6},{"fromTime":1374257362000,"toTime":1374257820000,"spanLength":7,"timeSinceLastSpan":35,"accumulatedTime":617,"signals":16,"distinctShips":7},{"fromTime":1374261058127,"toTime":1374261077807,"spanLength":1,"timeSinceLastSpan":53,"accumulatedTime":671,"signals":2,"distinctShips":1},{"fromTime":1374263221000,"toTime":1374263407000,"spanLength":3,"timeSinceLastSpan":35,"accumulatedTime":710,"signals":16,"distinctShips":5},{"fromTime":1374269013000,"toTime":1374269185000,"spanLength":2,"timeSinceLastSpan":93,"accumulatedTime":806,"signals":6,"distinctShips":2},{"fromTime":1374274821000,"toTime":1374274933000,"spanLength":1,"timeSinceLastSpan":93,"accumulatedTime":902,"signals":4,"distinctShips":4},{"fromTime":1374278293629,"toTime":1374278393470,"spanLength":1,"timeSinceLastSpan":56,"accumulatedTime":960,"signals":4,"distinctShips":3},{"fromTime":1374220785115,"toTime":1374220774501,"spanLength":1,"timeSinceLastSpan":33,"accumulatedTime":0,"signals":3,"distinctShips":1},{"fromTime":1374226711355,"toTime":1374227266676,"spanLength":9,"timeSinceLastSpan":98,"accumulatedTime":108,"signals":163,"distinctShips":7},{"fromTime":1374228081000,"toTime":1374228352000,"spanLength":4,"timeSinceLastSpan":13,"accumulatedTime":126,"signals":38,"distinctShips":6},{"fromTime":1374232884293,"toTime":1374233250297,"spanLength":6,"timeSinceLastSpan":75,"accumulatedTime":207,"signals":71,"distinctShips":6},{"fromTime":1374233909000,"toTime":1374234299000,"spanLength":6,"timeSinceLastSpan":10,"accumulatedTime":225,"signals":33,"distinctShips":7},{"fromTime":1374238552052,"toTime":1374239226409,"spanLength":11,"timeSinceLastSpan":70,"accumulatedTime":307,"signals":46,"distinctShips":6},{"fromTime":1374239872000,"toTime":1374239943000,"spanLength":1,"timeSinceLastSpan":10,"accumulatedTime":319,"signals":8,"distinctShips":5},{"fromTime":1374243070626,"toTime":1374243403490,"spanLength":5,"timeSinceLastSpan":52,"accumulatedTime":377,"signals":42,"distinctShips":6},{"fromTime":1374244812816,"toTime":1374245655000,"spanLength":14,"timeSinceLastSpan":23,"accumulatedTime":414,"signals":105,"distinctShips":6},{"fromTime":1374248972125,"toTime":1374249122001,"spanLength":2,"timeSinceLastSpan":55,"accumulatedTime":472,"signals":58,"distinctShips":7},{"fromTime":1374250432644,"toTime":1374251214883,"spanLength":13,"timeSinceLastSpan":21,"accumulatedTime":507,"signals":120,"distinctShips":7},{"fromTime":1374251846000,"toTime":1374251977000,"spanLength":2,"timeSinceLastSpan":10,"accumulatedTime":520,"signals":5,"distinctShips":4},{"fromTime":1374254798441,"toTime":1374255211329,"spanLength":6,"timeSinceLastSpan":47,"accumulatedTime":573,"signals":33,"distinctShips":6},{"fromTime":1374257362000,"toTime":1374257820000,"spanLength":7,"timeSinceLastSpan":35,"accumulatedTime":617,"signals":16,"distinctShips":7},{"fromTime":1374261058127,"toTime":1374261077807,"spanLength":1,"timeSinceLastSpan":53,"accumulatedTime":671,"signals":2,"distinctShips":1},{"fromTime":1374263221000,"toTime":1374263407000,"spanLength":3,"timeSinceLastSpan":35,"accumulatedTime":710,"signals":16,"distinctShips":5},{"fromTime":1374269013000,"toTime":1374269185000,"spanLength":2,"timeSinceLastSpan":93,"accumulatedTime":806,"signals":6,"distinctShips":2},{"fromTime":1374274821000,"toTime":1374274933000,"spanLength":1,"timeSinceLastSpan":93,"accumulatedTime":902,"signals":4,"distinctShips":4},{"fromTime":1374278293629,"toTime":1374379393470,"spanLength":1,"timeSinceLastSpan":56,"accumulatedTime":960,"signals":4,"distinctShips":3}];
+//    	aisJsonClient.getSatCoverage(topleft.x+","+ topleft.y+","+ bottomright.x+","+ bottomright.y, function(array){
+//    	
+//	    	var output = "";
+//	    	var outer = $("#outer");
+//	//    	$("#bottomPanel").hide();
+//	    	outer.html("");
+//	    	result = "";
+//	    	if(array.length == 0){
+//	    		outer.html(" No data available");
+//	    		console.log("NO DATA");
+//	    		$("#bottomPanel").slideDown();
+//    			return;
+//    		}
+//	//    	console.log($("#statusPanel").html());
+//	    	var accumulatedTime = 0;
+//	//     	alert(array[array.length-1].toTime);
+//	    	lastDate = new Date(array[array.length-1].toTime);
+//	    	
+//	    	timeDifference = Math.ceil((array[array.length-1].toTime - array[0].fromTime)/1000/60/60);
+//	    	
+//	    	floorDate = new Date(array[0].fromTime);
+//	    	floorDate.setMinutes(0);
+//	    	offset = new Date(array[0].fromTime).getMinutes();
+//	    	var accumulatedTime = offset;
+//	    	var maxHeight = 0;
+//	//     	alert(floorDate.getDate()+"-"+floorDate.getMonth());
+//	
+//	    	//set width of diagram
+//	    	//outer.width(timeDifference*60);
+//	    	if(timeDifference*60 < outer.width()){
+//	    		timeDifference = outer.width()/60;
+//	    	}
+//	    	
+//	    	//draw vertical lines
+//	    	for (var i=0;i<=timeDifference;i++)
+//	    	{ 
+//	    		
+//	    		if(i%3==0 || i==0){
+//	    			currentDate = new Date(floorDate.getTime()+(1000*60*60*i));
+//	//     			currentDate.setHours(currentDate.getHours()+i+1);
+//	    			dateLabel = ('0' + currentDate.getDate()).slice(-2)+"-"+('0' + currentDate.getMonth()).slice(-2)+" "+(('0' + currentDate.getHours()).slice(-2)+":00");
+//	//    			console.log(outer.html());
+//	    			result+='<div class="labelDate" style="left:'+((i)*60-50)+'px">'+dateLabel+'</div>';
+//	    		}
+//	    		if(i == 0){
+//	    			result+='<div class="leftVerticalLine" style="left:'+(i)*60+'px;"></div>';
+//	    		}else{
+//	    			result+='<div class="line" style="left:'+(i)*60+'px;"></div>';
+//	    		}
+//	    		
+//	    	}
+//	    	
+//	    	//Draw the horizontal lower border
+//	    	var lowerBorderwidth = 60*timeDifference;
+//	    	if(lowerBorderwidth < outer.width()){
+//	    		lowerBorderwidth=outer.width();
+//	    	}
+//	    	result+='<div class="horizontalLine" style="bottom:0px;left:0px;width:'+lowerBorderwidth+'px;"></div>';
+//	    	//draw bottom horizontal line
+//	    	
+//	    	//Find max height and calculate scale factor
+//	    	$.each(array, function(key, bar) {
+//	    		if(bar.signals > maxHeight){maxHeight=bar.signals;}	  
+//	    	});
+//	    	if(maxHeight > outer.height()){
+//	    	scale = outer.height()/maxHeight;
+//	    	}else{
+//	    		scale=1;
+//	    	}
+//	    	
+//	    	//draw bars
+//	    	$.each(array, function(key, bar) {
+//	    		var leftPos =  (bar.fromTime - floorDate.getTime())/1000/60/60;
+//	    		console.log(bar.fromTime+" "+bar.toTime);
+//	    		if(key != 0){result+="<div class='rotate betweenSpanLabel' style='left: "+(accumulatedTime-50+(bar.timeSinceLastSpan/2))+"px'>"+bar.timeSinceLastSpan+" min</div>";}
+//	    		accumulatedTime += bar.timeSinceLastSpan;
+//	    		result+="<div class='bar' style='width: "+bar.spanLength+"px; height:"+bar.signals*scale+"px; background: #6E6E6E; left: "+accumulatedTime+"px;bottom:0px;'></div><div class='rotate timeSpanLabel' style='left: "+(accumulatedTime-50+(bar.spanLength/2))+"px'>"+bar.spanLength+" min</div><div class='value' style=' left: "+(accumulatedTime-50+(bar.spanLength/2))+"px;bottom:"+(bar.signals*scale)+"px;'>"+bar.signals+"</div>";
+//	    		accumulatedTime += bar.spanLength;
+//	    		  
+//	    	});
+//	    	
+//	    	
+//	    	outer.html(result);
+//	    	$("#bottomPanel").slideDown();
+//    	});
+////    	alert(topleft);
+//    }
 
     this.drawCoverage = function(){
     	

@@ -57,6 +57,7 @@ import dk.dma.ais.analysis.coverage.data.json.JsonConverter;
 import dk.dma.ais.analysis.coverage.data.json.JsonSource;
 import dk.dma.ais.analysis.coverage.data.json.Status;
 import dk.dma.ais.analysis.coverage.export.CSVGenerator;
+import dk.dma.ais.analysis.coverage.export.ChartGenerator;
 import dk.dma.ais.analysis.coverage.export.KMLGenerator;
 import dk.dma.ais.analysis.coverage.export.XMLGenerator;
 import dk.dma.ais.data.AisVesselTarget;
@@ -121,6 +122,7 @@ public class CoverageRestService {
     @Path("coverage")
     @Produces(MediaType.APPLICATION_JSON)
     public JSonCoverageMap coverage(@Context HttpServletRequest request) {
+    	Date start = new Date();
         Objects.requireNonNull(handler);
         String sources = request.getParameter("sources");
 		String area = request.getParameter("area");
@@ -140,7 +142,9 @@ public class CoverageRestService {
 				sourcesMap.put(string, true);
 			}
 		}		
-		
+		JSonCoverageMap result = handler.getJsonCoverage(latStart, lonStart, latEnd, lonEnd, sourcesMap, multiplicationFactor);
+		Date end = new Date();
+		LOG.info("Coverage request completed in: "+((double) (end.getTime()-start.getTime())/1000)+" seconds");
 		return handler.getJsonCoverage(latStart, lonStart, latEnd, lonEnd, sourcesMap, multiplicationFactor);
     }
     
@@ -239,9 +243,67 @@ public class CoverageRestService {
     		latBottom = latPoint2;
     	}
     	
+//    	List<TimeSpan> spans =handler.getSatCalc().getTimeSpans(latTop, lonLeft, latBottom, lonRight);
+//    	if(!spans.isEmpty()){
+//	    	ChartGenerator cg = new ChartGenerator();
+//	    	cg.generateChart(spans.get(0).getFirstMessage(), spans.get(spans.size()-1).getLastMessage(), spans);
+//    	}
+    	return JsonConverter.toJsonTimeSpan(handler.getSatCalc().getTimeSpans(null, null, latTop, lonLeft, latBottom, lonRight));
+    }
+    
+    @GET
+    @Path("satExportPNG")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Object satExportPNG(@QueryParam("startTime") String startTime,@QueryParam("endTime") String endTime,@QueryParam("lat1") String lat1, @QueryParam("lon1") String lon1,@QueryParam("lat2") String lat2,@QueryParam("lon2") String lon2,  @Context HttpServletResponse response) throws IOException {
+//    	double latTop = 62.47;
+//    	double latBottom = 57.5;
+//    	double lonRight = -35;
+//    	double lonLeft = -55;
+    	
+//    	LOG.info("Finding sat coverage for area: "+area);
+    	double latPoint1 = Double.parseDouble(lat1);
+    	double latPoint2 = Double.parseDouble(lat2);
+    	double lonPoint1 = Double.parseDouble(lon1);
+    	double lonPoint2 = Double.parseDouble(lon2);
+    	
+    	Date startDate = new Date(Long.parseLong(startTime));
+    	Date endDate = new Date(Long.parseLong(endTime));
+    	
+    	//Determine which points are which
+    	double lonLeft;
+    	double lonRight;
+    	if(lonPoint1 < lonPoint2){
+    		lonLeft = lonPoint1;
+    		lonRight = lonPoint2;
+    	}else{
+    		lonLeft = lonPoint2;
+    		lonRight = lonPoint1;
+    	}
+    	double latTop;
+    	double latBottom;
+    	if(latPoint1 < latPoint2){
+    		latTop = latPoint2;
+    		latBottom = latPoint1;
+    	}else{
+    		latTop = latPoint1;
+    		latBottom = latPoint2;
+    	}
+    	
+		response.setContentType("image/png");
+//		response.setHeader("Content-Disposition", "attachment; filename=" + "satexport.txt");
+		ServletOutputStream out = response.getOutputStream();
+		
+    	List<TimeSpan> spans =handler.getSatCalc().getTimeSpans(startDate, endDate, latTop, lonLeft, latBottom, lonRight);
+
+	    ChartGenerator cg = new ChartGenerator();
+	    cg.generateChart(startDate, endDate, spans);
+	    cg.exportAsPNG(out);
     	
     	
-    	return JsonConverter.toJsonTimeSpan(handler.getSatCalc().getTimeSpans(latTop, lonLeft, latBottom, lonRight));
+    	
+		out.flush();
+
+		return null;
     }
     
     @GET
@@ -260,7 +322,7 @@ public class CoverageRestService {
 		ServletOutputStream out = response.getOutputStream();
 		
 		
-		List<TimeSpan> timeSpans = handler.getSatCalc().getTimeSpans(latTop, lonLeft, latBottom, lonRight);
+		List<TimeSpan> timeSpans = handler.getSatCalc().getTimeSpans(null, null, latTop, lonLeft, latBottom, lonRight);
 		TimeSpan first = null;
 		TimeSpan previous = null;
 		for (TimeSpan timeSpan : timeSpans) {
