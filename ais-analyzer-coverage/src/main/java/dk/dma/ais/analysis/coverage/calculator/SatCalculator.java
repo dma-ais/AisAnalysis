@@ -116,7 +116,7 @@ public class SatCalculator extends AbstractCalculator {
 	}
 	
 	/**
-	 * Retrieves a list of time spans based on a rectangle defined på two lat-lon points. 
+	 * Retrieves a list of time spans based on a rectangle defined by two lat-lon points. 
 	 * Cells within the rectangle each contain a number of time spans. Two time spans will be merged
 	 * if they are close to each other (closeness is defined by timeMargin). In that way the rectangle
 	 * given by the user will be seen as one big cell.
