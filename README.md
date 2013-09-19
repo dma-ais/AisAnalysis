@@ -33,11 +33,19 @@ A distributable zip file is found [here](http://fuka.dk/ais-coverage-analysis.zi
 Be aware: As it contains executable files, your browser may post a warning when you download the file. <br><br>
 When you have downloaded the zip file, extract it to your desired location, and open the folder. <br>
 Modify the configuration file (configuration.xml)to suit your needs (For guidance, Look at the 4 configuration samples (also included)). If you will be using several standart configurations you can edit the -file part in the bat file to point at the configuration file you wish you use for the given test<br>
+A Sample data file is included, and the used configuration file is set up to use this sample data. <br>
+So you only need need to modify the configuration file, to run your own data.
 
 Run the coverage.bat file (windows) or the coverage.sh file (linux) to start the coverage-analysis. While the service is running, you can view the progress/result by opening your browser at the address given in the configuration file (sample-default-address = localhost:8090/coverage/)
 <br><br>
 When running tests from files, please use the memory only option. <br>
 When running tests over longer periods using mongodb you might experience some issues. A solution to this, is being worked on.
+
+The current release makes it possible to see the coverage within a limited timespan, down to a single hour, and with 1 hour intervals. <br>
+The data is currently only persisted in memory, so might make an out of memory error, if run over longer amounts of time. <br>
+
+A sample of how satalite data coverage will be handled is possible, by pressing ctrl, and dragging the mouse over the area of interest.
+<br>
 
 Examples of configuration files can be found here:<br>
 [Read from a file](https://github.com/dma-dk/AisAnalysis/blob/master/ais-analyzer-coverage/src/main/resources/coverage-fromfile-sample.xml)<br>
