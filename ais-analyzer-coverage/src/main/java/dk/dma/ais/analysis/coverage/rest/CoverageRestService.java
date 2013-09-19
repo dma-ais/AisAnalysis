@@ -47,6 +47,7 @@ import org.slf4j.LoggerFactory;
 import dk.dma.ais.analysis.coverage.AisCoverage;
 import dk.dma.ais.analysis.coverage.AisCoverageGUI;
 import dk.dma.ais.analysis.coverage.CoverageHandler;
+import dk.dma.ais.analysis.coverage.calculator.geotools.Helper;
 import dk.dma.ais.analysis.coverage.data.Source;
 import dk.dma.ais.analysis.coverage.data.Cell;
 import dk.dma.ais.analysis.coverage.data.ICoverageData;
@@ -56,7 +57,7 @@ import dk.dma.ais.analysis.coverage.data.json.JSonCoverageMap;
 import dk.dma.ais.analysis.coverage.data.json.JsonConverter;
 import dk.dma.ais.analysis.coverage.data.json.JsonSource;
 import dk.dma.ais.analysis.coverage.data.json.Status;
-import dk.dma.ais.analysis.coverage.export.CSVGenerator;
+//import dk.dma.ais.analysis.coverage.export.CSVGenerator;
 import dk.dma.ais.analysis.coverage.export.ChartGenerator;
 import dk.dma.ais.analysis.coverage.export.KMLGenerator;
 import dk.dma.ais.analysis.coverage.export.XMLGenerator;
@@ -126,6 +127,9 @@ public class CoverageRestService {
         Objects.requireNonNull(handler);
         String sources = request.getParameter("sources");
 		String area = request.getParameter("area");
+		long starttime = Long.parseLong(request.getParameter("starttime"));
+		long endtime = Long.parseLong(request.getParameter("endtime"));
+		
 		String[] areaArray = area.split(",");
 		
 		int multiplicationFactor = Integer.parseInt(request.getParameter("multiplicationFactor"));
@@ -142,69 +146,69 @@ public class CoverageRestService {
 				sourcesMap.put(string, true);
 			}
 		}		
-		JSonCoverageMap result = handler.getJsonCoverage(latStart, lonStart, latEnd, lonEnd, sourcesMap, multiplicationFactor);
+		JSonCoverageMap result = handler.getJsonCoverage(latStart, lonStart, latEnd, lonEnd, sourcesMap, multiplicationFactor, new Date(starttime), new Date(endtime));
 		Date end = new Date();
 		LOG.info("Coverage request completed in: "+((double) (end.getTime()-start.getTime())/1000)+" seconds");
-		return handler.getJsonCoverage(latStart, lonStart, latEnd, lonEnd, sourcesMap, multiplicationFactor);
+		return result;
     }
     
     @GET
     @Path("export")
     @Produces(MediaType.APPLICATION_JSON)
     public Object export(@QueryParam("exportType") String exportType, @QueryParam("exportMultiFactor") String exportMultiFactor, @Context HttpServletResponse response) {
-
-		int multiplicity = Integer.parseInt(exportMultiFactor);
-		
-//		BaseStationHandler gh = new BaseStationHandler();
-		ICoverageData dh = new OnlyMemoryData();
-		
-		
-		Collection<Source> sources = handler.getDistributeCalc().getDataHandler().getSources();
-		
-//		Collection<BaseStation> superSource = covH.getSupersourceCalculator().getDataHandler().getSources();
-		
-		Source superbs = handler.getSupersourceCalc().getDataHandler().getSource("supersource");	
-		
-		for (Source bs : sources) {
-			Source summedbs = dh.createSource(bs.getIdentifier());
-			summedbs.setLatSize(bs.getLatSize()*multiplicity);
-			summedbs.setLonSize(bs.getLonSize()*multiplicity);
-			dh.setLatSize(bs.getLatSize()*multiplicity);
-			dh.setLonSize(bs.getLonSize()*multiplicity);
-//			BaseStation tempSource = new BaseStation(basestation.getIdentifier(), gridHandler.getLatSize()*multiplicationFactor, gridHandler.getLonSize()*multiplicationFactor);
-			
-			Collection<Cell> cells = bs.getGrid().values();
-			
-			for (Cell cell : cells)
-			{
-				Cell dhCell = summedbs.getCell(cell.getLatitude(), cell.getLongitude());
-				if(dhCell == null)
-				{
-					dhCell = summedbs.createCell(cell.getLatitude(), cell.getLongitude());
-				}		
-				dhCell.addReceivedSignals(cell.getNOofReceivedSignals());
-				dhCell.addNOofMissingSignals((superbs.getGrid().get(cell.getId()).getTotalNumberOfMessages() - cell.getNOofReceivedSignals()));
-				
-//				LOG.debug("cell for export created: " + summedbs.getCell(cell.getLatitude(), cell.getLongitude()).getNOofReceivedSignals() + "-" + summedbs.getCell(cell.getLatitude(), cell.getLongitude()).getNOofMissingSignals());
-			}
-		}
-		if (exportType.equals("KML")) {
-//			System.out.println(expotype);
-			KMLGenerator.generateKML(dh.getSources(), dh.getLatSize(), dh.getLonSize(), multiplicity, response);
-		}
-		else if (exportType.equals("CSV")) {
-//			System.out.println(expotype);
-			CSVGenerator.generateCSV(dh.getSources(), dh.getLatSize(), dh.getLonSize(), multiplicity, response);
-		}
-		else if (exportType.equals("XML")) {
-//			System.out.println(expotype);
-			XMLGenerator.generateXML(dh.getSources(), dh.getLatSize(), dh.getLonSize(), multiplicity, response);
-		}
-		else
-		{
-			System.out.println("wrong exporttype");
-		}
-		return null;
+return null;
+//		int multiplicity = Integer.parseInt(exportMultiFactor);
+//		
+////		BaseStationHandler gh = new BaseStationHandler();
+//		ICoverageData dh = new OnlyMemoryData();
+//		
+//		
+//		Collection<Source> sources = handler.getDistributeCalc().getDataHandler().getSources();
+//		
+////		Collection<BaseStation> superSource = covH.getSupersourceCalculator().getDataHandler().getSources();
+//		
+//		Source superbs = handler.getSupersourceCalc().getDataHandler().getSource("supersource");	
+//		
+//		for (Source bs : sources) {
+//			Source summedbs = dh.createSource(bs.getIdentifier());
+//			summedbs.setLatSize(Helper.latSize*multiplicity);
+//			summedbs.setLonSize(Helper.lonSize*multiplicity);
+//			dh.setLatSize(bs.getLatSize()*multiplicity);
+//			dh.setLonSize(bs.getLonSize()*multiplicity);
+////			BaseStation tempSource = new BaseStation(basestation.getIdentifier(), gridHandler.getLatSize()*multiplicationFactor, gridHandler.getLonSize()*multiplicationFactor);
+//			
+//			Collection<Cell> cells = bs.getGrid().values();
+//			
+//			for (Cell cell : cells)
+//			{
+//				Cell dhCell = summedbs.getCell(cell.getLatitude(), cell.getLongitude());
+//				if(dhCell == null)
+//				{
+//					dhCell = summedbs.createCell(cell.getLatitude(), cell.getLongitude());
+//				}		
+////				dhCell.addReceivedSignals(cell.getNOofReceivedSignals());
+////				dhCell.addNOofMissingSignals((superbs.getGrid().get(cell.getId()).getTotalNumberOfMessages() - cell.getNOofReceivedSignals()));
+//				
+////				LOG.debug("cell for export created: " + summedbs.getCell(cell.getLatitude(), cell.getLongitude()).getNOofReceivedSignals() + "-" + summedbs.getCell(cell.getLatitude(), cell.getLongitude()).getNOofMissingSignals());
+//			}
+//		}
+//		if (exportType.equals("KML")) {
+////			System.out.println(expotype);
+//			KMLGenerator.generateKML(dh.getSources(), dh.getLatSize(), dh.getLonSize(), multiplicity, response);
+//		}
+//		else if (exportType.equals("CSV")) {
+////			System.out.println(expotype);
+////			CSVGenerator.generateCSV(dh.getSources(), dh.getLatSize(), dh.getLonSize(), multiplicity, response);
+//		}
+//		else if (exportType.equals("XML")) {
+////			System.out.println(expotype);
+////			XMLGenerator.generateXML(dh.getSources(), dh.getLatSize(), dh.getLonSize(), multiplicity, response);
+//		}
+//		else
+//		{
+//			System.out.println("wrong exporttype");
+//		}
+//		return null;
     }
     
     
@@ -248,7 +252,7 @@ public class CoverageRestService {
 //	    	ChartGenerator cg = new ChartGenerator();
 //	    	cg.generateChart(spans.get(0).getFirstMessage(), spans.get(spans.size()-1).getLastMessage(), spans);
 //    	}
-    	return JsonConverter.toJsonTimeSpan(handler.getSatCalc().getTimeSpans(null, null, latTop, lonLeft, latBottom, lonRight));
+    	return JsonConverter.toJsonTimeSpan(handler.getSatCalc().getDynamicTimeSpans(null, null, latTop, lonLeft, latBottom, lonRight));
     }
     
     @GET
@@ -270,33 +274,40 @@ public class CoverageRestService {
     	Date endDate = new Date(Long.parseLong(endTime));
     	
     	//Determine which points are which
-    	double lonLeft;
-    	double lonRight;
+    	double lonMin;
+    	double lonMax;
     	if(lonPoint1 < lonPoint2){
-    		lonLeft = lonPoint1;
-    		lonRight = lonPoint2;
+    		lonMin = lonPoint1;
+    		lonMax = lonPoint2;
     	}else{
-    		lonLeft = lonPoint2;
-    		lonRight = lonPoint1;
+    		lonMin = lonPoint2;
+    		lonMax = lonPoint1;
     	}
-    	double latTop;
-    	double latBottom;
+    	double latMax;
+    	double latMin;
     	if(latPoint1 < latPoint2){
-    		latTop = latPoint2;
-    		latBottom = latPoint1;
+    		latMax = latPoint2;
+    		latMin = latPoint1;
     	}else{
-    		latTop = latPoint1;
-    		latBottom = latPoint2;
+    		latMax = latPoint1;
+    		latMin = latPoint2;
     	}
     	
 		response.setContentType("image/png");
 //		response.setHeader("Content-Disposition", "attachment; filename=" + "satexport.txt");
 		ServletOutputStream out = response.getOutputStream();
 		
-    	List<TimeSpan> spans =handler.getSatCalc().getTimeSpans(startDate, endDate, latTop, lonLeft, latBottom, lonRight);
+		System.out.println(latMax);
+		System.out.println(lonMin);
+		System.out.println(latMin);
+		System.out.println(lonMax);
+//    	List<TimeSpan> spans =handler.getSatCalc().getDynamicTimeSpans(startDate, endDate, latTop, lonLeft, latBottom, lonRight);
+    	List<TimeSpan> spans =handler.getSatCalc().getFixedTimeSpans(startDate, endDate, latMin, latMax, lonMin, lonMax,1);
 
 	    ChartGenerator cg = new ChartGenerator();
-	    cg.generateChart(startDate, endDate, spans);
+//	    cg.generateChartMethod1(startDate, endDate, spans, latTop, latBottom, lonLeft, lonRight);
+	    cg.generateChartMethod2(startDate, endDate, spans, latMin, latMax, lonMin, lonMax, true);
+
 	    cg.exportAsPNG(out);
     	
     	
@@ -322,7 +333,7 @@ public class CoverageRestService {
 		ServletOutputStream out = response.getOutputStream();
 		
 		
-		List<TimeSpan> timeSpans = handler.getSatCalc().getTimeSpans(null, null, latTop, lonLeft, latBottom, lonRight);
+		List<TimeSpan> timeSpans = handler.getSatCalc().getDynamicTimeSpans(null, null, latTop, lonLeft, latBottom, lonRight);
 		TimeSpan first = null;
 		TimeSpan previous = null;
 		for (TimeSpan timeSpan : timeSpans) {
@@ -340,8 +351,8 @@ public class CoverageRestService {
 								Math.abs(timeSpan.getLastMessage().getTime()-timeSpan.getFirstMessage().getTime())/1000/60+","+		//Timespan length
 								timeSinceLastTimeSpan+","+		// Time since last timestamp
 								Math.abs(timeSpan.getLastMessage().getTime()-first.getLastMessage().getTime())/1000/60+","+		//accumulated time
-								timeSpan.getMessageCounter()+ ","+	//signals
-								timeSpan.getDistinctShips().size()+	//distinct ships
+								timeSpan.getMessageCounterSat()+ ","+	//signals
+								timeSpan.getDistinctShipsSat().size()+	//distinct ships
 								"\n";
 			out.write(outstring.getBytes());
 			previous=timeSpan;

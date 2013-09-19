@@ -15,26 +15,35 @@
  */
 package dk.dma.ais.analysis.coverage.data;
 
-import java.io.Serializable;
-import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class Cell {
 	
 	
-	private static final long serialVersionUID = 1L;
-	private Map<Long, Ship> ships = new ConcurrentHashMap<Long, Ship>();
-	private Long NOofReceivedSignals=0L; 
-	private Long NOofMissingSignals=0L;
+//	private static final long serialVersionUID = 1L;
+//	private Map<Long, Ship> ships = new ConcurrentHashMap<Long, Ship>();
+	
+	
+	private int NOofReceivedSignals=0; 
+	private int NOofMissingSignals=0;
 	private double latitude;
 	private double longitude;
-	private String id;
-	private Source grid;
-	private int shipCount = 0;
+//	private String id;
+//	private Source grid;
+//	private int shipCount = 0;
 	private List<TimeSpan> timeSpans;
+	private Map<Long,TimeSpan> fixedWidthSpans = new HashMap<Long, TimeSpan>();
 	
+	public Map<Long, TimeSpan> getFixedWidthSpans() {
+		return fixedWidthSpans;
+	}
+	public void setFixedWidthSpans(Map<Long, TimeSpan> fixedWidthSpans) {
+		this.fixedWidthSpans = fixedWidthSpans;
+	}
 	public List<TimeSpan> getTimeSpans() {
 		return timeSpans;
 	}
@@ -44,14 +53,14 @@ public class Cell {
 	public Cell(Source grid, double lat, double lon, String id){
 		this.latitude = lat;
 		this.longitude = lon;
-		this.grid = grid;
-		this.id = id;
+//		this.grid = grid;
+//		this.id = id;
 	}
 	public Cell(double lat, double lon, String id)
 	{
 		this.latitude = lat;
 		this.longitude = lon;
-		this.id = id;
+//		this.id = id;
 	}
 	
     public void incrementNOofReceivedSignals(){
@@ -60,9 +69,9 @@ public class Cell {
 	public void incrementNOofMissingSignals(){
 		NOofMissingSignals++;
 	}
-	public void incrementShipCount(){
-		shipCount++;
-	}
+//	public void incrementShipCount(){
+//		shipCount++;
+//	}
 	
 	public long getTotalNumberOfMessages(){
 		return NOofReceivedSignals+NOofMissingSignals;
@@ -70,9 +79,9 @@ public class Cell {
 	public double getCoverage(){
 		return (double)NOofReceivedSignals/ (double)getTotalNumberOfMessages();
 	}
-	public Map<Long, Ship> getShips() {
-		return ships;
-	}
+//	public Map<Long, Ship> getShips() {
+//		return ships;
+//	}
 	public double getLatitude() {
 		return latitude;
 	}
@@ -86,33 +95,57 @@ public class Cell {
 		this.longitude = longitude;
 	}
 	public String getId() {
-		return id;
+		return this.latitude+"_"+this.longitude;
 	}
-	public void setId(String id) {
-		this.id = id;
+//	public void setId(String id) {
+//		this.id = id;
+//	}
+//	public Source getGrid() {
+//		return grid;
+//	}
+//	public void setGrid(Source grid) {
+//		this.grid = grid;
+//	}
+//	public int getShipCount() {
+//		return shipCount;
+//	}
+	public int getNOofReceivedSignals(Date starttime, Date endTime) {
+		int result = 0;
+		Collection<TimeSpan> spans = fixedWidthSpans.values();
+		for (TimeSpan timeSpan : spans) {
+			
+			if(timeSpan.getFirstMessage().getTime() >= starttime.getTime() && timeSpan.getLastMessage().getTime() <= endTime.getTime()){
+				
+				result=result+timeSpan.getMessageCounterTerrestrial();
+			}
+		}
+		
+		return result;
 	}
-	public Source getGrid() {
-		return grid;
+	public int getNOofMissingSignals(Date starttime, Date endTime) {
+		int result = 0;
+		Collection<TimeSpan> spans = fixedWidthSpans.values();
+		for (TimeSpan timeSpan : spans) {
+			if(timeSpan.getFirstMessage().getTime() >= starttime.getTime() && timeSpan.getLastMessage().getTime() <= endTime.getTime()){
+				result=result+timeSpan.getMissingSignals();
+			}
+		}
+		return result;
 	}
-	public void setGrid(Source grid) {
-		this.grid = grid;
+	public int getNOofReceivedSignals() {
+		return this.NOofReceivedSignals;
 	}
-	public int getShipCount() {
-		return shipCount;
+	public int getNOofMissingSignals() {
+		return this.NOofMissingSignals;
 	}
-	public Long getNOofReceivedSignals() {
-		return NOofReceivedSignals;
-	}
-	public Long getNOofMissingSignals() {
-		return NOofMissingSignals;
-	}
-	public void addReceivedSignals(long amount){
+	public void addReceivedSignals(int amount){
 		this.NOofReceivedSignals += amount;
 	}
-	public void addNOofMissingSignals(long amount) {
+	public void addNOofMissingSignals(int amount) {
 		this.NOofMissingSignals+=amount;
 	}
-	public void setNoofMissingSignals(long amount){
+	public void setNoofMissingSignals(int amount){
 		this.NOofMissingSignals=amount;
 	}
+
 }

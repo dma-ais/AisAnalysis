@@ -38,6 +38,7 @@ body{
 }
 
 #bottomPanel{
+	position:relative;
 	width: 800px;
 	height: 500px;
 	padding: 4px;
@@ -45,7 +46,8 @@ body{
 	margin-left: -400px;
 	top:50%;
 	margin-top:-250px;
-	
+	overflow: auto;
+	overflow-y: hidden;
 
 	vertical-align:middle;
 	position: absolute;

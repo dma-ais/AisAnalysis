@@ -3,6 +3,7 @@ package dk.dma.ais.analysis.coverage.data.json;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,14 +41,25 @@ public class JsonConverter {
 		return sourcesMap;
 	}
 	
-	public static JsonCell toJsonCell(Cell cell, Cell superCell) {
+	public static ExportCell toJsonCell(Cell cell, Cell superCell, Date starttime, Date endtime) {
+
 		long expected = (superCell.getNOofReceivedSignals()+superCell.getNOofMissingSignals());
-		
-		JsonCell Jcell = new JsonCell();
+//		System.out.println(superCell.getNOofMissingSignals());
+
+		ExportCell Jcell = new ExportCell();
 		Jcell.lat = cell.getLatitude();
 		Jcell.lon = cell.getLongitude();
 		Jcell.nrOfMisMes = expected - cell.getNOofReceivedSignals();
 		Jcell.nrOfRecMes = cell.getNOofReceivedSignals();
+		
+//		if(expected < Jcell.nrOfRecMes){
+//			System.out.println("supercell received="+superCell.getNOofReceivedSignals());
+//			System.out.println("supercell missng="+superCell.getNOofMissingSignals());
+//			System.out.println("expected: "+expected);
+//			System.out.println("received: "+Jcell.nrOfRecMes);
+//			System.out.println("misses: "+Jcell.nrOfMisMes);
+//			System.out.println();
+//		}
 
 		return Jcell;
 	}
@@ -77,8 +89,8 @@ public class JsonConverter {
 				jsonspan.spanLength=1;
 			jsonspan.timeSinceLastSpan=(int) timeSinceLastTimeSpan;
 			jsonspan.accumulatedTime=(int) (Math.abs(timeSpan.getLastMessage().getTime()-first.getLastMessage().getTime())/1000/60);
-			jsonspan.signals=timeSpan.getMessageCounter();
-			jsonspan.distinctShips=timeSpan.getDistinctShips().size();
+			jsonspan.signals=timeSpan.getMessageCounterSat();
+			jsonspan.distinctShips=timeSpan.getDistinctShipsSat().size();
 			
 			jsonSpans.add(jsonspan);
 			previous=timeSpan;

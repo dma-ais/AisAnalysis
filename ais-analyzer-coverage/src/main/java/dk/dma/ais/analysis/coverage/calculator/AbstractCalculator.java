@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import dk.dma.ais.analysis.coverage.AisCoverageGUI;
 import dk.dma.ais.analysis.coverage.calculator.geotools.GeoConverter;
+import dk.dma.ais.analysis.coverage.calculator.geotools.Helper;
 import dk.dma.ais.analysis.coverage.calculator.geotools.SphereProjection;
 import dk.dma.ais.analysis.coverage.data.Source;
 import dk.dma.ais.analysis.coverage.data.Source.ReceiverType;
@@ -239,13 +240,13 @@ public abstract class AbstractCalculator implements Serializable {
 	 * Calculates lat/lon sizes based on a meter scale and a lat/lon position
 	 */
 	protected void calculateLatLonSize(double latitude){
-		if(dataHandler.getLatSize() == -1){
+		if(Helper.latSize == -1){
 			
 			double cellInMeters= getCellSize(); //cell size in meters
 			dataHandler.setLatSize(GeoConverter.metersToLatDegree(cellInMeters));
 			dataHandler.setLonSize(GeoConverter.metersToLonDegree(latitude, cellInMeters));
-			LOG.info("lat size initiated with: "+dataHandler.getLatSize());
-			LOG.info("lon size initiated with: "+dataHandler.getLonSize());
+			LOG.info("lat size initiated with: "+Helper.latSize);
+			LOG.info("lon size initiated with: "+Helper.lonSize);
 		}
 	}
 	
