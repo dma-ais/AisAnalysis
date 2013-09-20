@@ -635,8 +635,8 @@ function CoverageUI () {
     	//use json client to fetch data from web service
     	aisJsonClient.getCoverage(dataToBeSent, screenarea, multifactor,selectedStartDate.getTime(), selectedEndDate.getTime(), function(data){
     		
-    		$('#latSize').html(data.latSize.toFixed(4));
-    		$('#lonSize').html(data.lonSize.toFixed(4));
+    		$('#latSize').html(data.latSize.toFixed(4) + " degrees");
+    		$('#lonSize').html(data.lonSize.toFixed(4) + " degrees");
     		
     		var minExpectedMessages = 
     		$.each(data.cells, function(key, val) {
