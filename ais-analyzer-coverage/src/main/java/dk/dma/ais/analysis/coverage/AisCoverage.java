@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 import dk.dma.ais.analysis.common.web.WebServer;
 import dk.dma.ais.analysis.coverage.configuration.AisCoverageConfiguration;
 import dk.dma.ais.bus.AisBus;
+import dk.dma.ais.bus.AisBusProvider;
 import dk.dma.ais.bus.consumer.DistributerConsumer;
 import dk.dma.ais.bus.provider.FileReaderProvider;
 import dk.dma.ais.message.AisStaticCommon;
@@ -68,25 +69,11 @@ public class AisCoverage {
             webServer = null;
         }
 
-        // Get distributers
-//        final DistributerConsumer filteredConsumer = (DistributerConsumer) aisBus.getConsumer("FILTERED");
-//        if (filteredConsumer == null) {
-//            LOG.error("Could not find distributer with name: FILTERED");
-//            return;
-//        }
         final DistributerConsumer unfilteredConsumer = (DistributerConsumer) aisBus.getConsumer("UNFILTERED");
         if (unfilteredConsumer == null) {
             LOG.error("Could not find distributer with name: UNFILTERED");
             return;
         }
-
-        // Delegate filtered packets to handler
-//        filteredConsumer.getConsumers().add(new Consumer<AisPacket>() {
-//            @Override
-//            public void accept(AisPacket packet) {
-//                handler.receiveFiltered(packet);
-//            }
-//        });
 
         // Delegate unfiltered packets to handler
         unfilteredConsumer.getConsumers().add(new Consumer<AisPacket>() {
@@ -96,9 +83,9 @@ public class AisCoverage {
             }
         });
         
-        if(aisBus.getProviders().iterator().next() instanceof FileReaderProvider){
+        if(conf.getFilename() != null){
         	try {
-            	aisReader = new AisStreamReader(new FileInputStream("d:\\Søfart\\putty.log"));
+            	aisReader = new AisStreamReader(new FileInputStream(conf.getFilename()));
             	aisReader.registerPacketHandler(new Consumer<AisPacket>() {            
     			    @Override
     			    public void accept(AisPacket aisPacket) {
@@ -106,14 +93,11 @@ public class AisCoverage {
     			    }
     			});
     			aisReader.start();
-//    			aisReader.join();
     			LOG.info("File reader started - Not aisbus");
     		} catch (FileNotFoundException e) {
     			e.printStackTrace();
     		}
         }
-        
-        
 
     }
 

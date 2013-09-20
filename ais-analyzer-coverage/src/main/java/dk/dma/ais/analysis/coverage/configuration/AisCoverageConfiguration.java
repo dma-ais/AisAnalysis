@@ -45,10 +45,17 @@ public class AisCoverageConfiguration {
     private double lonSize=0.0386812541;
     private DatabaseConfiguration dbConf = new DatabaseConfiguration();
     private HashMap<String, Station> sourcenames = new HashMap<String, Station>();
+    private String filename = null;
 
  
 
-    public HashMap<String, Station> getSourceNameMap()
+    public String getFilename() {
+		return filename;
+	}
+	public void setFilename(String filename) {
+		this.filename = filename;
+	}
+	public HashMap<String, Station> getSourceNameMap()
     {
     	return sourcenames;
     }
