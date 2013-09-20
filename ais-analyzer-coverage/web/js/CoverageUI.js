@@ -630,10 +630,13 @@ function CoverageUI () {
     	//convert enabled sources to string to be sent
     	var dataToBeSent = self.enabledSourcesToString();
     	
-    	polygonLayer.removeAllFeatures();
+    	
     	
     	//use json client to fetch data from web service
     	aisJsonClient.getCoverage(dataToBeSent, screenarea, multifactor,selectedStartDate.getTime(), selectedEndDate.getTime(), function(data){
+    		
+    		//remove existing cells
+    		polygonLayer.removeAllFeatures();
     		
     		$('#latSize').html(data.latSize.toFixed(4) + " degrees");
     		$('#lonSize').html(data.lonSize.toFixed(4) + " degrees");
