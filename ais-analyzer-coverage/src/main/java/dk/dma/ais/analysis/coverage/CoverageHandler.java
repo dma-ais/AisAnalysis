@@ -27,12 +27,15 @@ import org.slf4j.LoggerFactory;
 import dk.dma.ais.analysis.coverage.calculator.DistributeOnlyCalculator;
 import dk.dma.ais.analysis.coverage.calculator.SatCalculator;
 import dk.dma.ais.analysis.coverage.calculator.SupersourceCoverageCalculator;
+import dk.dma.ais.analysis.coverage.calculator.geotools.Helper;
 import dk.dma.ais.analysis.coverage.configuration.AisCoverageConfiguration;
 import dk.dma.ais.analysis.coverage.data.Cell;
-import dk.dma.ais.analysis.coverage.data.MongoBasedData;
+import dk.dma.ais.analysis.coverage.data.CustomMessage;
+import dk.dma.ais.analysis.coverage.data.ICoverageData;
 import dk.dma.ais.analysis.coverage.data.OnlyMemoryData;
+import dk.dma.ais.analysis.coverage.data.QueryParams;
 import dk.dma.ais.analysis.coverage.data.json.JSonCoverageMap;
-import dk.dma.ais.analysis.coverage.data.json.JsonCell;
+import dk.dma.ais.analysis.coverage.data.json.ExportCell;
 import dk.dma.ais.analysis.coverage.data.json.JsonConverter;
 import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.packet.AisPacket;
@@ -68,18 +71,22 @@ public class CoverageHandler {
 		
 		//Setting data handlers
 		if(conf.getDatabaseConfiguration().getType().toLowerCase().equals("memoryonly")){
-			distributeOnlyCalc.setDataHandler(new OnlyMemoryData());
+			ICoverageData dataH = new OnlyMemoryData();
+			distributeOnlyCalc.setDataHandler(dataH);
 			superCalc.setDataHandler(new OnlyMemoryData());
-			satCalc.setDataHandler(new OnlyMemoryData());	
+			satCalc.setDataHandler(dataH);	
 			LOG.info("coverage calculators set up with memory only data handling");
-		}else{
-			distributeOnlyCalc.setDataHandler(new MongoBasedData(conf.getDatabaseConfiguration()));
-			superCalc.setDataHandler(new MongoBasedData(conf.getDatabaseConfiguration()));
-			LOG.info("coverage calculators set up with mongodb data handling");
 		}
+//		else{
+//			distributeOnlyCalc.setDataHandler(new MongoBasedData(conf.getDatabaseConfiguration()));
+//			superCalc.setDataHandler(new MongoBasedData(conf.getDatabaseConfiguration()));
+//			LOG.info("coverage calculators set up with mongodb data handling");
+//		}
 		
 		
 		//setting grid granularity
+		Helper.latSize=conf.getLatSize();
+		Helper.lonSize=conf.getLonSize();
 		distributeOnlyCalc.getDataHandler().setLatSize(conf.getLatSize());
 		distributeOnlyCalc.getDataHandler().setLonSize(conf.getLonSize());
 		superCalc.getDataHandler().setLatSize(conf.getLatSize());
@@ -88,9 +95,97 @@ public class CoverageHandler {
 		satCalc.getDataHandler().setLonSize(conf.getLonSize());
 		LOG.info("grid granularity initiated with lat: "+conf.getLatSize() + " and lon: " + conf.getLonSize());
 		
+		final Date then = new Date();
+		Thread t = new Thread(new Runnable(){
+
+			@Override
+			public void run() {
+				while(true){
+					try{
+						Thread.sleep(1000);
+					}catch(Exception e){
+							
+					}
+				
+					Date now = new Date();
+//					System.out.println((((now.getTime()-then.getTime())/1000)));
+					System.out.println("messages per second: "+(unfiltCount/(((now.getTime()-then.getTime())/1000))));
+					System.out.println("messages processed: "+unfiltCount);
+					System.out.println("biggest delay in minutes: "+ biggestDelay/1000/60);
+					System.out.println("weird stamps: "+weird);
+					System.out.println("delayed more than ten min: "+delayedMoreThanTen);
+					System.out.println("delayed less than ten min: "+delayedLessThanTen);
+					System.out.println();
+				}		
+				
+			}
+		});
+		
+//		t.start();
+		
     }
-    int pr=0;
+//    int pr=0;
+	int unfiltCount = 0;
+	Date start = new Date();
+	long biggestDiff = 0;
+	long now = 0;
+	AisPacket lastTer = null;
+	long biggestDelay = 0;
+	int weird=0;
+	int delayedMoreThanTen = 0;
+	int delayedLessThanTen = 0;
     public void receiveUnfiltered(AisPacket packet) {
+    	
+    		
+		unfiltCount++;
+//		AisMessage message = packet.tryGetAisMessage();
+//        if (message == null) {	return;	}
+//        
+//		
+//		CustomMessage c = satCalc.aisToCustom(message, "sat");
+//		if(c == null)return;
+//		if(packet.getTags().getSourceType() == SourceType.SATELLITE){
+////			System.out.println("sdf");
+////			System.out.println(packet.getReceiveTimestamp());
+//			if(c.getTimestamp().getTime() < now){
+//				long delay = now-c.getTimestamp().getTime();
+////				System.out.println(delay);
+//				if(delay > 600000){
+//					delayedMoreThanTen++;
+//				}
+//				else{
+//					delayedLessThanTen++;
+//				}
+//				if(delay < 86400000){
+//					
+//					if(delay > biggestDelay)
+//						biggestDelay=delay;
+//				}else{
+//					weird++;
+//				}
+////				System.out.println(now-c.getTimestamp().getTime());
+////				System.out.println("mja");
+//			}
+//		}else{
+////			System.out.println((c.getTimestamp().getTime()-now));
+//			if(now == 0)
+//				now=c.getTimestamp().getTime();
+//			else{
+//				if( c.getTimestamp().getTime()-now < 86400000){
+//					
+//					if(now < c.getTimestamp().getTime()){
+//						now = c.getTimestamp().getTime();
+//	//					System.out.println(now);
+//					}
+//				}
+//			}
+//			
+////			System.out.println(packet.getReceiveTimestamp());
+////			if(packet.getReceiveTimestamp())
+////			lastTer=packet;
+////			if(lastTer == null)
+////				last
+//		}
     	superCalc.processMessage(packet, "supersource");
     	distributeOnlyCalc.processMessage(packet, "1");    
         satCalc.processMessage(packet, "sat");
@@ -107,36 +202,51 @@ public class CoverageHandler {
 //        superCalc.processMessage(message, "supersource");
     }
     
-    public JSonCoverageMap getJsonCoverage(double latStart, double lonStart, double latEnd, double lonEnd, Map<String, Boolean> sources, int multiplicationFactor) {
+    public JSonCoverageMap getJsonCoverage(double latStart, double lonStart, double latEnd, double lonEnd, Map<String, Boolean> sources, int multiplicationFactor, Date starttime, Date endtime) {
 
 		JSonCoverageMap map = new JSonCoverageMap();
-		map.latSize=distributeOnlyCalc.getDataHandler().getLatSize()*multiplicationFactor;
-		map.lonSize=distributeOnlyCalc.getDataHandler().getLonSize()*multiplicationFactor;
+		map.latSize=Helper.latSize*multiplicationFactor;
+		map.lonSize=Helper.lonSize*multiplicationFactor;
 		
 
-		HashMap<String, JsonCell> JsonCells = new HashMap<String, JsonCell>();
+		HashMap<String, ExportCell> JsonCells = new HashMap<String, ExportCell>();
 
-		List<Cell> celllist = distributeOnlyCalc.getDataHandler().getCells( latStart,  lonStart,  latEnd, lonEnd, sources, multiplicationFactor);
+		QueryParams params = new QueryParams();
+		params.latStart=latStart;
+		params.latEnd=latEnd;
+		params.lonStart=lonStart;
+		params.lonEnd=lonEnd;
+		params.sources=sources;
+		params.multiplicationFactor=multiplicationFactor;
+		params.startDate=starttime;
+		params.endDate=endtime;
+
+		List<Cell> celllist = distributeOnlyCalc.getDataHandler().getCells( params );
 		HashMap<String,Boolean> superSourceIsHere = new HashMap<String,Boolean>();
 		superSourceIsHere.put("supersource", true);
-		List<Cell> celllistSuper = superCalc.getDataHandler().getCells( latStart,  lonStart,  latEnd, lonEnd, superSourceIsHere, multiplicationFactor);
+		params.sources=superSourceIsHere;
+		List<Cell> celllistSuper = superCalc.getDataHandler().getCells( params );
 		Map<String,Cell> superMap = new HashMap<String,Cell>();
 		for (Cell cell : celllistSuper) {
-			superMap.put(cell.getId(), cell);
+			if(cell.getNOofReceivedSignals() > 0){
+				superMap.put(cell.getId(), cell);
+			}
+//			System.out.println("yir"+cell.getNOofReceivedSignals( starttime,  endtime));
+//			System.out.println("yir"+cell.getNOofReceivedSignals());
 		}
 		
 		if(!celllist.isEmpty())
-			map.latSize = celllist.get(0).getGrid().getLatSize();
+			map.latSize = Helper.latSize*multiplicationFactor;
 		
 		for (Cell cell : celllist) {
 			Cell superCell = superMap.get(cell.getId());
 			if(superCell == null){
 
 			}else{
-				JsonCell existing = JsonCells.get(cell.getId());
-				JsonCell theCell = JsonConverter.toJsonCell(cell, superCell);
+				ExportCell existing = JsonCells.get(cell.getId());
+				ExportCell theCell = JsonConverter.toJsonCell(cell, superCell, starttime, endtime);
 				if (existing == null)
-					existing = JsonCells.put(cell.getId(), JsonConverter.toJsonCell(cell, superCell));
+					existing = JsonCells.put(cell.getId(), JsonConverter.toJsonCell(cell, superCell, starttime, endtime));
 				else if (theCell.getCoverage() > existing.getCoverage()){
 					JsonCells.put(cell.getId(), theCell);
 				}
@@ -144,6 +254,12 @@ public class CoverageHandler {
 		}
 
 		map.cells = JsonCells;
+		for (ExportCell cell : JsonCells.values()) {
+			
+//			System.out.println(cell.nrOfRecMes);
+		}
+//		System.out.println("map="+map.cells.size());
+//		System.out.println(map.cells.values()));
 		return map;
 	}
     

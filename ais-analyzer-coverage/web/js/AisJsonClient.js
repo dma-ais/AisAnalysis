@@ -21,14 +21,13 @@ function AisJsonClient (serverurl) {
     	});
     }
     
-    this.getCoverage = function(dataToBeSent, screenarea, multifactor, callback){	
-    	
+    this.getCoverage = function(dataToBeSent, screenarea, multifactor, start, end, callback){	
     	//aborting any previous requests
     	if(self.jsoncoveragerequest != null){
     		self.jsoncoveragerequest.abort();
     	}
     	//post won't work with the jetty server...
-    	self.jsoncoveragerequest = $.get('/coverage/rest/coverage', { sources: dataToBeSent, area: screenarea, multiplicationFactor: multifactor }, function(data) {
+    	self.jsoncoveragerequest = $.get('/coverage/rest/coverage', { sources: dataToBeSent, area: screenarea, multiplicationFactor: multifactor, starttime:start, endtime:end }, function(data) {
     		callback(data);
     	}); 
     }

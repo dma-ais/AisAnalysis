@@ -18,6 +18,7 @@ package dk.dma.ais.analysis.coverage.data;
 import java.io.Serializable;
 import java.util.concurrent.ConcurrentHashMap;
 
+import dk.dma.ais.analysis.coverage.calculator.geotools.Helper;
 import dk.dma.ais.analysis.coverage.data.Ship.ShipClass;
 
 
@@ -28,56 +29,37 @@ public class Source implements Serializable {
 	private ConcurrentHashMap<Long, Ship> ships = new ConcurrentHashMap<Long, Ship>();
 	private String name = "";
 	private String identifier;
-	private double latSize;
-	private double lonSize;
+//	private double latSize;
+//	private double lonSize;
 	private double latitude;
 	private double longitude;
 	private long messageCount = 0;
 	private boolean isVisible = true;
 	private ReceiverType receiverType = ReceiverType.NOTDEFINED;
+	private int multiplicationFactor = 1;
 
 	
+	public int getMultiplicationFactor() {
+		return multiplicationFactor;
+	}
+	public void setMultiplicationFactor(int multiplicationFactor) {
+		this.multiplicationFactor = multiplicationFactor;
+	}
 	public enum ReceiverType {
 		BASESTATION, REGION, NOTDEFINED
 	}
 	
-	public Source(String identifier, double latSize, double lonSize) {
+	public Source(String identifier) {
 		this.identifier = identifier;
-		this.latSize = latSize;
-		this.lonSize = lonSize;
+//		this.latSize = latSize;
+//		this.lonSize = lonSize;
 	}
 	public Source() {
 
 	}
 	
-	/**
-	 * latitude is rounded down
-	 * longitude is rounded up.
-	 * The id is lat-lon-coords representing top-left point in cell
-	 */
-	public String getCellId(double latitude, double longitude){
-		//TODO move CellId convertion somewhere better
-		double lat;
-		double lon;
-		if(latitude < 0){
-			latitude +=latSize;
-			lat = (double)((int)(10000*((latitude)- (latitude % latSize))))/10000;
-			
-		}else{
-			lat = (double)((int)(10000*((latitude)- (latitude % latSize))))/10000;
-		}
-		
-		if(longitude < 0){
-			lon = (double)((int)(10000*(longitude - (longitude % lonSize))))/10000;
-			
-		}else{
-			longitude -=lonSize;
-			lon = (double)((int)(10000*(longitude - (longitude % lonSize))))/10000;
-		}
-		
-		String cellId =  lat+"_"+lon;	
-		return cellId;
-	}
+	
+	
 
 	public void incrementMessageCount(){
 		messageCount++;
@@ -95,12 +77,12 @@ public class Source implements Serializable {
 		this.isVisible = isVisible;
 	}
 	public Cell getCell(double latitude, double longitude){
-		return grid.get(getCellId(latitude, longitude));
+		return grid.get(Helper.getCellId(latitude, longitude, multiplicationFactor));
 	}
 	public Cell createCell(double latitude, double longitude){
-		String id = getCellId(latitude, longitude);
-		double lat = (double)((int)(10000*(latitude - (latitude % latSize))))/10000;
-		double lon = (double)((int)(10000*(longitude - (longitude % lonSize))))/10000;
+		String id = Helper.getCellId(latitude, longitude, multiplicationFactor);
+		double lat = Helper.roundLat(latitude, multiplicationFactor);
+		double lon = Helper.roundLon(longitude, multiplicationFactor);
 		Cell cell = new Cell(this, lat, lon, id);
 		grid.put(cell.getId(), cell);		
 		
@@ -142,18 +124,18 @@ public class Source implements Serializable {
 	public void setName(String name) {
 		this.name = name;
 	}
-	public double getLatSize() {
-		return latSize;
-	}
-	public void setLatSize(double latSize) {
-		this.latSize = latSize;
-	}
-	public double getLonSize() {
-		return lonSize;
-	}
-	public void setLonSize(double lonSize) {
-		this.lonSize = lonSize;
-	}
+//	public double getLatSize() {
+//		return latSize;
+//	}
+//	public void setLatSize(double latSize) {
+//		this.latSize = latSize;
+//	}
+//	public double getLonSize() {
+//		return lonSize;
+//	}
+//	public void setLonSize(double lonSize) {
+//		this.lonSize = lonSize;
+//	}
 	public Double getLatitude() {
 		return latitude;
 	}

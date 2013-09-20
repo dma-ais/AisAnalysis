@@ -22,22 +22,22 @@ import java.util.List;
 
 public class Ship implements Serializable {
 	
-	private static final long serialVersionUID = 1L;
-	private Long mmsi;
+//	private static final long serialVersionUID = 1L;
+	private long mmsi;
 	private CustomMessage lastMessage = null;
 	private List<CustomMessage> messageBuffer = new ArrayList<CustomMessage>();
-	private Cell lastCell = null;
+//	private Cell lastCell = null;
 	private ShipClass shipClass;
 	
 	public enum ShipClass{
 		CLASS_A, CLASS_B
 	}
-	public Cell getLastCell() {
-		return lastCell;
-	}
-	public void setLastCell(Cell lastCell) {
-		this.lastCell = lastCell;
-	}
+//	public Cell getLastCell() {
+//		return lastCell;
+//	}
+//	public void setLastCell(Cell lastCell) {
+//		this.lastCell = lastCell;
+//	}
 	public Ship(Long mmsi, ShipClass shipClass) {
 		this.mmsi = mmsi;
 		this.shipClass = shipClass;

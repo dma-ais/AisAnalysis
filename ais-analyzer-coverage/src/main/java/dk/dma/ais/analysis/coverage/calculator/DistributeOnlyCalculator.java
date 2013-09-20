@@ -73,14 +73,15 @@ public class DistributeOnlyCalculator extends AbstractCalculator implements IAis
 				//increment cell in each source
 				Source source = dataHandler.getSource(customMessage.getSourceMMSI());
 				
-				Cell cell = dataHandler.getCell(source.getIdentifier(), customMessage.getLatitude(), customMessage.getLongitude());
-				if (cell == null) {
-					cell = dataHandler.createCell(source.getIdentifier(), customMessage.getLatitude(), customMessage.getLongitude());
-				}
+//				Cell cell = dataHandler.getCell(source.getIdentifier(), customMessage.getLatitude(), customMessage.getLongitude());
+//				if (cell == null) {
+//					cell = dataHandler.createCell(source.getIdentifier(), customMessage.getLatitude(), customMessage.getLongitude());
+//				}
 				
 				dataHandler.getSource(source.getIdentifier()).incrementMessageCount();
-				cell.incrementNOofReceivedSignals();
-				dataHandler.updateCell(cell);
+				dataHandler.incrementReceivedSignals(source.getIdentifier(), customMessage.getLatitude(), customMessage.getLongitude(), aprrovedMessage.getTimestamp());
+//				cell.incrementNOofReceivedSignals();
+//				dataHandler.updateCell(cell);
 			}
 			
 			//Done processing - remove messages

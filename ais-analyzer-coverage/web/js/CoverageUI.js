@@ -633,7 +633,7 @@ function CoverageUI () {
     	polygonLayer.removeAllFeatures();
     	
     	//use json client to fetch data from web service
-    	aisJsonClient.getCoverage(dataToBeSent, screenarea, multifactor, function(data){
+    	aisJsonClient.getCoverage(dataToBeSent, screenarea, multifactor,selectedStartDate.getTime(), selectedEndDate.getTime(), function(data){
     		
     		$('#latSize').html(data.latSize.toFixed(4));
     		$('#lonSize').html(data.lonSize.toFixed(4));
@@ -663,7 +663,7 @@ function CoverageUI () {
 	  				  lon: val.lon,
 	  				  points: points,
 	  				  fillcolor: color,
-	  				  totalMessages: (val.nrOfMisMes+val.nrOfRecMes),
+	  				  totalMessages: expectedMessages,
 	  				  receivedMessages: val.nrOfRecMes
 	  			  });
   			  }

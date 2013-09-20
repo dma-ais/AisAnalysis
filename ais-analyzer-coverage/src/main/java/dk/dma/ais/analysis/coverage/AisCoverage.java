@@ -15,6 +15,9 @@
  */
 package dk.dma.ais.analysis.coverage;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+
 import net.jcip.annotations.GuardedBy;
 import net.jcip.annotations.ThreadSafe;
 
@@ -25,8 +28,12 @@ import dk.dma.ais.analysis.common.web.WebServer;
 import dk.dma.ais.analysis.coverage.configuration.AisCoverageConfiguration;
 import dk.dma.ais.bus.AisBus;
 import dk.dma.ais.bus.consumer.DistributerConsumer;
+import dk.dma.ais.bus.provider.FileReaderProvider;
+import dk.dma.ais.message.AisStaticCommon;
 import dk.dma.ais.packet.AisPacket;
 import dk.dma.enav.util.function.Consumer;
+import dk.dma.ais.reader.AisReader;
+import dk.dma.ais.reader.AisStreamReader;
 
 /**
  * AIS coverage analyzer
@@ -43,6 +50,7 @@ public class AisCoverage {
     private final CoverageHandler handler;
     private final AisBus aisBus;
     private final WebServer webServer;
+    private AisReader aisReader = null;
 
     private AisCoverage(AisCoverageConfiguration conf) {
         this.conf = conf;
@@ -87,15 +95,36 @@ public class AisCoverage {
                 handler.receiveUnfiltered(packet);
             }
         });
+        
+        if(aisBus.getProviders().iterator().next() instanceof FileReaderProvider){
+        	try {
+            	aisReader = new AisStreamReader(new FileInputStream("d:\\Søfart\\putty.log"));
+            	aisReader.registerPacketHandler(new Consumer<AisPacket>() {            
+    			    @Override
+    			    public void accept(AisPacket aisPacket) {
+    			    	handler.receiveUnfiltered(aisPacket);
+    			    }
+    			});
+    			aisReader.start();
+//    			aisReader.join();
+    			LOG.info("File reader started - Not aisbus");
+    		} catch (FileNotFoundException e) {
+    			e.printStackTrace();
+    		}
+        }
+        
+        
 
     }
 
     public void start() {
         // Start aisBus
-        aisBus.start();
-        aisBus.startConsumers();
-        aisBus.startProviders();
-        LOG.info("aisbus startet");
+    	if(aisReader == null){
+	        aisBus.start();
+	        aisBus.startConsumers();
+	        aisBus.startProviders();
+	        LOG.info("aisbus startet");
+    	}
         // Start web server
         if (webServer != null) {
             try {

@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import dk.dma.ais.analysis.coverage.AisCoverageGUI;
 import dk.dma.ais.analysis.coverage.calculator.geotools.GeoConverter;
+import dk.dma.ais.analysis.coverage.calculator.geotools.Helper;
 import dk.dma.ais.analysis.coverage.calculator.geotools.SphereProjection;
 import dk.dma.ais.analysis.coverage.data.Source;
 import dk.dma.ais.analysis.coverage.data.Source.ReceiverType;
@@ -239,13 +240,13 @@ public abstract class AbstractCalculator implements Serializable {
 	 * Calculates lat/lon sizes based on a meter scale and a lat/lon position
 	 */
 	protected void calculateLatLonSize(double latitude){
-		if(dataHandler.getLatSize() == -1){
+		if(Helper.latSize == -1){
 			
 			double cellInMeters= getCellSize(); //cell size in meters
 			dataHandler.setLatSize(GeoConverter.metersToLatDegree(cellInMeters));
 			dataHandler.setLonSize(GeoConverter.metersToLonDegree(latitude, cellInMeters));
-			LOG.info("lat size initiated with: "+dataHandler.getLatSize());
-			LOG.info("lon size initiated with: "+dataHandler.getLonSize());
+			LOG.info("lat size initiated with: "+Helper.latSize);
+			LOG.info("lon size initiated with: "+Helper.lonSize);
 		}
 	}
 	
@@ -295,6 +296,7 @@ public abstract class AbstractCalculator implements Serializable {
 		ShipClass shipClass = null;
 		AisPositionMessage posMessage;
 
+		
 		// Get source tag properties
 		IProprietarySourceTag sourceTag = aisMessage.getSourceTag();
 		
@@ -338,6 +340,7 @@ public abstract class AbstractCalculator implements Serializable {
 			}
 			
 		}
+		
 
 		//Checks if its neither a basestation nor a region
 		if (baseId == null){	baseId = defaultID;	}
@@ -351,9 +354,10 @@ public abstract class AbstractCalculator implements Serializable {
 			return null;
 		}
 		
+		
 		// if no allowed ship types has been set, we process all ship types
-//		if(!isShipAllowed(aisMessage))
-//			return null;
+		if(!isShipAllowed(aisMessage))
+			return null;
 
 		
 		// Handle position messages. If it's not a position message 
@@ -380,12 +384,14 @@ public abstract class AbstractCalculator implements Serializable {
 //		if(firstMessage == null){
 //			calculateLatLonSize(pos.getLatitude());
 //		}
-
+		
+//
+		
 		// Extract Base station
 		Source baseStation = extractBaseStation(baseId, receiverType);
 		baseStation.setName(name);
-
-		// Extract ship
+//
+//		// Extract ship
 		Ship ship = extractShip(aisMessage.getUserId(), shipClass, baseStation);
 
 		CustomMessage newMessage = new CustomMessage();
@@ -406,6 +412,7 @@ public abstract class AbstractCalculator implements Serializable {
 		if(firstMessage == null){
 			firstMessage = newMessage;
 		}
+//		return null;
 		return newMessage;
 	}
 	

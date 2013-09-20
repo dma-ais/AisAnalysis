@@ -2,12 +2,14 @@ package dk.dma.ais.analysis.coverage.data;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import com.mongodb.DBObject;
 
+import dk.dma.ais.analysis.coverage.calculator.geotools.Helper;
 import dk.dma.ais.analysis.coverage.data.Ship.ShipClass;
 
 
@@ -33,8 +35,8 @@ public class OnlyMemoryData implements ICoverageData{
 		// TODO Auto-generated method stub
 		
 	}
-	@Override
-	public List<Cell> getCells() {
+	
+	private List<Cell> getCells() {
 		List<Cell> cells = new ArrayList<Cell>();
 		Collection<Source> basestations = gridHandler.getBaseStations().values();
 		for (Source basestation : basestations) {
@@ -73,13 +75,13 @@ public class OnlyMemoryData implements ICoverageData{
 
 	@Override
 	public void setLatSize(double latsize) {
-		gridHandler.setLatSize(latsize);
+		Helper.latSize=latsize;
 		
 	}
 
 	@Override
 	public void setLonSize(double lonsize) {
-		gridHandler.setLonSize(lonsize);
+		Helper.lonSize=lonsize;
 	}
 
 	@Override
@@ -100,19 +102,19 @@ public class OnlyMemoryData implements ICoverageData{
 		return gridHandler.getBaseStations().values();
 	}
 
-	@Override
-	public double getLatSize() {
-		return gridHandler.getLatSize();
-	}
+//	@Override
+//	public double getLatSize() {
+//		return gridHandler.getLatSize();
+//	}
+//
+//	@Override
+//	public double getLonSize() {
+//		return gridHandler.getLonSize();
+//	}
 
-	@Override
-	public double getLonSize() {
-		return gridHandler.getLonSize();
-	}
-
-	@Override
-	public List<Cell> getCells(double latStart, double lonStart, double latEnd,
-			double lonEnd, Map<String, Boolean> sources, int multiplicationFactor) {
+	
+	private List<Cell> getCells(double latStart, double lonStart, double latEnd,
+			double lonEnd, Map<String, Boolean> sources, int multiplicationFactor, Date starttime, Date endtime) {
 		
 		List<Cell> cells = new ArrayList<Cell>();
 		Collection<Source> basestations = gridHandler.getBaseStations().values();
@@ -120,7 +122,8 @@ public class OnlyMemoryData implements ICoverageData{
 		for (Source basestation : basestations) {
 			if ( sources.containsKey(basestation.getIdentifier()) ) {	
 				
-				Source tempSource = new Source(basestation.getIdentifier(), gridHandler.getLatSize()*multiplicationFactor, gridHandler.getLonSize()*multiplicationFactor);
+				Source tempSource = new Source(basestation.getIdentifier());
+				tempSource.setMultiplicationFactor(multiplicationFactor);
 				// For each cell
 				Collection<Cell> bscells = basestation.getGrid().values();
 				for (Cell cell : bscells) {
@@ -128,29 +131,73 @@ public class OnlyMemoryData implements ICoverageData{
 					if(tempCell == null){
 						tempCell = tempSource.createCell(cell.getLatitude(), cell.getLongitude());
 					}
-					tempCell.addNOofMissingSignals(cell.getNOofMissingSignals());
-					tempCell.addReceivedSignals(cell.getNOofReceivedSignals());
+					tempCell.addNOofMissingSignals((int)cell.getNOofMissingSignals(starttime, endtime));
+					tempCell.addReceivedSignals(cell.getNOofReceivedSignals(starttime, endtime));
+					
+//					System.out.println(cell.getNOofReceivedSignals(starttime, endtime));
 				}
 				
 				// For each cell
 				Collection<Cell> tempCells = tempSource.getGrid().values();
 				for (Cell cell : tempCells) {
+					
 					if(cell.getLatitude() <= latStart && cell.getLatitude() >= latEnd ){
 						if(cell.getLongitude() >= lonStart && cell.getLongitude() <= lonEnd ){
-							cells.add(cell);
+							
+							//Only add if cell has received message n given timespan
+							if(cell.getNOofReceivedSignals() > 0)
+								cells.add(cell);
 						}
-					}
-					
+					}	
 				}
 			}
 		}
+		
 		return cells;
 	}
 
+	
 	@Override
-	public List<Cell> getCells(Map<String, Boolean> sources) {
-		// TODO Auto-generated method stub
-		return null;
+	public List<Cell> getCells(QueryParams params) {
+		if(params == null) return getCells();
+		return getCells(params.latStart, params.lonStart, params.latEnd, params.lonEnd, params.sources, params.multiplicationFactor, params.startDate, params.endDate);
+
+	}
+	@Override
+	public void incrementReceivedSignals(String sourceMmsi, double lat,
+			double lon, Date timestamp) {
+		Cell cell = getCell(sourceMmsi, lat, lon);
+		if (cell == null) {
+			cell = createCell(sourceMmsi, lat, lon);
+		}
+		Date id = Helper.getFloorDate(timestamp);
+		TimeSpan ts = cell.getFixedWidthSpans().get(id.getTime());
+		if(ts==null){
+			ts=new TimeSpan(id);
+			ts.setLastMessage(Helper.getCeilDate(timestamp));
+			cell.getFixedWidthSpans().put(id.getTime(), ts);
+		}
+		ts.setMessageCounterTerrestrial(ts.getMessageCounterTerrestrial()+1);
+		
+		
+	}
+	@Override
+	public void incrementMissingSignals(String sourceMmsi, double lat,
+			double lon, Date timestamp) {
+		
+		Cell cell = getCell(sourceMmsi, lat, lon);
+		if (cell == null) {
+			cell = createCell(sourceMmsi, lat, lon);
+		}
+		Date id = Helper.getFloorDate(timestamp);
+		TimeSpan ts = cell.getFixedWidthSpans().get(id.getTime());
+		if(ts==null){
+			ts=new TimeSpan(id);
+			ts.setLastMessage(Helper.getCeilDate(timestamp));
+			cell.getFixedWidthSpans().put(id.getTime(), ts);
+		}
+		ts.incrementMissingSignals();
+		
 	}
 
 

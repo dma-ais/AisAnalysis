@@ -6,5 +6,5 @@ import java.util.Map;
 public class JSonCoverageMap implements Serializable {
 	public double latSize;
 	public double lonSize;
-	public Map<String,JsonCell> cells;
+	public Map<String,ExportCell> cells;
 }

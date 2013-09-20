@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import dk.dma.ais.analysis.coverage.calculator.AbstractCalculator;
+import dk.dma.ais.analysis.coverage.calculator.geotools.Helper;
 import dk.dma.ais.analysis.coverage.event.AisEvent;
 
 
@@ -28,8 +29,7 @@ public class SourceHandler implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	private ConcurrentHashMap<String, Source> baseStations = new ConcurrentHashMap<String, Source>();
-	private double latSize = 0.022522522522522525;
-	private double lonSize = 0.03868125413876516;
+
 	private AbstractCalculator calculator;
 	
 	
@@ -45,7 +45,7 @@ public class SourceHandler implements Serializable {
 	 * Create grid associated to a specific transponder
 	 */
 	public Source createGrid(String bsMmsi){
-		Source grid = new Source(bsMmsi, latSize, lonSize);
+		Source grid = new Source(bsMmsi);
 		baseStations.put(bsMmsi, grid);
 		
 //		AisEvent event = new AisEvent();
@@ -77,16 +77,16 @@ public class SourceHandler implements Serializable {
 	public Map<String, Source> getBaseStations() {
 		return baseStations;
 	}
-	public double getLatSize() {
-		return latSize;
-	}
-	public void setLatSize(double latSize) {
-		this.latSize = latSize;
-	}
-	public double getLonSize() {
-		return lonSize;
-	}
-	public void setLonSize(double lonSize) {
-		this.lonSize = lonSize;
-	}
+//	public double getLatSize() {
+//		return latSize;
+//	}
+//	public void setLatSize(double latSize) {
+//		this.latSize = latSize;
+//	}
+//	public double getLonSize() {
+//		return lonSize;
+//	}
+//	public void setLonSize(double lonSize) {
+//		this.lonSize = lonSize;
+//	}
 }

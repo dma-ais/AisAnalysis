@@ -15,7 +15,7 @@ public class CustomMessage implements Serializable {
 	private double sog;
 	private double latitude;
 	private double longitude;
-	private Date timestamp = null;
+	private long timestamp;
 	private String sourceMMSI;
 	private long shipMMSI;
 	private long timeSinceLastMsg;
@@ -59,10 +59,10 @@ public class CustomMessage implements Serializable {
 		this.longitude = longitude;
 	}
 	public Date getTimestamp() {
-		return timestamp;
+		return new Date(timestamp);
 	}
 	public void setTimestamp(Date timestamp) {
-		this.timestamp = timestamp;
+		this.timestamp = timestamp.getTime();
 	}
 	public String getSourceMMSI() {
 		return sourceMMSI;

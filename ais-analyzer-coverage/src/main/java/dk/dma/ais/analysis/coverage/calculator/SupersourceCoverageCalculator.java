@@ -158,13 +158,16 @@ public class SupersourceCoverageCalculator extends AbstractCalculator {
 		Ship ship = dataHandler.getShip(m1.getSourceMMSI(), m1.getShipMMSI());
 		
 		// Get cell from first message and increment message count
-		Cell cell = dataHandler.getCell(source.getIdentifier(), m1.getLatitude(), m1.getLongitude());
-		if (cell == null) {
-			cell = dataHandler.createCell(source.getIdentifier(), m1.getLatitude(), m1.getLongitude());
-		}
-		dataHandler.getSource(source.getIdentifier()).incrementMessageCount();
-		cell.incrementNOofReceivedSignals();
-		dataHandler.updateCell(cell);
+//		Cell cell = dataHandler.getCell(source.getIdentifier(), m1.getLatitude(), m1.getLongitude());
+//		if (cell == null) {
+//			cell = dataHandler.createCell(source.getIdentifier(), m1.getLatitude(), m1.getLongitude());
+//		}
+		
+		dataHandler.getSource(source.getIdentifier()).incrementMessageCount(); //Hmm
+		
+		dataHandler.incrementReceivedSignals(source.getIdentifier(), m1.getLatitude(), m1.getLongitude(), m1.getTimestamp());
+//		cell.incrementNOofReceivedSignals();
+//		dataHandler.updateCell(cell);
 		this.broadcastEvent(new AisEvent(Event.AISMESSAGE_APPROVED,this,m1));
 
 		Long p1Time = m1.getTimestamp().getTime();
@@ -206,15 +209,16 @@ public class SupersourceCoverageCalculator extends AbstractCalculator {
 						p1Time, p2Time, p1Y, p2Y);
 
 				// Add number of missing messages to cell
-				Cell c = dataHandler.getCell(source.getIdentifier(), projection.y2Lat(xMissing, yMissing), projection.x2Lon(xMissing, yMissing));
-				if (c == null) {
-					c = dataHandler.createCell(source.getIdentifier(), projection.y2Lat(xMissing, yMissing), projection.x2Lon(xMissing, yMissing));
-				}
+//				Cell c = dataHandler.getCell(source.getIdentifier(), projection.y2Lat(xMissing, yMissing), projection.x2Lon(xMissing, yMissing));
+//				if (c == null) {
+//					c = dataHandler.createCell(source.getIdentifier(), projection.y2Lat(xMissing, yMissing), projection.x2Lon(xMissing, yMissing));
+//				}
 				//TODO shipslist in cell current not used?
 //				c.getShips().put(m1.getShip().getMmsi(), m1.getShip());
-				c.incrementNOofMissingSignals();
-				dataHandler.updateCell(c);
-				
+//				c.incrementNOofMissingSignals();
+//				dataHandler.updateCell(c);
+				Date stamp = new Date((long) (m1.getTimestamp().getTime()+(i*expectedTransmittingFrequency*1000)));
+				dataHandler.incrementMissingSignals(source.getIdentifier(), projection.y2Lat(xMissing, yMissing), projection.x2Lon(xMissing, yMissing), stamp);
 			}
 		}
 	}
