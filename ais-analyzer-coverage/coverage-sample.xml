@@ -5,7 +5,7 @@ Reads AIS messages from FILE and saves coverage data to memory only.
 -->
 <aisCoverageConfiguration>
 
-	<filename>d:\Søfart\aisdump_fullday.txt</filename>
+	<filename>D:\silentk\Desktop\ais-test-data.txt</filename>
 	<aisbus>
 		<transformer xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="sourceTypeSatTransformerConfiguration">
                 <gh_region>802</gh_region>

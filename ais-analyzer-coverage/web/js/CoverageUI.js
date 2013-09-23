@@ -198,6 +198,11 @@ function CoverageUI () {
     	$( "#globalStarTime" ).html(self.formatDate(startDate));
     	$( "#globalEndTime" ).html(self.formatDate(endDate));
     	
+    	
+		//Update export post form
+		$('#exportStartTime').val(startDate.getTime());
+		$('#exportEndTime').val(endDate.getTime());
+		
     	var timeDif = (endDate.getTime()-startDate.getTime())/1000/60/60;
     	var startTimeLabel = $( "#starTime" );
     	var endTimeLabel = $( "#endTime" );
@@ -207,6 +212,8 @@ function CoverageUI () {
     	var pixelInterval = $( "#slidingWindowOuter" ).width()/timeDif;
     	$( "#globalStarTime" ).css("left", leftOffset);
     	$( "#globalEndTime" ).css("left", leftOffset+(pixelInterval*timeDif));
+    	
+    	
     	
     	var updateLabels = function(firstValue, lastValue){
     		selectedStartDate = new Date(startDate.getTime()+firstValue*1000*60*60);
@@ -245,6 +252,11 @@ function CoverageUI () {
     	    	updateLabels(ui.values[ 0 ],ui.values[ 1 ]);
         	},
 	    	change: function(event, ui){
+	    	
+	    		//Update export post form
+		    	$('#exportStartTime').val(selectedStartDate.getTime());
+		    	$('#exportEndTime').val(selectedEndDate.getTime());
+		    		
 	    		//Update sat bar chart if it is visible
 		    	if ($('#bottomPanel').css('display') != 'none') {
 		    		self.updateBarChart();

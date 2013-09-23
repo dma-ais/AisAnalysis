@@ -57,6 +57,7 @@ import dk.dma.ais.analysis.coverage.data.json.JSonCoverageMap;
 import dk.dma.ais.analysis.coverage.data.json.JsonConverter;
 import dk.dma.ais.analysis.coverage.data.json.JsonSource;
 import dk.dma.ais.analysis.coverage.data.json.Status;
+import dk.dma.ais.analysis.coverage.export.CSVGenerator;
 //import dk.dma.ais.analysis.coverage.export.CSVGenerator;
 import dk.dma.ais.analysis.coverage.export.ChartGenerator;
 import dk.dma.ais.analysis.coverage.export.KMLGenerator;
@@ -129,6 +130,8 @@ public class CoverageRestService {
 		String area = request.getParameter("area");
 		long starttime = Long.parseLong(request.getParameter("starttime"));
 		long endtime = Long.parseLong(request.getParameter("endtime"));
+		System.out.println(starttime);
+		System.out.println(endtime);
 		
 		String[] areaArray = area.split(",");
 		
@@ -155,60 +158,81 @@ public class CoverageRestService {
     @GET
     @Path("export")
     @Produces(MediaType.APPLICATION_JSON)
-    public Object export(@QueryParam("exportType") String exportType, @QueryParam("exportMultiFactor") String exportMultiFactor, @Context HttpServletResponse response) {
-return null;
-//		int multiplicity = Integer.parseInt(exportMultiFactor);
+    public Object export(@QueryParam("exportType") String exportType, @QueryParam("exportMultiFactor") String exportMultiFactor, @Context HttpServletResponse response, @QueryParam("startTime") String startTime, @QueryParam("endTime") String endTime) {
+//return null;
+		int multiplicity = Integer.parseInt(exportMultiFactor);
+		long starttime = Long.parseLong(startTime);
+		long endtime = Long.parseLong(endTime);
+		System.out.println(starttime);
+		System.out.println(endtime);
+		
 //		
 ////		BaseStationHandler gh = new BaseStationHandler();
-//		ICoverageData dh = new OnlyMemoryData();
+		ICoverageData dh = new OnlyMemoryData();
+//		double latsize = Helper.latSize;
+//		double lonsize = Helper.lonSize;
+//		System.out.println(Helper.latSize);
+//		Helper helper = new Helper();
+//		helper.latSize = latsize*multiplicity;
+//		helper.lonSize = lonsize*multiplicity;
 //		
 //		
-//		Collection<Source> sources = handler.getDistributeCalc().getDataHandler().getSources();
+		Collection<Source> sources = handler.getDistributeCalc().getDataHandler().getSources();
 //		
-////		Collection<BaseStation> superSource = covH.getSupersourceCalculator().getDataHandler().getSources();
+//		Collection<BaseStation> superSource = covH.getSupersourceCalculator().getDataHandler().getSources();
 //		
-//		Source superbs = handler.getSupersourceCalc().getDataHandler().getSource("supersource");	
+		Source superbs = handler.getSupersourceCalc().getDataHandler().getSource("supersource");	
 //		
-//		for (Source bs : sources) {
-//			Source summedbs = dh.createSource(bs.getIdentifier());
+		for (Source bs : sources) {
+			Source summedbs = dh.createSource(bs.getIdentifier());
 //			summedbs.setLatSize(Helper.latSize*multiplicity);
 //			summedbs.setLonSize(Helper.lonSize*multiplicity);
 //			dh.setLatSize(bs.getLatSize()*multiplicity);
 //			dh.setLonSize(bs.getLonSize()*multiplicity);
-////			BaseStation tempSource = new BaseStation(basestation.getIdentifier(), gridHandler.getLatSize()*multiplicationFactor, gridHandler.getLonSize()*multiplicationFactor);
-//			
-//			Collection<Cell> cells = bs.getGrid().values();
-//			
-//			for (Cell cell : cells)
-//			{
-//				Cell dhCell = summedbs.getCell(cell.getLatitude(), cell.getLongitude());
-//				if(dhCell == null)
-//				{
-//					dhCell = summedbs.createCell(cell.getLatitude(), cell.getLongitude());
-//				}		
-////				dhCell.addReceivedSignals(cell.getNOofReceivedSignals());
-////				dhCell.addNOofMissingSignals((superbs.getGrid().get(cell.getId()).getTotalNumberOfMessages() - cell.getNOofReceivedSignals()));
-//				
-////				LOG.debug("cell for export created: " + summedbs.getCell(cell.getLatitude(), cell.getLongitude()).getNOofReceivedSignals() + "-" + summedbs.getCell(cell.getLatitude(), cell.getLongitude()).getNOofMissingSignals());
-//			}
-//		}
-//		if (exportType.equals("KML")) {
-////			System.out.println(expotype);
-//			KMLGenerator.generateKML(dh.getSources(), dh.getLatSize(), dh.getLonSize(), multiplicity, response);
-//		}
-//		else if (exportType.equals("CSV")) {
-////			System.out.println(expotype);
-////			CSVGenerator.generateCSV(dh.getSources(), dh.getLatSize(), dh.getLonSize(), multiplicity, response);
-//		}
-//		else if (exportType.equals("XML")) {
-////			System.out.println(expotype);
-////			XMLGenerator.generateXML(dh.getSources(), dh.getLatSize(), dh.getLonSize(), multiplicity, response);
-//		}
-//		else
-//		{
-//			System.out.println("wrong exporttype");
-//		}
-//		return null;
+//			BaseStation tempSource = new BaseStation(basestation.getIdentifier(), gridHandler.getLatSize()*multiplicationFactor, gridHandler.getLonSize()*multiplicationFactor);
+			
+			Collection<Cell> cells = bs.getGrid().values();
+			
+			for (Cell cell : cells)
+			{
+				Cell dhCell = summedbs.getTempCell(cell.getLatitude(), cell.getLongitude(), multiplicity);
+				if(dhCell == null)
+				{
+					dhCell = summedbs.createTempCell(cell.getLatitude(), cell.getLongitude(), multiplicity);
+				}		
+				
+				Cell activesbscell = superbs.getGrid().get(cell.getId());
+				if (activesbscell != null) {
+					int receivedsignals = cell.getNOofReceivedSignals(new Date(starttime), new Date(endtime));
+					dhCell.addReceivedSignals(receivedsignals);
+					int sbstotalmessages = (activesbscell.getNOofReceivedSignals(new Date(starttime), new Date(endtime))+activesbscell.getNOofMissingSignals(new Date(starttime), new Date(endtime)));
+					dhCell.addNOofMissingSignals(sbstotalmessages - receivedsignals);
+				}
+
+				
+//				LOG.debug("cell for export created: " + summedbs.getCell(cell.getLatitude(), cell.getLongitude()).getNOofReceivedSignals() + "-" + summedbs.getCell(cell.getLatitude(), cell.getLongitude()).getNOofMissingSignals());
+			}
+		}
+		if (exportType.equals("KML")) {
+//			System.out.println(expotype);
+			KMLGenerator.generateKML(dh.getSources(), Helper.latSize, Helper.lonSize, multiplicity, response);
+		}
+		else if (exportType.equals("CSV")) {
+//			System.out.println(expotype);
+			CSVGenerator.generateCSV(dh.getSources(), Helper.latSize, Helper.lonSize, multiplicity, response);
+		}
+		else if (exportType.equals("XML")) {
+//			System.out.println(expotype);
+			XMLGenerator.generateXML(dh.getSources(), Helper.latSize, Helper.lonSize, multiplicity, response);
+		}
+		else
+		{
+			System.out.println("wrong exporttype");
+		}
+		
+//		helper.latSize = latsize;
+//		helper.lonSize = lonsize;
+		return null;
     }
     
     

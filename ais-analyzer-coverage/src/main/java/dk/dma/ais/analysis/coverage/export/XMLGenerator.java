@@ -25,7 +25,7 @@ public class XMLGenerator {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(XMLGenerator.class);
 
-	public static void generateXML(Collection<Source> grids, double latSize, double lonSize, int multiplicity, HttpServletResponse response, Date starttime, Date endtime) {
+	public static void generateXML(Collection<Source> grids, double latSize, double lonSize, int multiplicity, HttpServletResponse response) {
 
 		LOG.info("startet csv generation");
 		
@@ -43,7 +43,7 @@ public class XMLGenerator {
 			writeLine("<cells>", out);
 
 			for (Source grid : grids) {
-				generateGrid(grid.getIdentifier(), grid.getGrid().values(), out, latSize, lonSize, starttime, endtime);
+				generateGrid(grid.getIdentifier(), grid.getGrid().values(), out, latSize*multiplicity, lonSize*multiplicity);
 			}
 			writeLine("</cells>", out);
 
@@ -68,7 +68,7 @@ public class XMLGenerator {
 	}
 	
 	private static void generateGrid(String bsMmsi, Collection<Cell> cells,
-			HttpServletResponse out, double latSize, double lonSize, Date starttime, Date endtime) {
+			HttpServletResponse out, double latSize, double lonSize) {
 
 			for (Cell cell : cells) {
 
@@ -82,8 +82,8 @@ public class XMLGenerator {
 				writeLine("<startlon>"+cell.getLongitude()+"</startlon>", out);
 				writeLine("<endlat>"+(cell.getLatitude()+latSize)+"</endlat>", out);
 				writeLine("<endlon>"+(cell.getLongitude()+lonSize)+"</endlon>", out);
-				writeLine("<received>"+cell.getNOofReceivedSignals(starttime, endtime)+"</received>", out);
-				writeLine("<missing>"+cell.getNOofMissingSignals(starttime, endtime)+"</missing>", out);				
+				writeLine("<received>"+cell.getNOofReceivedSignals()+"</received>", out);
+				writeLine("<missing>"+cell.getNOofMissingSignals()+"</missing>", out);				
 				writeLine("<coveragepercentage>"+(cell.getCoverage()*100)+"</coveragepercentage>", out);
 				writeLine("</cell>", out);
 					
