@@ -14,6 +14,8 @@ function CoverageUI () {
     this.selectedEndDate;
     var topleftPoint;//points which define sat box
     var bottomRightPoint
+    var shiptrackactive=false;
+    var satChartMethod='satonly';
 
 
     
@@ -51,6 +53,9 @@ function CoverageUI () {
     	$('#exportPanel').expandable({
     		header: "Export"
     	});
+    	$('#shiptrackPanel').expandable({
+    		header: "Ship Tracking"
+    	});
 //    	$('#bottomPanel').expandable({
 //    		header: "Satellite Statistics",
 //    		maxHeight: "800px"
@@ -87,6 +92,29 @@ function CoverageUI () {
     		boxLayer.removeAllFeatures();
     		
     	});
+    	
+    	//Open ship tracking chart listener  	
+    	$('#shiptrackingOpenChartBtn').click(function(){
+//    		alert("open bar chart");
+	    	self.updateShipTrackBarChart();
+	    	$('#trackingBarchartWindow').fadeIn(100);
+    		
+    	});
+    	
+    	//Draw ship track listener
+    	$('#shiptrackingMapBtn').click(function(){
+    		console.log("draw ship track");
+//    		self.drawLine(55,6,58,9);
+    		self.updateShipTrack();
+        		
+    	});
+    	
+    	//Chart method change - listener
+    	$( "#chartMethodSelect" ).change(function() {
+    		satChartMethod=$( this ).val();
+    		self.updateBarChart();
+    	});
+
     	
     	
     	 
@@ -177,6 +205,50 @@ function CoverageUI () {
     		
         });
     }
+    this.updateShipTrack = function(){
+    	aisJsonClient.getShipTrack(selectedStartDate.getTime(), selectedEndDate.getTime(), $('#shiptrackingmmsi').val(), function(trackarray){
+    		shiptrackactive=true;
+    		lineLayer.removeAllFeatures();
+    		var previousLat = null;
+    		var previousLon = null;
+    		var nextRed = false;
+    		//For each timespan
+    		$.each(trackarray, function(key, value) {
+    			//For each lat-lon inside timespan
+    			$.each(value.positions, function(key1, value1) {
+    				if(previousLat != null){
+    					if(nextRed == true){
+    						self.drawLine(previousLat,previousLon,value1.lat,value1.lon, '#CC0000');
+    						nextRed=false;
+    					}else{
+    						self.drawLine(previousLat,previousLon,value1.lat,value1.lon, '#006633');
+    					}
+    					
+    				}
+    				previousLat=value1.lat;
+    				previousLon=value1.lon;
+    			});
+    			nextRed=true;
+
+        	});
+    	});	
+    }
+    this.drawLine = function(lat1, lon1, lat2, lon2, color){
+    	var points = new Array(
+    			new OpenLayers.Geometry.Point(lon1, lat1).transform(new OpenLayers.Projection("EPSG:4326"), map.getProjectionObject()),
+    			new OpenLayers.Geometry.Point(lon2, lat2).transform(new OpenLayers.Projection("EPSG:4326"), map.getProjectionObject())
+    		);
+    	var line = new OpenLayers.Geometry.LineString(points);
+
+    	var style = { 
+    	  strokeColor: color, 
+//    	  strokeOpacity: 1.0,
+    	  strokeWidth: 5
+    	};
+
+    	lineFeature = new OpenLayers.Feature.Vector(line, null, style);
+    	lineLayer.addFeatures([lineFeature]);
+    }
     this.updateSlidingWindow = function(){
     	aisJsonClient.getStatus(function(data){
     		var startDate = new Date(data.firstMessage);
@@ -246,8 +318,13 @@ function CoverageUI () {
         	},
 	    	change: function(event, ui){
 	    		//Update sat bar chart if it is visible
-		    	if ($('#bottomPanel').css('display') != 'none') {
+		    	if ($('#barchartpanel').css('display') != 'none') {
 		    		self.updateBarChart();
+		    	}else if($('#trackingBarchartWindow').css('display') != 'none'){
+		    		self.updateShipTrackBarChart();
+		    	}
+		    	if(shiptrackactive==true){
+		    		self.updateShipTrack();
 		    	}
 	    		self.changed = true;
 	    	}
@@ -379,7 +456,7 @@ function CoverageUI () {
  			                   new OpenLayers.Projection("EPSG:4326"));
 
     					self.updateBarChart();
-    					$('#barchart').parent().fadeIn(100);
+    					$('#barchartpanel').fadeIn(100);
 //    				    console.log("A point has been added");
     				},
                     handlerOptions: {
@@ -410,9 +487,17 @@ function CoverageUI () {
 //    			$('.expandable').fadeIn();
     		}
     	});
+    	
+    	lineLayer = new OpenLayers.Layer.Vector("Line Layer");
+    	map.addLayers([lineLayer]);
     }
     this.updateBarChart = function(){
-    	$('#barchart').attr('src', 'rest/satExportPNG?random='+Math.random()+'&startTime='+selectedStartDate.getTime()+'&endTime='+selectedEndDate.getTime()+'&lat1='+topleftPoint.y+'&lon1='+topleftPoint.x+'&lat2='+bottomRightPoint.y+'&lon2='+bottomRightPoint.x);
+    	$('#trackingBarchartWindow').hide();
+    	$('#barchart').attr('src', 'rest/satExportPNG?random='+Math.random()+'&startTime='+selectedStartDate.getTime()+'&endTime='+selectedEndDate.getTime()+'&lat1='+topleftPoint.y+'&lon1='+topleftPoint.x+'&lat2='+bottomRightPoint.y+'&lon2='+bottomRightPoint.x+'&satChartMethod='+satChartMethod);
+    }
+    this.updateShipTrackBarChart = function(){
+    	$('#barchartpanel').hide();
+    	$('#trackingBarchartImg').attr('src', 'rest/shipTrackExportPNG?random='+Math.random()+'&startTime='+selectedStartDate.getTime()+'&endTime='+selectedEndDate.getTime()+'&shipmmsi='+$('#shiptrackingmmsi').val());
     }
     this.refreshSourceList = function(){	
     	var sourceContainer = $("#sourcesPanel > .panelContainer");

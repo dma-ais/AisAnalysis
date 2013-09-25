@@ -33,6 +33,7 @@ import dk.dma.ais.message.AisPositionMessage;
 import dk.dma.ais.message.ShipTypeCargo;
 import dk.dma.ais.message.ShipTypeCargo.ShipType;
 import dk.dma.ais.packet.AisPacket;
+import dk.dma.ais.packet.AisPacketTags.SourceType;
 import dk.dma.ais.proprietary.IProprietarySourceTag;
 import dk.dma.enav.model.geometry.Position;
 
@@ -110,7 +111,8 @@ public abstract class AbstractCalculator implements Serializable {
 		
 		CustomMessage newMessage = aisToCustom(message, defaultID);
 		if(newMessage != null){
-			newMessage.setSourceType(packet.getTags().getSourceType());
+			
+//			newMessage.setSourceType(packet.getTags().getSourceType());
 			calculate(newMessage);
 		}
 	}
@@ -295,6 +297,7 @@ public abstract class AbstractCalculator implements Serializable {
 		Date timestamp = null;
 		ShipClass shipClass = null;
 		AisPositionMessage posMessage;
+		SourceType sourceType = SourceType.TERRESTRIAL;
 
 		
 		// Get source tag properties
@@ -305,6 +308,12 @@ public abstract class AbstractCalculator implements Serializable {
 			timestamp = sourceTag.getTimestamp();
 //			srcCountry = sourceTag.getCountry();
 			String region = sourceTag.getRegion();
+			
+			//hardcode sat status until aisbus supports pull requests..
+			if(region != null ){
+				if(region.equals("802") || region.equals("804") ||region.equals("810"))
+				sourceType = SourceType.SATELLITE;
+			}
 			
 			if(defaultID != "sat"){
 				if(bsmmsi == null){
@@ -393,6 +402,8 @@ public abstract class AbstractCalculator implements Serializable {
 //
 //		// Extract ship
 		Ship ship = extractShip(aisMessage.getUserId(), shipClass, baseStation);
+		
+		// 
 
 		CustomMessage newMessage = new CustomMessage();
 		newMessage.setCog( (double) posMessage.getCog() / 10 );
@@ -404,6 +415,7 @@ public abstract class AbstractCalculator implements Serializable {
 		newMessage.setShipMMSI( ship.getMmsi() );
 //		newMessage.setOriginalMessage(aisMessage);
 		newMessage.setKey(messageToKey(newMessage));
+		newMessage.setSourceType(sourceType);
 
 		// Keep track of current message
 		currentMessage = newMessage;
@@ -412,6 +424,8 @@ public abstract class AbstractCalculator implements Serializable {
 		if(firstMessage == null){
 			firstMessage = newMessage;
 		}
+		
+		
 //		return null;
 		return newMessage;
 	}

@@ -42,5 +42,10 @@ function AisJsonClient (serverurl) {
     		callback(data);
     	}); 
     }
+    this.getShipTrack = function(start, end, ship, callback){
+    	$.get('/coverage/rest/shipTrackExport',{startTime:start, endTime:end, shipmmsi:ship}, function(data) {
+    		callback(data);
+    	}); 
+    }
  
 }

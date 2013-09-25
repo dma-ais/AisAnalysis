@@ -53,6 +53,7 @@ import dk.dma.ais.analysis.coverage.data.Cell;
 import dk.dma.ais.analysis.coverage.data.ICoverageData;
 import dk.dma.ais.analysis.coverage.data.OnlyMemoryData;
 import dk.dma.ais.analysis.coverage.data.TimeSpan;
+import dk.dma.ais.analysis.coverage.data.json.ExportShipTimeSpan;
 import dk.dma.ais.analysis.coverage.data.json.JSonCoverageMap;
 import dk.dma.ais.analysis.coverage.data.json.JsonConverter;
 import dk.dma.ais.analysis.coverage.data.json.JsonSource;
@@ -256,13 +257,50 @@ return null;
     }
     
     @GET
+    @Path("shipTrackExport")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Object shipTrackExport(@QueryParam("startTime") String startTime,@QueryParam("endTime") String endTime,@QueryParam("shipmmsi") int shipmmsi,  @Context HttpServletResponse response) throws IOException {
+
+    	Date startDate = new Date(Long.parseLong(startTime));
+    	Date endDate = new Date(Long.parseLong(endTime));
+		
+
+		return handler.getSatCalc().getShipDynamicTimeSpans(startDate, endDate, shipmmsi);
+			
+    }
+    
+    @GET
+    @Path("shipTrackExportPNG")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Object shipTrackExportPNG(@QueryParam("startTime") String startTime,@QueryParam("endTime") String endTime,@QueryParam("shipmmsi") int shipmmsi,  @Context HttpServletResponse response) throws IOException {
+
+    	Date startDate = new Date(Long.parseLong(startTime));
+    	Date endDate = new Date(Long.parseLong(endTime));
+
+		response.setContentType("image/png");
+		ServletOutputStream out = response.getOutputStream();
+		
+		ChartGenerator cg = new ChartGenerator();
+		if(!handler.getSatCalc().getSuperships().containsKey(shipmmsi)){
+			cg.printMessage("No such ship: "+shipmmsi);
+		}else{
+			List<ExportShipTimeSpan> spans = handler.getSatCalc().getShipDynamicTimeSpans(startDate, endDate, shipmmsi);
+			if(spans.isEmpty()){
+				cg.printMessage("No data available");
+			}else{
+				cg.generateChartMethod3(startDate, endDate, shipmmsi, spans, true);
+			}
+		}
+		cg.exportAsPNG(out);
+		out.flush();
+
+		return null;
+    }
+    
+    @GET
     @Path("satExportPNG")
     @Produces(MediaType.APPLICATION_JSON)
-    public Object satExportPNG(@QueryParam("startTime") String startTime,@QueryParam("endTime") String endTime,@QueryParam("lat1") String lat1, @QueryParam("lon1") String lon1,@QueryParam("lat2") String lat2,@QueryParam("lon2") String lon2,  @Context HttpServletResponse response) throws IOException {
-//    	double latTop = 62.47;
-//    	double latBottom = 57.5;
-//    	double lonRight = -35;
-//    	double lonLeft = -55;
+    public Object satExportPNG(@QueryParam("startTime") String startTime,@QueryParam("endTime") String endTime,@QueryParam("lat1") String lat1, @QueryParam("lon1") String lon1,@QueryParam("lat2") String lat2,@QueryParam("lon2") String lon2, @QueryParam("satChartMethod") String satChartMethod,  @Context HttpServletResponse response) throws IOException {
     	
 //    	LOG.info("Finding sat coverage for area: "+area);
     	double latPoint1 = Double.parseDouble(lat1);
@@ -301,12 +339,17 @@ return null;
 		System.out.println(lonMin);
 		System.out.println(latMin);
 		System.out.println(lonMax);
-//    	List<TimeSpan> spans =handler.getSatCalc().getDynamicTimeSpans(startDate, endDate, latTop, lonLeft, latBottom, lonRight);
-    	List<TimeSpan> spans =handler.getSatCalc().getFixedTimeSpans(startDate, endDate, latMin, latMax, lonMin, lonMax,1);
+		
 
-	    ChartGenerator cg = new ChartGenerator();
-//	    cg.generateChartMethod1(startDate, endDate, spans, latTop, latBottom, lonLeft, lonRight);
-	    cg.generateChartMethod2(startDate, endDate, spans, latMin, latMax, lonMin, lonMax, true);
+		ChartGenerator cg = new ChartGenerator();
+		if(satChartMethod.equals("satonly")){
+			List<TimeSpan> spans =handler.getSatCalc().getDynamicTimeSpans(startDate, endDate, latMin, latMax, lonMin, lonMax);
+			cg.generateChartMethod1(startDate, endDate, spans, latMin, latMax, lonMin, lonMax);
+    	}else{
+        	List<TimeSpan> spans =handler.getSatCalc().getFixedTimeSpans(startDate, endDate, latMin, latMax, lonMin, lonMax,1);
+    	    cg.generateChartMethod2(startDate, endDate, spans, latMin, latMax, lonMin, lonMax, true);
+    	}
+
 
 	    cg.exportAsPNG(out);
     	
@@ -331,7 +374,7 @@ return null;
 		response.setContentType("text/plain");
 		response.setHeader("Content-Disposition", "attachment; filename=" + "satexport.txt");
 		ServletOutputStream out = response.getOutputStream();
-		
+
 		
 		List<TimeSpan> timeSpans = handler.getSatCalc().getDynamicTimeSpans(null, null, latTop, lonLeft, latBottom, lonRight);
 		TimeSpan first = null;

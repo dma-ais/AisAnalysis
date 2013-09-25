@@ -7,7 +7,13 @@ public class Helper {
 	
 	public static double latSize = 0.022522522522522525;
 	public static double lonSize = 0.03868125413876516;
+	public static Date analysisStarted;
+	public static Date latestMessage;
+	private static SphereProjection projection = new SphereProjection();
 
+	public static SphereProjection getProjection() {
+		return projection;
+	}
 	public static Date getFloorDate(Date d){
 		Calendar cal = Calendar.getInstance();  
 		cal.setTime(d);  

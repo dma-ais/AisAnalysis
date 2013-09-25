@@ -34,6 +34,8 @@ import dk.dma.ais.analysis.coverage.data.CustomMessage;
 import dk.dma.ais.analysis.coverage.data.ICoverageData;
 import dk.dma.ais.analysis.coverage.data.OnlyMemoryData;
 import dk.dma.ais.analysis.coverage.data.QueryParams;
+import dk.dma.ais.analysis.coverage.data.Source;
+import dk.dma.ais.analysis.coverage.data.SuperShip;
 import dk.dma.ais.analysis.coverage.data.json.JSonCoverageMap;
 import dk.dma.ais.analysis.coverage.data.json.ExportCell;
 import dk.dma.ais.analysis.coverage.data.json.JsonConverter;
@@ -72,8 +74,8 @@ public class CoverageHandler {
 		//Setting data handlers
 		if(conf.getDatabaseConfiguration().getType().toLowerCase().equals("memoryonly")){
 			ICoverageData dataH = new OnlyMemoryData();
-			distributeOnlyCalc.setDataHandler(dataH);
-			superCalc.setDataHandler(new OnlyMemoryData());
+			distributeOnlyCalc.setDataHandler(new OnlyMemoryData());
+			superCalc.setDataHandler(dataH);
 			satCalc.setDataHandler(dataH);	
 			LOG.info("coverage calculators set up with memory only data handling");
 		}
@@ -102,7 +104,7 @@ public class CoverageHandler {
 			public void run() {
 				while(true){
 					try{
-						Thread.sleep(1000);
+						Thread.sleep(10000);
 					}catch(Exception e){
 							
 					}
@@ -115,13 +117,33 @@ public class CoverageHandler {
 					System.out.println("weird stamps: "+weird);
 					System.out.println("delayed more than ten min: "+delayedMoreThanTen);
 					System.out.println("delayed less than ten min: "+delayedLessThanTen);
+					long numberofcells = 0;
+					long uniquecells = 0;
+					long uniqueships = 0;
+					long uniqueShipHours = 0;
+					for (SuperShip ss : satCalc.getSuperships().values()) {
+						uniqueShipHours+=ss.getHours().size();
+					}
+					for (Source s : satCalc.getDataHandler().getSources()) {
+						numberofcells+= s.getGrid().size();
+						uniquecells+= s.getGrid().size();
+						uniqueships+=s.getShips().size();
+					}
+					for (Source s : distributeOnlyCalc.getDataHandler().getSources()) {
+						numberofcells+= s.getGrid().size();
+					}
+					System.out.println("total cells: "+numberofcells);
+					System.out.println("Unique cells: "+uniquecells);
+					System.out.println("Unique ships: "+uniqueships);
+					System.out.println("Unique ship hours: "+uniqueShipHours);
+					System.out.println(satCalc.getDataHandler().getSources().size());
 					System.out.println();
 				}		
 				
 			}
 		});
 		
-//		t.start();
+		t.start();
 		
     }
 //    int pr=0;

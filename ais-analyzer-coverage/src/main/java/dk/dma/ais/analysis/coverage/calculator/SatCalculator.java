@@ -7,9 +7,11 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.PriorityQueue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -24,13 +26,20 @@ import dk.dma.ais.analysis.coverage.data.QueryParams;
 import dk.dma.ais.analysis.coverage.data.Source;
 import dk.dma.ais.analysis.coverage.data.CustomMessage;
 import dk.dma.ais.analysis.coverage.data.Source.ReceiverType;
+import dk.dma.ais.analysis.coverage.data.SuperShip;
+import dk.dma.ais.analysis.coverage.data.SuperShip.Hour;
 import dk.dma.ais.analysis.coverage.data.TimeSpan;
+import dk.dma.ais.analysis.coverage.data.json.ExportShipTimeSpan;
 import dk.dma.ais.packet.AisPacketTags.SourceType;
 
 
 public class SatCalculator extends AbstractCalculator {
 
-	
+	private Map<Integer, SuperShip> superships = new ConcurrentHashMap<Integer, SuperShip>();
+	public Map<Integer, SuperShip> getSuperships() {
+		return superships;
+	}
+
 	private static final Logger LOG = LoggerFactory.getLogger(SatCalculator.class);
 	private int timeMargin = 600000; //in ms
 	private LinkedHashMap<String, Boolean> doubletBufferSat = new LinkedHashMap<String, Boolean>()
@@ -115,6 +124,53 @@ public class SatCalculator extends AbstractCalculator {
 		return result;
 	}
 	
+	public List<ExportShipTimeSpan> getShipDynamicTimeSpans(Date startTime, Date endTime, int shipMmsi){
+		System.out.println("shipmmsi: "+shipMmsi);
+		SuperShip ss = superships.get(shipMmsi);
+		if(ss == null)return null;
+		
+		List<ExportShipTimeSpan> result = new ArrayList<ExportShipTimeSpan>();
+		short startHour = (short) ((startTime.getTime()-Helper.analysisStarted.getTime())/1000/60/60);
+		short endHour = (short) ((endTime.getTime()-Helper.analysisStarted.getTime())/1000/60/60);
+		System.out.println(startHour);
+		System.out.println(endHour);
+		int previousMinute = -1;
+		int currentMinute = -1;
+		for (short i = startHour; i < endHour; i++) {
+			Hour h = ss.getHours().get(i);
+			if(h != null){
+				for (int j = 0; j < 60; j++) {
+					boolean gotSignal = h.gotSignal(j);
+					if(gotSignal){
+						currentMinute = i*60+j;
+						if(result.isEmpty()){
+							//If result is empty, add the first timespan
+							ExportShipTimeSpan timespan = new ExportShipTimeSpan(Helper.analysisStarted.getTime()+currentMinute*60*1000);
+							timespan.getPositions().add(timespan.new LatLon(h.getLat(j), h.getLon(j)));
+							result.add(timespan);
+						}
+						if(currentMinute-previousMinute < timeMargin/1000/60){
+							//If current minute is within the time margin, we expand the latest timespan
+							ExportShipTimeSpan timespan=result.get(result.size()-1);
+							timespan.setLastMessage(Helper.analysisStarted.getTime()+currentMinute*60*1000);
+							timespan.getPositions().add(timespan.new LatLon(h.getLat(j), h.getLon(j)));
+							
+						}else{
+							//If current minute exceeds the time margin, we add a new timespan
+							ExportShipTimeSpan timespan = new ExportShipTimeSpan(Helper.analysisStarted.getTime()+currentMinute*60*1000);
+							timespan.getPositions().add(timespan.new LatLon(h.getLat(j), h.getLon(j)));
+							result.add(timespan);
+						}
+						previousMinute= i*60+j;
+						
+					}
+				}
+			}
+		}
+		System.out.println("Size of result: "+result.size());
+		return result;
+		
+	}
 	/**
 	 * Retrieves a list of time spans based on a rectangle defined by two lat-lon points. 
 	 * Cells within the rectangle each contain a number of time spans. Two time spans will be merged
@@ -126,17 +182,18 @@ public class SatCalculator extends AbstractCalculator {
 	 * @param lonEnd
 	 * @return
 	 */
-	public List<TimeSpan> getDynamicTimeSpans(Date startTime, Date endTime, double latStart, double lonStart, double latEnd, double lonEnd){
+	public List<TimeSpan> getDynamicTimeSpans(Date startTime, Date endTime, double latMin, double latMax, double lonMin, double lonMax){
 			
 		//Retrieve cells within the specified rectangle
     	Collection<Cell> cells = dataHandler.getCells(null);
 		List<Cell> areaFiltered = new ArrayList<Cell>();
 		for (Cell cell : cells) {
-			if(cell.getLatitude() <= latStart && cell.getLatitude() >= latEnd ){
-				if(cell.getLongitude() >= lonStart && cell.getLongitude() <= lonEnd ){
-					areaFiltered.add(cell);
-				}
+			
+			if(cell.getLatitude() <= latMax && cell.getLatitude() >= latMin &&
+					cell.getLongitude() >= lonMin && cell.getLongitude() <= lonMax	){
+				areaFiltered.add(cell);
 			}
+
 		}
 		
 		//Store every time span of the filtered cells
@@ -144,18 +201,22 @@ public class SatCalculator extends AbstractCalculator {
 		if(startTime != null && endTime != null){
 			for (Cell cell : areaFiltered) {
 				List<TimeSpan> individualSpan = cell.getTimeSpans();
-				for (TimeSpan timeSpan : individualSpan) {
-					if(timeSpan.getFirstMessage().getTime() > startTime.getTime() &&
-							timeSpan.getLastMessage().getTime() < endTime.getTime()){
-						spans.add(timeSpan);
+				if(cell.getTimeSpans() != null){
+					for (TimeSpan timeSpan : individualSpan) {
+						if(timeSpan.getFirstMessage().getTime() > startTime.getTime() &&
+								timeSpan.getLastMessage().getTime() < endTime.getTime()){
+							spans.add(timeSpan);
+						}
 					}
 				}
 			}	
 		}else{
 	    	for (Cell cell : areaFiltered) {
 				List<TimeSpan> individualSpan = cell.getTimeSpans();
-				for (TimeSpan timeSpan : individualSpan) {
-					spans.add(timeSpan);
+				if(cell.getTimeSpans() != null){
+					for (TimeSpan timeSpan : individualSpan) {
+						spans.add(timeSpan);
+					}
 				}
 			}	
 		}
@@ -276,128 +337,99 @@ public class SatCalculator extends AbstractCalculator {
 		if(filterMessage(m))
 			return;
 		
+		if(Helper.analysisStarted == null)
+			Helper.analysisStarted = Helper.getFloorDate(m.getTimestamp());
+		
+		//Register message in ship
+		SuperShip supership = superships.get((int)m.getShipMMSI());
+		if(supership == null){
+			supership = new SuperShip();
+			superships.put((int) m.getShipMMSI(), supership);
+			supership = superships.get((int) m.getShipMMSI());
+		}
+		supership.registerMessage(m.getTimestamp(), (float)m.getLatitude(), (float)m.getLongitude());
+		
+		
 		calcFixedTimeSpan(m);
 		
 		if(m.getSourceType() != SourceType.SATELLITE){
 			return;
 		}
-//		if(m.getSourceType() != SourceType.SATELLITE){
-//			tenMinQueue.add(m);
-//			
-//			//Check ten minutes queue
-//			//Match each messages older than ten minutes with existing sat time spans.
-//			//If message matches no timespan, then put it in 6 hour queue for later check
-//			while(true){
-//				if(tenMinQueue.isEmpty())
-//					break;
-//				
-//				CustomMessage m2 = tenMinQueue.peek();
-//				//If message is older than ten minutes, try to put in sat timespan
-//				if(m.getTimestamp().getTime()-m2.getTimestamp().getTime() > 1000*60*10){
-//					tenMinQueue.poll();
-//					//if no timespan found, put in 6 hour queue
-//					if(!matchTerrestrialMessage(m2)){
-//						sixHourQueue.add(m2);
-//					}
-//					
-//				}else{
-//					break;
-//				}
-//			}
-//			//Check six hours queue
-//			//Match each messages older than six hours with existing sat time spans.
-//			//If message matches no sat-timespan, then we don't expect the timespan to ever be created
-//			//hence throw away message
-//			while(true){
-//				if(sixHourQueue.isEmpty())
-//					break;
-//				
-//				CustomMessage m2 = sixHourQueue.peek();
-//				//If message is older than six hours, try to put in sat timespan
-//				if(m.getTimestamp().getTime()-m2.getTimestamp().getTime() > 1000*60*60*6){
-//					sixHourQueue.poll();
-//					//if no timespan found, throw away message
-//					matchTerrestrialMessage(m2);
-//				}else{
-//					break;
-//				}
-//			}
-//			
-////			System.out.println("oldest: "+tenMinQueue.peek().getTimestamp()+" newest: "+m.getTimestamp());
-//			return;
-//		}
-
 		
 		//get the right cell, or create it if it doesn't exist.
-//		Cell c = dataHandler.getCell("supersource", m.getLatitude(), m.getLongitude());
-//		if(c == null){
-//			c = dataHandler.createCell("supersource", m.getLatitude(), m.getLongitude());
-//			c.setTimeSpans(new ArrayList<TimeSpan>());
-//		}			
-//		
-//		//If no time spans exist for corresponding cell, create one
-//		if(c.getTimeSpans().isEmpty()){
-//			c.getTimeSpans().add(new TimeSpan(m.getTimestamp()));
-//		}
-//		
-//		//We can not be sure that the message belongs to the latest time span (because order is not guaranteed).
-//		//Search through list backwards, until a time span is found where first message is older than the new one.
-//		TimeSpan timeSpan = null;
-//		int timeSpanPos = 0;
-//		for (int i = c.getTimeSpans().size()-1; i >= 0; i--) {
-//			TimeSpan t = c.getTimeSpans().get(i);
-//			if(t.getFirstMessage().getTime() <= m.getTimestamp().getTime()){
-//				timeSpan = t;
-//				timeSpanPos = i;
-//			}
-//		}
-//
-//		//if no time span was found a new one has to be inserted at the beginning of the list
-//		if(timeSpan == null){
-//			timeSpan = new TimeSpan(m.getTimestamp());
-//			c.getTimeSpans().add(0,timeSpan);
-//			timeSpanPos = 0; //not necessary.. should be 0 at this point. Just to be sure.
-//		}
-//		
-//		
-//		//if time span is out dated, create new one and add it right after timeSpan.
-//		if(Math.abs(m.getTimestamp().getTime()-timeSpan.getLastMessage().getTime()) > timeMargin){
-//			timeSpan = new TimeSpan(m.getTimestamp());
-//			c.getTimeSpans().add(timeSpanPos+1,timeSpan);
-//			timeSpanPos = timeSpanPos+1;
-//			
-//		}
-//
-//		//Set the last message, if the new one is newer than the existing last message
-//		if(timeSpan.getLastMessage().getTime() < m.getTimestamp().getTime()){
-//			timeSpan.setLastMessage(m.getTimestamp());
-//			
-//			//Check if the time span needs to be merged with the next (if timeMargin is larger than time difference)
-//			if(c.getTimeSpans().size() > timeSpanPos+1){
-//				TimeSpan nextSpan = c.getTimeSpans().get(timeSpanPos+1);
-//				if(Math.abs(nextSpan.getFirstMessage().getTime() - timeSpan.getLastMessage().getTime()) <= timeMargin){
-//					//remove old timespans from list
-//					c.getTimeSpans().remove(timeSpanPos);
-//					c.getTimeSpans().remove(timeSpanPos);
-//					
-//					//add the merged time span to the list
-//					TimeSpan merged = mergeTimeSpans(timeSpan, nextSpan);
-//					c.getTimeSpans().add(timeSpanPos, merged);
-//					timeSpan = merged;
-//				}
-//			}
-//			
-//		
-//			
-//		}
-//		
-//		
-//		
-//		//Put ship mmsi in the map
-//		timeSpan.getDistinctShipsSat().put(""+m.getShipMMSI(), true);
-//		
-//		//Increment message counter
-//		timeSpan.setMessageCounterSat(timeSpan.getMessageCounterSat()+1);
+		Cell c = dataHandler.getCell("supersource", m.getLatitude(), m.getLongitude());
+		if(c == null){
+			c = dataHandler.createCell("supersource", m.getLatitude(), m.getLongitude());
+			c.setTimeSpans(new ArrayList<TimeSpan>());
+		}			
+		
+		//If no time spans exist for corresponding cell, create one
+//		System.out.println(c.getTimeSpans());
+		if(c.getTimeSpans()==null){
+			c.setTimeSpans(new ArrayList<TimeSpan>());
+		}
+		if(c.getTimeSpans().isEmpty()){
+			c.getTimeSpans().add(new TimeSpan(m.getTimestamp()));
+		}
+		
+		//We can not be sure that the message belongs to the latest time span (because order is not guaranteed).
+		//Search through list backwards, until a time span is found where first message is older than the new one.
+		TimeSpan timeSpan = null;
+		int timeSpanPos = 0;
+		for (int i = c.getTimeSpans().size()-1; i >= 0; i--) {
+			TimeSpan t = c.getTimeSpans().get(i);
+			if(t.getFirstMessage().getTime() <= m.getTimestamp().getTime()){
+				timeSpan = t;
+				timeSpanPos = i;
+			}
+		}
+
+		//if no time span was found a new one has to be inserted at the beginning of the list
+		if(timeSpan == null){
+			timeSpan = new TimeSpan(m.getTimestamp());
+			c.getTimeSpans().add(0,timeSpan);
+			timeSpanPos = 0; //not necessary.. should be 0 at this point. Just to be sure.
+		}
+		
+		
+		//if time span is out dated, create new one and add it right after timeSpan.
+		if(Math.abs(m.getTimestamp().getTime()-timeSpan.getLastMessage().getTime()) > timeMargin){
+			timeSpan = new TimeSpan(m.getTimestamp());
+			c.getTimeSpans().add(timeSpanPos+1,timeSpan);
+			timeSpanPos = timeSpanPos+1;
+			
+		}
+
+		//Set the last message, if the new one is newer than the existing last message
+		if(timeSpan.getLastMessage().getTime() < m.getTimestamp().getTime()){
+			timeSpan.setLastMessage(m.getTimestamp());
+			
+			//Check if the time span needs to be merged with the next (if timeMargin is larger than time difference)
+			if(c.getTimeSpans().size() > timeSpanPos+1){
+				TimeSpan nextSpan = c.getTimeSpans().get(timeSpanPos+1);
+				if(Math.abs(nextSpan.getFirstMessage().getTime() - timeSpan.getLastMessage().getTime()) <= timeMargin){
+					//remove old timespans from list
+					c.getTimeSpans().remove(timeSpanPos);
+					c.getTimeSpans().remove(timeSpanPos);
+					
+					//add the merged time span to the list
+					TimeSpan merged = mergeTimeSpans(timeSpan, nextSpan);
+					c.getTimeSpans().add(timeSpanPos, merged);
+					timeSpan = merged;
+				}
+			}
+			
+		
+			
+		}
+		
+		
+		
+		//Put ship mmsi in the map
+		timeSpan.getDistinctShipsSat().put(""+m.getShipMMSI(), true);
+		
+		//Increment message counter
+		timeSpan.setMessageCounterSat(timeSpan.getMessageCounterSat()+1);
 				
 	}
 	private TimeSpan mergeTimeSpans(TimeSpan span1, TimeSpan span2){

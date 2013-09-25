@@ -8,6 +8,7 @@ var sourceLayer;
 var aisJsonClient;
 var coverageUI;
 var boxLayer;
+var lineLayer;
 
 
 /**

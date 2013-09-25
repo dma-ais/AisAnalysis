@@ -82,6 +82,13 @@
 					<br>
 				</div>
 				
+				<div id="shiptrackPanel" class="expandable whiteOpacity">
+					<div class="smallText">Ship MMSI</div>
+					<input type="text" id="shiptrackingmmsi" value="352594000" style="width:120px;margin:10px;margin-left:25px;float:left;">
+					<div id="shiptrackingOpenChartBtn" style="float:left;background:red;width:22px;height:22px;margin-top:10px;margin-right:10px;"></div>
+					<div id="shiptrackingMapBtn" style="float:left;background:green;width:22px;height:22px;margin-top:10px"></div>
+				</div>
+				
 				<div id="exportPanel" class="expandable whiteOpacity">
 					<div class="smallText">Export format</div>
 					<div style="margin-top:10px; margin-left:auto;margin-right:auto;width:100px;">
@@ -108,13 +115,27 @@
 					</div>
 					<div style="clear:both"></div>
 				</div>
+				
+				
 			</div>
 			
-			<div id="bottomPanel" class="whiteOpacity">
+			<div id="barchartpanel" class="whiteOpacity2 centerWindow" >
 				<img class="close" src="img/cross.png" alt="Close window" style="position:absolute;right:12px;top:8px;">
-				<div class="panelHeader">Satellite Bar Chart</div>
-				<img style="margin: 20px;" id="barchart" src="#" alt="Satellite bar chart">
-				
+				<div class="panelHeader">Bar Chart</div>
+				<select id="chartMethodSelect" style="margin:20px;">
+				  <option value="satonly">Satellite: Adaptive Periods</option>
+				  <option value="satter">Satellite-Terrestrial: Fixed Periods</option>
+				</select><br>
+				<div style="overflow:auto;">
+					<img style="margin: 10px;" id="barchart" src="#" alt="Satellite bar-chart">
+				</div>		
+			</div>
+			<div id="trackingBarchartWindow" class="whiteOpacity2 centerWindow">
+				<img class="close" src="img/cross.png" alt="Close window" style="position:absolute;right:12px;top:8px;">
+				<div class="panelHeader">Bar Chart</div>
+				<div style="overflow:auto;">
+					<img style="margin: 10px;" id="trackingBarchartImg" src="#" alt="Ship tracking bar-chart">
+				</div>		
 			</div>
 			<div id="slidingWindowPanel" class="expandable whiteOpacity noScroll">
 				<div class="panelHeader">Sliding Window</div>
@@ -152,7 +173,6 @@
 			</div>
 		</div>
 		
-<!-- 		<div id="teest" style="position:absolute;left:300;top:300; width: 1200px; height:400px;">dfg</div> -->
 		<div class="whiteOpacity" style="position:absolute; bottom:15px;left:10px;background:white;">
 			<img src="img/logo.png" style="padding: 10px">
 		</div>
