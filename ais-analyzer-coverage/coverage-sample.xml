@@ -4,7 +4,6 @@
 Reads AIS messages from FILE and saves coverage data to memory only.
 -->
 <aisCoverageConfiguration>
-
 	<filename>d:\Søfart\putty.log</filename>
 	<aisbus>
 		<transformer xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="sourceTypeSatTransformerConfiguration">

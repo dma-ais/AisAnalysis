@@ -79,10 +79,22 @@ public class Source implements Serializable {
 	public Cell getCell(double latitude, double longitude){
 		return grid.get(Helper.getCellId(latitude, longitude, multiplicationFactor));
 	}
+	public Cell getTempCell(double latitude, double longitude, int multiplicationFactorTemp){
+		return grid.get(Helper.getCellId(latitude, longitude, multiplicationFactorTemp));
+	}
 	public Cell createCell(double latitude, double longitude){
 		String id = Helper.getCellId(latitude, longitude, multiplicationFactor);
 		double lat = Helper.roundLat(latitude, multiplicationFactor);
 		double lon = Helper.roundLon(longitude, multiplicationFactor);
+		Cell cell = new Cell(this, lat, lon, id);
+		grid.put(cell.getId(), cell);		
+		
+		return cell;
+	}
+	public Cell createTempCell(double latitude, double longitude, int multiplicationFactorTemp){
+		String id = Helper.getCellId(latitude, longitude, multiplicationFactorTemp);
+		double lat = Helper.roundLat(latitude, multiplicationFactorTemp);
+		double lon = Helper.roundLon(longitude, multiplicationFactorTemp);
 		Cell cell = new Cell(this, lat, lon, id);
 		grid.put(cell.getId(), cell);		
 		

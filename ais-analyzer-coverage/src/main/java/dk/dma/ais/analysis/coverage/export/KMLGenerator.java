@@ -91,7 +91,7 @@ public class KMLGenerator {
 			writeLine("</Style>", out);
 
 			for (Source grid : grids) {
-				generateGrid(grid.getIdentifier(), grid.getGrid().values(), out, latSize, lonSize);
+				generateGrid(grid.getIdentifier(), grid.getGrid().values(), out, latSize*multiplicity, lonSize*multiplicity);
 			}
 
 			writeLine("</Document>", out);
