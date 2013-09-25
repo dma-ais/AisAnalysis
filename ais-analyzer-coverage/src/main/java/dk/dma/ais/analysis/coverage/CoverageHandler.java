@@ -124,6 +124,9 @@ public class CoverageHandler {
 					for (SuperShip ss : satCalc.getSuperships().values()) {
 						uniqueShipHours+=ss.getHours().size();
 					}
+//					for (Integer iterable_element : satCalc.getSuperships().keySet()) {
+//						System.out.println(iterable_element);
+//					}
 					for (Source s : satCalc.getDataHandler().getSources()) {
 						numberofcells+= s.getGrid().size();
 						uniquecells+= s.getGrid().size();

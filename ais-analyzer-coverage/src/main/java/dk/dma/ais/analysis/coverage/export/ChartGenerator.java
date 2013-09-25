@@ -224,11 +224,24 @@ public class ChartGenerator {
      		ig2.setTransform(orig);
      		ig2.setFont(defaultFont);
      		
+     		//Draw distinct ship stats
+     		ig2.setFont(small);
+     		ig2.setColor(Color.DARK_GRAY);
+     		ig2.drawString(totalDistinctShips+"", x+30-getTextWidth(totalDistinctShips+"")/2, height-1-bottomOffset+15);
+     		ig2.drawString(timeSpan.getDistinctShipsTerrestrial().size()+"", x+30-getTextWidth(timeSpan.getDistinctShipsTerrestrial().size()+"")/2, height-1-bottomOffset+30);
+     		ig2.drawString(timeSpan.getDistinctShipsSat().size()+"", x+30-getTextWidth(timeSpan.getDistinctShipsSat().size()+"")/2, height-1-bottomOffset+45);
+     		
      		
 
  		}
      	if(timeSpans.size() > 1)
      		avgBetweenBarWidth=(long) (minutesNotCovered/(timeSpans.size()-1));
+     	
+     	ig2.setFont(small);
+     	ig2.setColor(Color.gray);
+     	ig2.drawString("Distinct Ships - Total", offset-getTextWidth("Distinct Ships- Total"), height-1-bottomOffset+15);
+     	ig2.drawString("Distinct Ships - Terrestrial", offset-getTextWidth("Distinct Ships- Terrestrial"), height-1-bottomOffset+30);
+     	ig2.drawString("Distinct Ships - Satellite", offset-getTextWidth("Distinct Ships- Satellite"), height-1-bottomOffset+45);
      	
      	coverageRatio=((double)(Math.round((double)minutesCovered/exactTimeDifference*10000))/100);
      	System.out.println((double)(Math.round((double)minutesCovered/exactTimeDifference*10000))/100);
