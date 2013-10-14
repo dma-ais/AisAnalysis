@@ -13,16 +13,6 @@
 			<reconnectInterval>10</reconnectInterval>
 			<timeout>10</timeout>
 		</provider>
-		<filter xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="locationFilterConfiguration">
-			<geometry xsi:type="circleGeometryConfiguration">
-				<lat>70</lat>
-				<lon>-46</lon>
-				<radius>1800000</radius>
-			</geometry>
-		</filter>
-		<filter xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="expressionFilterConfiguration">
-			<expression><![CDATA[country!=ISL&id!=MSSIS]]></expression>
-		</filter>
 	</aisbus>
 	<serverConfiguration>
 		<port>8081</port>
@@ -33,7 +23,7 @@
 	<cleanupTtl>43200</cleanupTtl>
 	<liveTargetTtl>1200</liveTargetTtl>
 	<pastTrackLiveTtl>3600</pastTrackLiveTtl>
-	<pastTrackMinDist>100</pastTrackMinDist>
+	<pastTrackMinDist>1000</pastTrackMinDist>
 	<pastTrackSatTtl>3600</pastTrackSatTtl>
 	<recordPastTrack>true</recordPastTrack>
 	<satTargetTtl>172800</satTargetTtl>

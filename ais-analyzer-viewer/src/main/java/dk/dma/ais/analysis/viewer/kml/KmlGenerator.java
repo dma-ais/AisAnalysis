@@ -472,11 +472,11 @@ public class KmlGenerator {
             // check time of pathtrack points. Only keep points within 24 and 72 hours
             Date now = null;
             if (!pastTrackPoints.isEmpty())
-                now = pastTrackPoints.get(pastTrackPoints.size() - 1).getTime();
+                now = pastTrackPoints.get(pastTrackPoints.size() - 1).getDate();
 
             for (int i = pastTrackPoints.size() - 1; i >= 0; i--) {
                 // System.out.println(pastTrackPoints.get(i).getTime());
-                int timeDif_Hours = (int) Math.abs((now.getTime() - pastTrackPoints.get(i).getTime().getTime()) / 1000 / 60 / 60);
+                int timeDif_Hours = (int) Math.abs((now.getTime() - pastTrackPoints.get(i).getTime()) / 1000 / 60 / 60);
 
                 PastTrackPoint trackpoint = pastTrackPoints.get(i);
 

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>dk.dma.ais.analysis</groupId>
+    <artifactId>ais-analysis-parent</artifactId>
+    <version>0.1-SNAPSHOT</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+
+  <artifactId>ais-analysis-dist-parent</artifactId>
+  <packaging>pom</packaging>
+  <name>AisAnalysis distribution parent</name>
+  <description>AisAnalysis distribution parent module</description>
+
+  <modules>
+    <module>ais-analyzer-viewer-dist</module>
+  </modules>
+
+</project>
