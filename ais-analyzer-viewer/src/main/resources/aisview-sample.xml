@@ -23,7 +23,7 @@
 	<cleanupTtl>43200</cleanupTtl>
 	<liveTargetTtl>1200</liveTargetTtl>
 	<pastTrackLiveTtl>3600</pastTrackLiveTtl>
-	<pastTrackMinDist>1000</pastTrackMinDist>
+	<pastTrackMinDist>500</pastTrackMinDist>
 	<pastTrackSatTtl>3600</pastTrackSatTtl>
 	<recordPastTrack>true</recordPastTrack>
 	<satTargetTtl>172800</satTargetTtl>

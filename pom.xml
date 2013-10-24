@@ -26,6 +26,7 @@
     <module>ais-analyzer-coverage</module>
     <module>ais-analyzer-abnormal</module>
     <module>ais-analyzer-viewer</module>
+    <module>ais-analyzer-dist</module>
   </modules>
 
   <dependencies>
