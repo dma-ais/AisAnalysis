@@ -15,27 +15,6 @@
 	<name>AIS viewer</name>
 	<description>AIS viewer</description>
 
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-assembly-plugin</artifactId>
-				<configuration>
-					<descriptor>src/assembly/bin.xml</descriptor>
-					<finalName>ais-analyzer-viewer-${project.version}</finalName>
-				</configuration>
-				<executions>
-					<execution>
-						<phase>package</phase>
-						<goals>
-							<goal>single</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-		</plugins>
-	</build>
-
 	<dependencies>
 		<dependency>
 			<groupId>dk.dma.ais.analysis</groupId>
