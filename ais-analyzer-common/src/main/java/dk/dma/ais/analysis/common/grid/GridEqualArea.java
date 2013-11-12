@@ -18,9 +18,8 @@ package dk.dma.ais.analysis.common.grid;
 import dk.dma.enav.model.geometry.Position;
 
 public class GridEqualArea {
-
-    private double earthRadius = 6371228; // [m]
-    private double poleLatitude = 89.8; // The poles are defined in a single cell
+    private static final double EARTH_RADIUS = 6371228; // [m]
+    private static final double POLE_LATITUDE = 89.8; // The poles are defined in a single cell
 
     public double cellHeightInMeter; // The height and width of the cell
     public double latmin; // Minimum latitude for the grid
@@ -31,8 +30,7 @@ public class GridEqualArea {
     public int numberOfCells; // Total number of cells in the grid
     public LatitudeStrip[] parallelStrips; // List with each parallel strip
 
-    // Must be called before the grid can be used
-    public void initGrid(double lonmin_, double latmin_, double lonmax_, double latmax_, double cellHeightInMeter_) {
+    public GridEqualArea(double lonmin_, double latmin_, double lonmax_, double latmax_, double cellHeightInMeter_) {
         double lat;
         double cellHeightInDeg;
 
@@ -47,19 +45,19 @@ public class GridEqualArea {
 
         numberOfCells = 0;
         lat = latmin;
-        if (lat < -poleLatitude) { // South pole cap
-            lat = -poleLatitude;
+        if (lat < -POLE_LATITUDE) { // South pole cap
+            lat = -POLE_LATITUDE;
             LatitudeStrip strip = new LatitudeStrip();
             strip.nColumns = 1;
             strip.latmin = latmin;
-            strip.cellHeightInDeg = -poleLatitude - latmin;
+            strip.cellHeightInDeg = -POLE_LATITUDE - latmin;
             strip.cellWidthInDeg = -1;
             parallelStrips[0] = strip;
             numberOfCells = 1;
         }
 
         long j = 0;
-        if (latmax > poleLatitude) {
+        if (latmax > POLE_LATITUDE) {
             j = 1; // Make room for the polecap
         }
         int i = 0;
@@ -80,11 +78,11 @@ public class GridEqualArea {
         }
 
         // Create the pole cap
-        if (latmax > poleLatitude) {
+        if (latmax > POLE_LATITUDE) {
             LatitudeStrip strip = new LatitudeStrip();
             strip.nColumns = 1;
-            strip.latmin = poleLatitude;
-            strip.cellHeightInDeg = latmax - poleLatitude;
+            strip.latmin = POLE_LATITUDE;
+            strip.cellHeightInDeg = latmax - POLE_LATITUDE;
             strip.cellWidthInDeg = -1.0;
             parallelStrips[i] = strip;
             numberOfCells = numberOfCells + 1;
@@ -110,21 +108,21 @@ public class GridEqualArea {
 
         numberOfParallelStrips = 0;
         lat = latmin;
-        if (lat < -poleLatitude) {
-            lat = -poleLatitude;
+        if (lat < -POLE_LATITUDE) {
+            lat = -POLE_LATITUDE;
             numberOfParallelStrips = 1;
         }
-        if (lat > poleLatitude) {
-            lat = poleLatitude;
+        if (lat > POLE_LATITUDE) {
+            lat = POLE_LATITUDE;
         }
 
-        while (lat < latmax && lat < poleLatitude) {
+        while (lat < latmax && lat < POLE_LATITUDE) {
             double cellHeightInDeg = cellHeightInMeter * LatitudeDeg2m(lat);
             lat = lat + cellHeightInDeg;
             numberOfParallelStrips = numberOfParallelStrips + 1;
         }
 
-        if (latmax > poleLatitude) {
+        if (latmax > POLE_LATITUDE) {
             numberOfParallelStrips = numberOfParallelStrips + 1;
         }
         return numberOfParallelStrips;
@@ -134,7 +132,7 @@ public class GridEqualArea {
     public int calcNumberOfColumns(double lat) {
         double lat0;
 
-        if ((lat < -poleLatitude) || (lat >= poleLatitude)) {
+        if ((lat < -POLE_LATITUDE) || (lat >= POLE_LATITUDE)) {
             return 1;
         }
 
@@ -156,17 +154,17 @@ public class GridEqualArea {
     public double CalcCircumference(double lat) {
         // radius1 = majorAxis * (1 - flattening * Sin(lat / 180# * Pi) ^ 2 - 3 / 8 * flattening ^ 2 * Sin(2 * lat / 180# * Pi) ^ 2)
         // CalcCircumference = 2# * Pi * radius1
-        return 2.0 * Math.PI * earthRadius * Math.cos(lat / 180.0 * Math.PI);
+        return 2.0 * Math.PI * EARTH_RADIUS * Math.cos(lat / 180.0 * Math.PI);
     }
 
     // Calculates the lower latitude of the cell that contains the latitude lat
     public double calcLat0(double lat) {
         double lat0;
 
-        if (lat >= -poleLatitude) {
+        if (lat >= -POLE_LATITUDE) {
             lat0 = latmin;
         } else {
-            lat0 = -poleLatitude;
+            lat0 = -POLE_LATITUDE;
         }
 
         for (int i = 0; i <= numberOfParallelStrips - 1; i++) {
@@ -189,10 +187,10 @@ public class GridEqualArea {
         }
 
         int id = 0;
-        if (lat < -poleLatitude) {
+        if (lat < -POLE_LATITUDE) {
             return id;
         }
-        if (lat > poleLatitude) {
+        if (lat > POLE_LATITUDE) {
             return numberOfCells - 1;
         }
 
@@ -221,7 +219,8 @@ public class GridEqualArea {
 
     // Calculates the lat,lon of a cell with id
     // return not null if all went well
-    public Position getGeoPosOfCellId(int cellId, double lon, double lat) {
+    public Position getGeoPosOfCellId(int cellId) {
+        double lat, lon;
         if (cellId < 0 || cellId > numberOfCells) {
             lon = 181.0;
             lat = 91.0;
@@ -254,7 +253,7 @@ public class GridEqualArea {
         lon = lonmin + parallelStrips[i].cellWidthInDeg * id;
         return Position.create(lat, lon);
     }
-    
+
     // Each latitude strip is stored with the parameters below
     private class LatitudeStrip {
         int nColumns; // Number of columns in the strip
@@ -262,5 +261,4 @@ public class GridEqualArea {
         double cellHeightInDeg; // The height of the latitude strip
         double cellWidthInDeg; // the width of the cells in the strip
     }
-
 }
