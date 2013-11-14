@@ -27,14 +27,11 @@ import org.slf4j.LoggerFactory;
 import dk.dma.ais.analysis.common.web.WebServer;
 import dk.dma.ais.analysis.coverage.configuration.AisCoverageConfiguration;
 import dk.dma.ais.bus.AisBus;
-import dk.dma.ais.bus.AisBusProvider;
 import dk.dma.ais.bus.consumer.DistributerConsumer;
-import dk.dma.ais.bus.provider.FileReaderProvider;
-import dk.dma.ais.message.AisStaticCommon;
 import dk.dma.ais.packet.AisPacket;
-import dk.dma.enav.util.function.Consumer;
 import dk.dma.ais.reader.AisReader;
-import dk.dma.ais.reader.AisStreamReader;
+import dk.dma.ais.reader.AisReaders;
+import dk.dma.enav.util.function.Consumer;
 
 /**
  * AIS coverage analyzer
@@ -85,7 +82,7 @@ public class AisCoverage {
         
         if(conf.getFilename() != null){
         	try {
-            	aisReader = new AisStreamReader(new FileInputStream(conf.getFilename()));
+            	aisReader = AisReaders.createReaderFromInputStream(new FileInputStream(conf.getFilename()));
             	aisReader.registerPacketHandler(new Consumer<AisPacket>() {            
     			    @Override
     			    public void accept(AisPacket aisPacket) {
