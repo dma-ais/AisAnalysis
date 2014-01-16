@@ -37,6 +37,7 @@ import dk.dma.ais.analysis.viewer.rest.json.VesselCluster;
 import dk.dma.ais.analysis.viewer.rest.json.VesselClusterJsonRepsonse;
 import dk.dma.ais.analysis.viewer.rest.json.VesselList;
 import dk.dma.ais.analysis.viewer.rest.json.VesselTargetDetails;
+import dk.dma.ais.bus.status.FlowStat;
 import dk.dma.ais.data.AisClassATarget;
 import dk.dma.ais.data.AisTarget;
 import dk.dma.ais.data.AisVesselPosition;
@@ -66,6 +67,9 @@ public class AisViewHandler extends Thread implements Consumer<AisPacket> {
 
     // Time of last cleanup
     private long lastCleanup = 0;
+    
+    // Flow status
+    private FlowStat flow = new FlowStat(); 
 
     public AisViewHandler(AisViewConfiguration conf) {
         this.conf = conf;
@@ -73,6 +77,8 @@ public class AisViewHandler extends Thread implements Consumer<AisPacket> {
 
     @Override
     public synchronized void accept(AisPacket packet) {
+        flow.received();
+        
         // Get AisMessage
         AisMessage aisMessage = packet.tryGetAisMessage();
         if (aisMessage == null) {
@@ -571,7 +577,7 @@ public class AisViewHandler extends Thread implements Consumer<AisPacket> {
     }
 
     public synchronized AisViewHandlerStats getStat() {
-        AisViewHandlerStats stats = new AisViewHandlerStats(targetsMap.values(), getAllPastTracks());
+        AisViewHandlerStats stats = new AisViewHandlerStats(targetsMap.values(), getAllPastTracks(), flow.getRate());
         return stats;
     }
 

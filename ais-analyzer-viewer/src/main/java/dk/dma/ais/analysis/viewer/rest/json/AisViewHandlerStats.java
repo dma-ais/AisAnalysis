@@ -31,8 +31,10 @@ public class AisViewHandlerStats implements Serializable {
     private int pastTrackTargets = 0;
     private int vesselTargets = 0;
     private int pastTrackPoints = 0;
+    private double rate = 0.0;
 
-    public AisViewHandlerStats(Collection<AisTargetEntry> targets, Collection<IPastTrack> pastTracks) {
+    public AisViewHandlerStats(Collection<AisTargetEntry> targets, Collection<IPastTrack> pastTracks, double rate) {
+        this.rate = rate;
         totalTargets = targets.size();
         // Go through all targets
         for (AisTargetEntry targetEntry : targets) {
@@ -61,6 +63,10 @@ public class AisViewHandlerStats implements Serializable {
 
     public int getPastTrackPoints() {
         return pastTrackPoints;
+    }
+    
+    public double getRate() {
+        return rate;
     }
 
 }

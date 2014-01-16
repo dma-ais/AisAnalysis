@@ -113,6 +113,16 @@ public class AisViewRestService {
     public AisViewHandlerStats stats() {
         return handler.getStat();
     }
+    
+    @GET
+    @Path("rate")
+    @Produces(MediaType.TEXT_PLAIN)
+    public String rate(@QueryParam("expected") Double expected) {
+        if (expected == null) {
+            expected = 0.0;
+        }
+        return "status=" + ((handler.getStat().getRate() > expected) ? "ok" : "nok");
+    }
 
     @GET
     @Path("kml")
