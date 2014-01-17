@@ -38,6 +38,7 @@ public class VesselTargetDetails {
     protected String vesselClass;
     protected String lastReceived;
     protected long currentTime;
+    protected long timestamp;
     protected String lat;
     protected String lon;
     protected String cog;
@@ -81,6 +82,7 @@ public class VesselTargetDetails {
         this.mmsi = target.getMmsi();
         this.vesselClass = (target instanceof AisClassBTarget) ? "B" : "A";
         this.lastReceived = formatTime(currentTime - target.getLastReport().getTime());
+        this.timestamp = target.getLastReport().getTime();
         this.lat = latToPrintable(pos.getPos().getLatitude());
         this.lon = lonToPrintable(pos.getPos().getLongitude());
         this.cog = formatDouble(pos.getCog(), 0);        
@@ -386,6 +388,10 @@ public class VesselTargetDetails {
     
     public IPastTrack getPastTrack() {
         return pastTrack;
+    }
+    
+    public long getTimestamp() {
+        return timestamp;
     }
     
 }
